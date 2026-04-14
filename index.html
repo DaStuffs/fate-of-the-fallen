@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Fate of the Fallen — Deck Building RPG</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=MedievalSharp&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="style.css">
+</head>
+
+</head>
+<body>
+<audio id="title-music" loop preload="auto" style="display:none">
+  <source src="title-music.mp3" type="audio/mpeg">
+</audio>
+<audio id="battle-music-1" preload="auto" style="display:none">
+  <source src="battle-music-1.mp3" type="audio/mpeg">
+</audio>
+<audio id="battle-music-2" preload="auto" style="display:none">
+  <source src="battle-music-2.mp3" type="audio/mpeg">
+</audio>
+<audio id="battle-music-3" preload="auto" style="display:none">
+  <source src="battle-music-3.mp3" type="audio/mpeg">
+</audio>
+<audio id="boss-music-1" preload="auto" style="display:none">
+  <source src="boss-music-1.mp3" type="audio/mpeg">
+</audio>
+<audio id="boss-music-2" preload="auto" style="display:none">
+  <source src="boss-music-2.mp3" type="audio/mpeg">
+</audio>
+<audio id="gameover-music" loop preload="auto" style="display:none">
+  <source src="gameover-music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ── GLOBAL SETTINGS BUTTON ──────────────────────────────── -->
+<button id="global-settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
+
+<!-- ── TITLE SCREEN ─────────────────────────────────────────── -->
+<div id="screen-title" class="screen scrollable active">
+ <div id="title-stat-banner" class="title-stat-banner"></div>
+ <div class="title-logo">⚔️ Fate of the Fallen</div>
+ <div class="title-subtitle">A DECK-BUILDING RPG</div>
+ <div class="pixel-divider"></div>
+ <div class="title-buttons">
+ <button class="btn btn-primary btn-lg" id="btn-newgame">⚔️ NEW ADVENTURE</button>
+ <button class="btn btn-lg" id="btn-continue" style="display:none">📖 CONTINUE RUN</button>
+ <button class="btn btn-ghost btn-lg" id="btn-legacy">⚡ LEGACY VAULT</button>
+ </div>
+ <div id="title-flavor" style="font-family:var(--font-pixel);font-size:6px;color:var(--parch-text-dim);margin-top:40px;font-style:italic;max-width:420px;line-height:2;text-align:center"></div>
+</div>
+
+<!-- ── ADVENTURE SELECT ──────────────────────────────────────── -->
+<div id="screen-adventure-select" class="screen scrollable">
+ <div style="display:flex;flex-direction:column;align-items:center;padding:32px 16px 40px;min-height:100%">
+ <div class="section-header">CHOOSE YOUR ADVENTURE</div>
+ <div class="section-subheader">Select a dungeon to conquer</div>
+ <div class="adv-grid" id="adventure-grid"></div>
+ <button class="btn btn-ghost btn-sm" onclick="initTitle()">← BACK</button>
+ </div>
+</div>
+
+<!-- ── CLASS SELECT ───────────────────────────────────────────── -->
+<div id="screen-class-select" class="screen scrollable">
+ <div style="display:flex;flex-direction:column;align-items:center;padding:32px 16px 40px;min-height:100%">
+ <div class="section-header">CHOOSE YOUR CLASS</div>
+ <div class="section-subheader">Each class plays differently — pick what suits your style</div>
+ <div class="class-grid" id="class-grid"></div>
+ <input type="hidden" id="selected-class" value="">
+ <div style="display:flex;gap:10px;margin-top:8px">
+ <button class="btn btn-ghost btn-sm" onclick="showAdventureSelect()">← BACK</button>
+ <button class="btn btn-primary" id="btn-begin">⚔️ CHOOSE HERO →</button>
+ </div>
+ </div>
+</div>
+
+<!-- ── HERO SELECT (dynamically built) ───────────────────────── -->
+
+<!-- ── ADVENTURE / ENCOUNTER SCREEN ──────────────────────────── -->
+<div id="screen-adventure" class="screen">
+ <div class="adv-sidebar">
+ <div class="sb-portrait" id="sb-icon">⚔️</div>
+ <div class="sb-name" id="sb-name">Hero</div>
+ <div class="sb-class" id="sb-class">Class · Lv1</div>
+ <div class="sb-label">HP</div>
+ <div id="sb-hp-bar"></div>
+ <div class="sb-stat" id="sb-hp-label-r" style="color:var(--hp-full)">20/20</div>
+ <div class="sb-label">XP</div>
+ <div id="sb-xp-bar"></div>
+ <div class="sb-stat" id="sb-xp-label-r" style="color:var(--chrome-gold)">0/100</div>
+ <div class="sb-label">GOLD</div>
+ <div class="sb-stat" id="sb-gold">0g</div>
+ <div class="sb-label">DECK</div>
+ <div id="sb-deck-pills"></div>
+ <div class="sb-label" style="margin-top:10px">GEAR</div>
+ <div id="sb-equipment"></div>
+ <div class="sb-label" id="sb-inv-label" style="margin-top:10px;display:none">ITEMS</div>
+ <div id="sb-inventory"></div>
+ </div>
+ <div class="adv-main">
+ <div id="enc-badge" class="quest-type-badge badge-story">STORY</div>
+ <div class="enc-title"><span id="enc-title-icon">⚔️</span> <span id="enc-title-text">Encounter</span></div>
+ <div id="enc-text" class="enc-text"></div>
+ <div id="enc-choices"></div>
+ </div>
+</div>
+
+<!-- ── COMBAT SCREEN ──────────────────────────────────────────── -->
+<div id="screen-combat" class="screen">
+ <div class="combat-main">
+ <div class="combat-top">
+  <div id="player-hud" class="player-hud"></div>
+  <div id="enemy-row" class="enemy-row"></div>
+ </div>
+ <div id="buff-zone" class="buff-zone"></div>
+ <div id="player-hp-center" class="player-hp-center"></div>
+ <div id="hand-zone" class="hand-area"></div>
+ <div id="action-bar" class="action-bar"></div>
+ </div>
+ <div id="combat-log" class="combat-log"></div>
+</div>
+
+<!-- ── DRAFT SCREEN ──────────────────────────────────────────── -->
+<div id="screen-draft" class="screen scrollable">
+ <div style="display:flex;align-items:center;justify-content:center;min-height:100%;padding:32px 16px">
+ <div class="draft-frame">
+ <div class="section-header" id="draft-title-txt">DRAFT A CARD</div>
+ <div class="section-subheader" id="draft-sub-txt">Choose one card to add to your deck</div>
+ <div class="draft-cards-row" id="draft-cards-row"></div>
+ <div style="text-align:center;margin-top:8px">
+ <button class="btn btn-ghost btn-sm" id="btn-skip-draft">Skip — don't add a card</button>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ── LEVEL UP SCREEN ───────────────────────────────────────── -->
+<div id="screen-levelup" class="screen scrollable">
+ <div style="display:flex;flex-direction:column;align-items:center;min-height:100%;padding:40px 16px 60px">
+ <div class="unlock-banner">⬆️ LEVEL UP — YOUR POWER GROWS</div>
+ <div class="section-header" id="lvlup-title">LEVEL UP!</div>
+ <div class="section-subheader" id="lvlup-tier">New tier unlocked</div>
+ <div style="font-family:var(--font-pixel);font-size:8px;color:var(--chrome-gold-hi);margin-bottom:16px">CHOOSE A PERK</div>
+ <div class="perk-grid" id="perk-grid"></div>
+ <div style="height:1px;background:var(--chrome-mid);width:100%;max-width:700px;margin:20px 0"></div>
+ <div style="font-family:var(--font-pixel);font-size:8px;color:var(--parch-text-dim);margin-bottom:12px">— OR REMOVE A CARD FROM YOUR DECK —</div>
+ <div class="cull-grid" id="cull-grid"></div>
+ <div style="margin-top:24px">
+ <button class="btn btn-ghost btn-sm" id="btn-skip-lvlup">Skip — no perk, no removal</button>
+ </div>
+ </div>
+</div>
+
+<!-- ── SHOP SCREEN ───────────────────────────────────────────── -->
+<div id="screen-shop" class="screen scrollable">
+ <!-- Sticky top bar -->
+ <div style="position:sticky;top:0;z-index:10;background:rgba(13,10,6,0.95);border-bottom:1px solid var(--chrome-mid);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;width:100%;flex-shrink:0">
+ <div style="font-family:var(--font-pixel);font-size:9px;color:var(--chrome-gold-hi)">⚗️ THE WANDERING MERCHANT</div>
+ <div style="display:flex;align-items:center;gap:12px">
+ <div style="font-family:var(--font-pixel);font-size:8px;color:var(--chrome-gold-hi)">💰 <span id="shop-gold">0</span>g</div>
+ <button class="btn btn-sm" id="btn-shop-leave-top">LEAVE SHOP →</button>
+ </div>
+ </div>
+ <!-- Scrollable content -->
+ <div style="padding:24px 16px 40px;width:100%;max-width:900px;align-self:center">
+ <div class="section-subheader" style="margin-bottom:20px">"A deal is a deal, friend."</div>
+ <div style="font-family:var(--font-pixel);font-size:7px;color:var(--chrome-gold-hi);margin-bottom:14px;letter-spacing:0.05em">── CONSUMABLES ──</div>
+ <div class="shop-grid" id="shop-grid"></div>
+ <div style="text-align:center;margin-top:24px">
+ <button class="btn" id="btn-shop-leave">LEAVE SHOP →</button>
+ </div>
+ </div>
+</div>
+
+<!-- ── DEATH SCREEN ───────────────────────────────────────────── -->
+<div id="screen-dead" class="screen scrollable">
+ <div class="endscreen-center">
+ <div class="endscreen-icon">💀</div>
+ <div class="endscreen-title" id="dead-title" style="color:var(--dmg-col)">YOU HAVE FALLEN</div>
+ <div class="endscreen-msg" id="dead-msg"></div>
+ <div class="run-history-box">
+ <div class="run-history-title">RUN SUMMARY</div>
+ <div id="dead-stats"></div>
+ </div>
+ <div id="dead-unlock" style="font-family:var(--font-pixel);font-size:7px;color:var(--chrome-gold-hi);margin-bottom:20px;max-width:400px;line-height:2"></div>
+ <button class="btn btn-primary" id="btn-dead-new">⚔️ NEW RUN</button>
+ </div>
+</div>
+
+<!-- ── VICTORY SCREEN ────────────────────────────────────────── -->
+<div id="screen-victory" class="screen scrollable">
+ <div class="endscreen-center">
+ <div class="endscreen-icon">🏆</div>
+ <div class="endscreen-title" id="victory-name" style="color:var(--crit-col)">DEADMINES CLEARED!</div>
+ <div class="pixel-divider" style="margin:20px auto"></div>
+ <div class="endscreen-msg">"The Defias Brotherhood is broken. The warship will never sail. Westfall is safe — for now."</div>
+ <div class="run-history-box">
+ <div class="run-history-title">VICTORY STATS</div>
+ <div id="victory-stats"></div>
+ </div>
+ <button class="btn btn-primary" id="btn-victory-new">⚔️ PLAY AGAIN</button>
+ </div>
+</div>
+
+<!-- ── LEGACY VAULT ───────────────────────────────────────────── -->
+<div id="screen-legacy" class="screen">
+ <!-- Top nav bar -->
+ <div style="display:flex;align-items:center;padding:0 20px;height:48px;background:rgba(0,0,0,0.6);border-bottom:1px solid var(--chrome-mid);flex-shrink:0;gap:16px">
+ <button class="btn btn-ghost btn-sm" id="btn-legacy-back" style="font-size:7px" onclick="initTitle()">← Title</button>
+ <button class="btn btn-ghost btn-sm" style="font-size:7px;color:#f99;border-color:rgba(200,80,80,0.4)" onclick="confirmRefundUpgrades()">↩ Refund All Upgrades</button>
+ <div style="font-family:var(--font-pixel);font-size:9px;color:var(--chrome-gold-hi);letter-spacing:0.08em">⚔️ THE LEGACY VAULT</div>
+ <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
+ <div style="font-family:var(--font-pixel);font-size:7px;color:var(--parch-text-dim)">LIFETIME <span id="legacy-lifetime">0</span> LP</div>
+ <div style="font-family:var(--font-pixel);font-size:11px;color:var(--chrome-gold-rim)">⚡ <span id="legacy-pts">0</span> LP</div>
+ </div>
+ </div>
+ <!-- Vault content fills remaining space, scrollable -->
+ <div id="legacy-vault-content" class="legacy-vault-inner" style="flex:1;min-height:0;overflow:hidden;padding:0"></div>
+</div>
+
+<!-- ── MODAL ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay">
+ <div class="modal-box">
+ <div class="modal-title" id="m-title">Title</div>
+ <div class="modal-body" id="m-body"></div>
+ <div class="modal-footer">
+ <button class="btn btn-primary" id="m-btn">Continue</button>
+ </div>
+ </div>
+</div>
+
+<!-- ── DICE POPUP ─────────────────────────────────────────────── -->
+<div class="dice-popup" id="dice-popup">
+ <div style="font-family:var(--font-pixel);font-size:7px;color:var(--parch-text-dim);margin-bottom:8px;letter-spacing:0.15em">ROLLING D20</div>
+ <span class="dice-num" id="dice-num">—</span>
+ <span class="dice-outcome-label" id="dice-outcome-label"></span>
+ <span class="dice-sub" id="dice-sub"></span>
+</div>
+
+<!-- ── SETTINGS OVERLAY ───────────────────────────────────────── -->
+<div id="settings-overlay">
+ <div class="settings-box">
+ <div class="settings-title">⚙️ SETTINGS</div>
+ <div class="settings-actions">
+ <!-- Volume Slider -->
+ <div style="display:flex;flex-direction:column;gap:6px;padding:4px 0 8px">
+ <div style="font-family:var(--font-pixel);font-size:6px;color:var(--chrome-gold-hi);letter-spacing:0.08em">🔊 MUSIC VOLUME</div>
+ <div style="display:flex;align-items:center;gap:10px">
+ <input type="range" id="volume-slider" min="0" max="100" value="45" step="5"
+ oninput="setMusicVolume(this.value)"
+ style="flex:1;accent-color:var(--chrome-gold);cursor:pointer;height:4px">
+ <span id="volume-label" style="font-family:var(--font-pixel);font-size:6px;color:var(--parch-text-dim);min-width:28px;text-align:right">45%</span>
+ </div>
+ </div>
+ <!-- Music mute / Fullscreen -->
+ <div style="display:flex;gap:8px">
+ <button id="btn-mute" class="btn btn-ghost" onclick="toggleTitleMusic()" style="flex:1;justify-content:center">🔊 Music</button>
+ <button class="btn btn-ghost" onclick="toggleFullscreen()" style="flex:1;justify-content:center">⛶ Fullscreen</button>
+ </div>
+ <hr style="border:none;border-top:1px solid var(--chrome-mid)">
+ <button class="btn btn-ghost" onclick="settingsAction('title')" style="justify-content:flex-start">🏠 Return to Title</button>
+ <button class="btn btn-ghost" id="settings-action-save" onclick="settingsAction('save')" style="justify-content:flex-start">💾 Save Run</button>
+ <hr style="border:none;border-top:1px solid var(--chrome-mid)">
+ <button class="btn btn-ghost" id="settings-action-abandon" onclick="settingsAction('abandon')" style="justify-content:flex-start;color:#f88;border-color:rgba(200,80,80,0.4)">☠️ Abandon Run</button>
+ <hr style="border:none;border-top:1px solid rgba(200,80,80,0.2)">
+ <button class="btn btn-ghost" onclick="settingsAction('wipe')" style="justify-content:flex-start;color:#f66;border-color:rgba(200,40,40,0.4);opacity:0.7;font-size:8px">🗑️ Wipe All Progress</button>
+ </div>
+ <button class="btn btn-ghost btn-sm" onclick="closeSettings()" style="width:100%;margin-top:12px">✕ Close</button>
+ </div>
+</div>
+
+<!-- ── DEBUG BAR ──────────────────────────────────────────────── -->
+<div id="debug-bar"></div>
+
+
+<script src="game.js"></script>
+<script>
+window.addEventListener("error",function(e){
+  const bar=document.getElementById("debug-bar");
+  if(bar){bar.style.display="block";bar.textContent="⚠ "+e.message+" (line "+e.lineno+")";}
+});
+</script>
+
+</body>
+</html>
