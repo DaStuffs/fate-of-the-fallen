@@ -7,7 +7,7 @@
   --px: 2px;
 
   /* Parchment / text */
-  --parch-bg:       #0d0a06;
+  --parch-bg:       #0d0d0d;
   --parch-dark:     #110e08;
   --parch-text:     #c8b078;
   --parch-text-hi:  #e8d098;
@@ -76,9 +76,9 @@ body {
   font-family: var(--font-pixel);
   font-size: 8px;
   padding: 8px 14px;
-  border: var(--px) solid var(--chrome-mid);
-  background: linear-gradient(180deg, #2a1f0f 0%, #1a1208 100%);
-  color: var(--parch-text-hi);
+  border: var(--px) solid #555;
+  background: linear-gradient(180deg, #2a2a2a 0%, #161616 100%);
+  color: #e0e0e0;
   cursor: pointer;
   border-radius: 2px;
   letter-spacing: 0.05em;
@@ -87,13 +87,13 @@ body {
   align-items: center;
   gap: 6px;
 }
-.btn:hover:not(:disabled)  { border-color: var(--chrome-gold); color: var(--chrome-gold-hi); }
-.btn:active:not(:disabled) { background: linear-gradient(180deg, #1a1208 0%, #0d0906 100%); }
+.btn:hover:not(:disabled)  { border-color: #aaa; color: #fff; background: linear-gradient(180deg, #3a3a3a 0%, #1e1e1e 100%); }
+.btn:active:not(:disabled) { background: linear-gradient(180deg, #181818 0%, #0d0d0d 100%); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-primary  { background: linear-gradient(180deg, #3a2810 0%, #201508 100%); border-color: var(--chrome-gold); color: var(--chrome-gold-hi); }
-.btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #4a3018 0%, #2a1a08 100%); }
-.btn-ghost    { background: transparent; border-color: rgba(255,255,255,0.12); color: var(--parch-text-dim); }
-.btn-ghost:hover:not(:disabled) { border-color: var(--chrome-gold); color: var(--chrome-gold-hi); background: rgba(0,0,0,0.2); }
+.btn-primary  { background: linear-gradient(180deg, #3a3a3a 0%, #1e1e1e 100%); border-color: #bbb; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #4a4a4a 0%, #262626 100%); border-color: #fff; }
+.btn-ghost    { background: transparent; border-color: rgba(255,255,255,0.18); color: #c0c0c0; }
+.btn-ghost:hover:not(:disabled) { border-color: #ddd; color: #fff; background: rgba(255,255,255,0.05); }
 .btn-sm { font-size: 6px; padding: 5px 10px; }
 .btn-lg { font-size: 10px; padding: 10px 18px; }
 
@@ -267,13 +267,17 @@ body {
 
 /* ── TITLE SCREEN ────────────────────────────────────────────── */
 #screen-title {
-  background: radial-gradient(ellipse at 50% 40%, #2a1808 0%, #0d0a06 65%);
+  background: radial-gradient(ellipse at 50% 40%, #2a2a2a 0%, #0d0d0d 65%);
   align-items: center; justify-content: center; text-align: center;
 }
 .title-logo {
-  font-family: var(--font-header); font-size: 42px;
-  color: var(--chrome-gold-hi); margin-bottom: 6px;
-  text-shadow: 0 0 40px rgba(200,160,40,0.4);
+  font-family: var(--font-header); font-size: 68px;
+  color: var(--chrome-gold-hi); margin-bottom: 10px;
+  letter-spacing: 0.04em;
+  text-shadow:
+    0 0 24px rgba(255,190,60,0.55),
+    0 0 60px rgba(200,120,30,0.35),
+    0 4px 0 rgba(0,0,0,0.6);
 }
 .title-subtitle {
   font-family: var(--font-pixel); font-size: 7px;
@@ -287,16 +291,16 @@ body {
 
 /* ── ADVENTURE SELECT ────────────────────────────────────────── */
 #screen-adventure-select {
-  background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #0d0d0d 70%);
   padding: 32px 16px; align-items: center;
 }
 .adv-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
-  gap: 14px; width: 100%; max-width: 860px; margin: 24px 0;
+  grid-template-columns: repeat(auto-fill, minmax(340px,1fr));
+  gap: 18px; width: 100%; max-width: 1040px; margin: 24px 0;
 }
 .adv-card {
-  padding: 20px; border: 1px solid var(--chrome-mid);
+  padding: 26px; border: 1px solid var(--chrome-mid);
   background: rgba(0,0,0,0.35); border-radius: 3px;
   transition: border-color 0.15s; cursor: pointer;
 }
@@ -305,7 +309,7 @@ body {
 
 /* ── CLASS SELECT ────────────────────────────────────────────── */
 #screen-class-select {
-  background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #0d0d0d 70%);
   padding: 32px 16px; align-items: center;
 }
 /* Class select grid — compact tiles */
@@ -336,7 +340,7 @@ body {
   z-index: 8000; padding: 20px;
 }
 .class-detail-box {
-  background: #0e0b07; border: 1px solid var(--chrome-mid);
+  background: #111111; border: 1px solid var(--chrome-mid);
   border-radius: 4px; padding: 28px 28px 24px;
   max-width: 540px; width: 100%;
   max-height: 88vh; overflow-y: auto;
@@ -380,7 +384,7 @@ body {
 
 /* ── HERO SELECT ─────────────────────────────────────────────── */
 #screen-hero-select {
-  background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #0d0d0d 70%);
   padding: 32px 16px; align-items: center;
 }
 .hero-grid {
@@ -397,7 +401,7 @@ body {
 
 /* ── ADVENTURE (ENCOUNTER) SCREEN ────────────────────────────── */
 #screen-adventure {
-  background: radial-gradient(ellipse at 30% 50%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 30% 50%, #1a1a1a 0%, #0d0d0d 70%);
   flex-direction: row;
 }
 .adv-sidebar {
@@ -501,7 +505,7 @@ body {
 
 /* ── COMBAT SCREEN ───────────────────────────────────────────── */
 #screen-combat {
-  background: radial-gradient(ellipse at 50% 20%, #1a0e06 0%, #0d0a06 60%);
+  background: radial-gradient(ellipse at 50% 20%, #161616 0%, #0d0d0d 60%);
   overflow: hidden;
   flex-direction: row !important;
 }
@@ -518,7 +522,7 @@ body {
 /* Player HUD box (left panel) */
 .player-hud {
   width: 210px; flex-shrink: 0;
-  background: #0c0a07;
+  background: #0d0d0d;
   border-right: 1px solid rgba(80,200,80,0.2);
   padding: 10px 10px 8px;
   display: flex; flex-direction: column; gap: 6px;
@@ -670,7 +674,7 @@ body {
   width: 280px; flex-shrink: 0;
   overflow-y: auto;
   scrollbar-width: none;
-  background: #050402;
+  background: #050505;
   border-left: 1px solid var(--chrome-dark);
   padding: 8px 12px; font-size: 11px; line-height: 1.7;
 }
@@ -899,7 +903,7 @@ body {
 .ability-card {
   width: 190px; min-height: 150px; flex-shrink: 0;
   border: 1px solid var(--chrome-mid); border-radius: 3px;
-  background: linear-gradient(180deg, #1a1208 0%, #0d0906 100%);
+  background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
   cursor: pointer; transition: border-color 0.12s, transform 0.12s;
   display: flex; flex-direction: column; overflow: hidden;
 }
@@ -943,7 +947,7 @@ body {
 
 /* ── DRAFT SCREEN ────────────────────────────────────────────── */
 #screen-draft {
-  background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #0d0d0d 70%);
   align-items: center; justify-content: center;
 }
 .draft-frame { max-width: 920px; width: 100%; padding: 32px 20px; }
@@ -952,7 +956,7 @@ body {
 }
 .draft-card-big {
   width: 220px; border: 1px solid var(--chrome-mid); border-radius: 3px;
-  background: linear-gradient(180deg, #1e1508 0%, #0d0906 100%);
+  background: linear-gradient(180deg, #1e1e1e 0%, #0d0d0d 100%);
   cursor: pointer; transition: border-color 0.12s, transform 0.12s;
   overflow: hidden;
 }
@@ -972,7 +976,7 @@ body {
 
 /* ── LEVEL UP SCREEN ─────────────────────────────────────────── */
 #screen-levelup {
-  background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #0d0d0d 70%);
   align-items: center; padding: 40px 16px 60px;
 }
 .perk-grid { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 720px; }
@@ -996,7 +1000,7 @@ body {
 
 /* ── SHOP SCREEN ─────────────────────────────────────────────── */
 #screen-shop {
-  background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #0d0d0d 70%);
   align-items: center;
   justify-content: flex-start;
 }
@@ -1013,7 +1017,7 @@ body {
 
 /* ── DEATH / VICTORY ─────────────────────────────────────────── */
 #screen-dead    { background: radial-gradient(ellipse at 50% 40%, #1a0606 0%, #060404 70%); align-items: center; justify-content: center; }
-#screen-victory { background: radial-gradient(ellipse at 50% 40%, #1a1208 0%, #0d0a06 70%); align-items: center; justify-content: center; }
+#screen-victory { background: radial-gradient(ellipse at 50% 40%, #1a1a1a 0%, #0d0d0d 70%); align-items: center; justify-content: center; }
 .endscreen-center { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 560px; padding: 40px 20px; }
 .endscreen-icon  { font-size: 64px; margin-bottom: 16px; }
 .endscreen-title { font-family: var(--font-header); font-size: 28px; margin-bottom: 16px; }
@@ -1034,7 +1038,7 @@ body {
 
 /* ── LEGACY VAULT ────────────────────────────────────────────── */
 #screen-legacy {
-  background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #0d0a06 70%);
+  background: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #0d0d0d 70%);
   align-items: center; padding: 32px 16px 48px;
 }
 .legacy-vault-inner { display: flex; gap: 16px; width: 100%; max-width: 960px; align-items: flex-start; }
@@ -1233,8 +1237,10 @@ body {
 .unlock-banner     { font-size: 12px; }
 
 /* Title screen */
-.title-subtitle    { font-size: 12px; }
+.title-logo        { font-size: 96px; }
+.title-subtitle    { font-size: 14px; }
 .title-stat-banner { font-size: 11px; }
+#title-flavor      { font-size: 13px !important; max-width: 640px !important; }
 
 /* Encounter / adventure screen */
 .quest-type-badge  { font-size: 11px; }

@@ -246,11 +246,11 @@ const CARDS = {
  hit:'Your fire abilities deal +1 damage. If you take damage from an enemy deal. them 1 damage and roll. On roll > 7 apply 1 ignite counter to them. This ability has 2 charges.',
  crit:null, miss:null, critmiss:'take 2 Fire damage' },
  { id:'m27', name:'Water Elemental', tier:2, type:'target', risk:8,
- hit:'Summon a Water Elemental',
- crit:null, miss:null, critmiss:null },
+ hit:'Summon a Water Elemental (6 HP). On summon: deal 2 ice magic to all enemies. Each turn it deals 2 ice magic to ALL enemies and taunts attacks.',
+ crit:'Water Elemental enters play with +3 max HP.', miss:null, critmiss:null },
  { id:'m28', name:'Blizzard', tier:3, type:'damage', risk:12,
- hit:'Deal 2 ice damage. Enemies deal half attack damage this turn (rounded up)',
- crit:'Deal double damage', miss:null, critmiss:'All players take 2 damage and deal half damage this round' },
+ hit:'Deal 2 ice magic damage to all enemies. Channel begins: at the start of each turn roll DC 12 — on success deal escalating ice damage to all enemies (3, 4, 5, …). Channel breaks on failed roll.',
+ crit:'Initial damage is doubled.', miss:null, critmiss:'You take 2 damage.' },
  { id:'m29', name:'Flamestrike', tier:3, type:'damage', risk:12,
  hit:'Deal 3 fire damage. All enemies take +1 damage this round. apply 2 ignite counters to each enemy dealt damage this way..',
  crit:'Double damage and + damage bonus', miss:null, critmiss:'All allies take 3 damage' },
@@ -376,8 +376,8 @@ const CARDS = {
  crit:'Double the counters on Starfall.',
  miss:null, critmiss:'Deal 2 damage to yourself. Lose your next turn.' },
  { id:'d22', name:'Tranquility', tier:3, type:'health', risk:8,
- hit:'Heal yourself for 4. (Channeled: roll 8+ each turn to heal 4+2 more per success.)',
- crit:'Heal double.',
+ hit:'Heal 4 and apply a channeled HoT buff. Each turn, roll 8+ to heal (first tick 6, +2 per success after). Buff fades on failed roll.',
+ crit:'Initial heal is doubled.',
  miss:null, critmiss:'Lose your next turn.' },
  { id:'d23', name:'Strangling Roots',tier:3, type:'target', risk:8,
  hit:'Enemies deal no attack damage this turn. Deal 2 nature magic damage.',
@@ -458,8 +458,8 @@ const CARDS = {
  hit:'Draw 3 cards. Play 2 additional cards this turn. +3 on all rolls this turn.',
  crit:'Repeat this ability on the next round', miss:null, critmiss:'Target ally only may draw 1 card on their next turn and recieves -3 on their next roll' },
  { id:'d49', name:'Force of Nature', tier:3, type:'target', risk:6,
- hit:'Summon Treant allies based on roll: 2-8 = 1 Treant, 9-15 = 2, 16-20 = 3. Treants deal 3 nature damage per turn combined. Multiple casts stack.',
- crit:'Summon an additional Treant (max 3 per cast). Treants deal 3 nature damage per turn combined.', miss:null, critmiss:null },
+ hit:'Summon 3 Treant companions (4 HP each). Each turn every Treant deals 2 nature damage to an enemy and taunts attacks. Stacks with existing Treants.',
+ crit:'Each summoned Treant enters play with +2 max HP.', miss:null, critmiss:null },
  { id:'d50', name:"Gaia's Bounty", tier:4, type:'health', risk:12,
  hit:'Refresh the count on all hots you have in play and apply each hot to a second ally not currently benefiting from it.',
  crit:'Apply your hots to a 3rd target', miss:null, critmiss:null },
@@ -579,7 +579,7 @@ const CARDS = {
  Hunter: [
  { id:'h00', name:'Arcane Shot', tier:1, type:'damage', risk:6,
  hit:'Deal 2 ranged arcane damage. Draw 1 card and play another card.',
- crit:'Deal double damage.', miss:null, critmiss:'Take 3 damage.' },
+ crit:'Deal double damage and draw 2 cards.', miss:null, critmiss:'Take 3 damage.' },
  { id:'h01', name:'Kill Command', tier:1, type:'damage', risk:7,
  hit:'Deal 3 melee damage, or 6 if you have a pet in play.',
  crit:'Deal double damage.', miss:null, critmiss:'Take 3 damage. Your pet attacks you this turn if able.' },
@@ -593,8 +593,8 @@ const CARDS = {
  hit:'Passive: +1 to all rolls and draw 1 extra card per turn. Take +1 from attacks. Only one aspect active.',
  crit:'Play another card.', miss:null, critmiss:'Take 3 damage.' },
  { id:'h05', name:'Serpent Sting', tier:1, type:'damage', risk:7,
- hit:'Deal 3 ranged damage. Apply 1 Poison stack (deals 1 damage/turn for 3 turns).',
- crit:'Deal 4 damage and apply 2 Poison stacks.', miss:null, critmiss:'Take 1 damage and apply 1 Poison to yourself.' },
+ hit:'Deal 3 ranged damage. Apply 3 Poison stacks (each deals 1 dmg/turn).',
+ crit:'Deal 4 damage and apply 5 Poison stacks.', miss:null, critmiss:'Take 1 damage and apply 1 Poison to yourself.' },
  { id:'h06', name:'Concussive Shot', tier:1, type:'damage', risk:7,
  hit:'Deal 2 ranged damage. Take half damage this turn. Play another card.',
  crit:null, miss:null, critmiss:'Take 3 damage.' },
@@ -602,8 +602,8 @@ const CARDS = {
  hit:'Set trap: next time you take damage, discard Steel Trap — target takes 5 damage, you take none.',
  crit:null, miss:null, critmiss:'Take 3 damage and deal half damage this turn.' },
  { id:'h08', name:"Hunter's Mark", tier:1, type:'damage', risk:8,
- hit:'You may only have 1 mark in play at a time.Target enemy takes +1 damage from you and your pets. You require 2 less to succed on rolls for abilities that target this enemy This card remains in play.',
- crit:'Apply to all all enemies', miss:null, critmiss:null },
+ hit:'Mark target enemy (persistent debuff). Marked enemy takes +1 damage from all sources and you get +2 to rolls targeting them. Enemies can only have one mark at a time.',
+ crit:'Apply the mark to all enemies.', miss:null, critmiss:null },
  { id:'h09', name:'Careful Aim', tier:1, type:'damage', risk:9,
  hit:'Leave this card in play. If you didn\'t take damage last turn you deal +2 ranged damage.',
  crit:null, miss:null, critmiss:null },
@@ -626,14 +626,14 @@ const CARDS = {
  hit:'Deal 2 ranged damage. Repeat until you fail — each repeat increases the DC by 2.',
  crit:'DC does not increase between repeats.', miss:null, critmiss:'Take 2 damage.' },
  { id:'h16', name:'Aimed Shot', tier:2, type:'damage', risk:7,
- hit:'Your next ranged ability deals double damage but needs +3 to succeed.',
- crit:'Your next ranged ability auto-crits.', miss:null, critmiss:null },
+ hit:'Your next ranged card deals double damage. Play another card.',
+ crit:'Your next ranged card auto-crits instead.', miss:null, critmiss:null },
  { id:'h17', name:'Eagle Eye', tier:2, type:'target', risk:13,
  hit:'Play with top card of your deck revealed each turn — you may play it as a bonus (persistent).',
  crit:null, miss:null, critmiss:null },
- { id:'h18', name:'Ricocheting shot.II', tier:1, type:'damage', risk:8,
- hit:'Roll up to 3 times. Deal 4 ranged damage per roll, choosing a different target each time.',
- crit:'Deal double damage.', miss:null, critmiss:null },
+ { id:'h18', name:'Ricochet Shot', tier:2, type:'damage', risk:8,
+ hit:'Deal 4 ranged damage. On hit, reroll DC to hit a new random enemy — repeat up to 3 total hits.',
+ crit:'Deal double damage on the first hit.', miss:null, critmiss:null },
  { id:'h19', name:'Feign Death', tier:2, type:'damage', risk:7,
  hit:'Block all attack damage this turn. Play another card next turn.',
  crit:'Effect lasts an extra round.', miss:null, critmiss:'Take +3 damage this turn.' },
@@ -751,8 +751,8 @@ const CARDS = {
  hit:'Persistent: your Shadow Word abilities affect a second enemy.',
  crit:null, miss:null, critmiss:null },
  { id:'pr23', name:'Summon Shadow Fiend', tier:2, type:'target', risk:10,
- hit:'Summon a Shadow Fiend that deals 3 Shadow damage per turn.',
- crit:null, miss:null, critmiss:null },
+ hit:'Summon a Shadow Fiend (6 HP). Enters with 1 shadow counter (max 5). Each time you deal shadow magic damage it gains a counter. Each turn it deals counter-value shadow magic to a random enemy. Does not taunt.',
+ crit:'Enters with +2 extra shadow counters.', miss:null, critmiss:null },
  { id:'pr24', name:'Evangelism', tier:3, type:'target', risk:8,
  hit:'Persistent: your Divine Word abilities affect a second ally.',
  crit:'Search deck or discard for a Divine Word and play it — auto-succeeds.', miss:null, critmiss:null },
@@ -804,7 +804,7 @@ const CARDS = {
  hit:'Deal 3 fire damage. Apply 1 Ignite stack (1 fire damage per turn).',
  crit:'Deal 6 fire damage and 2 Ignite stacks.', miss:null, critmiss:'Apply Immolate to yourself instead.' },
  { id:'wl04', name:'Summon: Imp', tier:1, type:'target', risk:6,
- hit:'Summon an Imp that deals 2 Shadow damage per turn.',
+ hit:'Summon an Imp (2 HP). Grants +3 max HP while alive. Each turn: roll; on >5 deals 1 fire magic to a random enemy. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 1 enemy appears.' },
  { id:'wl05', name:'Create: Health Stone', tier:1, type:'target', risk:5,
  hit:'Heal 5 HP immediately.',
@@ -822,10 +822,10 @@ const CARDS = {
  hit:'Deal 2 fire damage. Target takes +2 from all sources this turn.',
  crit:'Affects all enemies.', miss:null, critmiss:'Take +2 damage this turn.' },
  { id:'wl10', name:'Summon: Fel Guard', tier:2, type:'target', risk:10,
- hit:'Summon a Fel Guard that deals 4 Shadow damage per turn.',
+ hit:'Summon a Fel Guard (6 HP). Takes -2 damage from all sources. Each turn: roll; on >7 heals 2 HP. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 3 enemy appears.' },
  { id:'wl11', name:'Summon: Fel Hunter', tier:2, type:'target', risk:10,
- hit:'Summon a Fel Hunter that deals 3 Shadow damage per turn.',
+ hit:'Summon a Fel Hunter (3 HP). Each turn: roll; on >7 you deal +2 shadow magic damage this turn. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 3 enemy appears.' },
  { id:'wl12', name:'Curse of Agony', tier:2, type:'damage', risk:8,
  hit:'Attach to target: deals escalating Shadow damage per turn (starts at 2, increases by 1 each turn).',
@@ -861,10 +861,10 @@ const CARDS = {
  hit:'Deal 5 Shadow damage. All other Shadow damage to this target is doubled this turn.',
  crit:'Shadow damage to this target is also doubled next turn.', miss:null, critmiss:'Take damage equal to your full HP (cannot be reduced).' },
  { id:'wl23', name:'Summon Void Walker', tier:3, type:'target', risk:8,
- hit:'Summon a Void Walker that deals 3 Shadow damage per turn.',
+ hit:'Summon a Void Walker (4 HP). Grants +1 card draw and +1 to rolls while alive. Each turn: roll; on >10 gain +3 rolls this turn. Can be sacrificed to heal you for 2× its current HP. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 2 enemy appears.' },
  { id:'wl24', name:'Summon: Infernal', tier:3, type:'target', risk:12,
- hit:'Summon an Infernal that deals 5 fire damage per turn.',
+ hit:'Summon an Infernal (15 HP). Each turn: 1 fire to you AND all enemies, then roll; on >8 deal 5 fire to all enemies. After 3 turns it breaks free and escapes.',
  crit:'Play another card.', miss:null, critmiss:'A random tier 4 enemy appears.' },
  { id:'wl25', name:'Reign Of Fire', tier:3, type:'damage', risk:10,
  hit:'Deal 3 fire damage to all enemies. Repeats each turn on a successful roll (DC 10+).',
@@ -920,23 +920,23 @@ const CARDS = {
  hit:'Play a card from your discard pile this turn.',
  crit:'That card auto-succeeds.', miss:null, critmiss:'Lose your next turn.' },
  { id:'sh08', name:'Healing Spring Totem', tier:1, type:'target', risk:6,
- hit:'Place a Healing Spring Totem — heals 2 HP per turn for 4 turns.',
- crit:'Heals 3 HP per turn. Play another card.', miss:null, critmiss:'Take 2 damage.' },
+ hit:'Place a Healing Spring Totem (1 HP, no taunt). Heals you for 1 HP on summon and at the start of each turn.',
+ crit:'On summon heal is 2 HP instead. Play another card.', miss:null, critmiss:'Take 2 damage.' },
  { id:'sh09', name:'Searing Totem', tier:1, type:'target', risk:6,
- hit:'Place a Searing Totem — deals 2 fire damage per turn.',
- crit:'Totem deals 3 fire damage per turn. Play another card.', miss:null, critmiss:'Take 2 damage.' },
+ hit:'Place a Searing Totem (1 HP, no taunt). At start of each turn: deal 1 fire magic to a random enemy.',
+ crit:'Play another card.', miss:null, critmiss:'Take 2 damage.' },
  { id:'sh10', name:'Fire Nova Totem', tier:1, type:'target', risk:6,
- hit:'Place a Fire Nova Totem — immediately deals 2 fire damage to all enemies.',
- crit:'Deal 4 fire to all enemies. Play another card.', miss:null, critmiss:'All allies take 2 damage.' },
+ hit:'Place a Fire Nova Totem (1 HP, no taunt). At end of your turn it self-destructs and deals 3 fire magic to every enemy.',
+ crit:'Play another card.', miss:null, critmiss:'All allies take 2 damage.' },
  { id:'sh11', name:'Stoneskin Totem', tier:1, type:'target', risk:6,
- hit:'Place a Stoneskin Totem — grant +1 damage reduction for the rest of combat.',
- crit:'+2 damage reduction. Play another card.', miss:null, critmiss:'Take 2 damage.' },
+ hit:'Place a Stone Skin Totem (4 HP). Taunts attacks; takes -1 damage from all sources (minimum 1).',
+ crit:'Enters with +2 max HP.', miss:null, critmiss:'Take 2 damage.' },
  { id:'sh12', name:'Healing Surge', tier:1, type:'health', risk:6,
  hit:'Heal 2 HP. Play another card.',
  crit:'Heal 4 HP. Play another card.', miss:null, critmiss:'Take 2 damage.' },
  { id:'sh13', name:'Cloud Burst Totem', tier:2, type:'target', risk:6,
- hit:'Place a Cloud Burst Totem — heals 2 HP per turn for 4 turns.',
- crit:'Heals 3 HP per turn. Play another card.', miss:null, critmiss:'Take 2 damage.' },
+ hit:'Place a Cloud Burst Totem (1 HP, no taunt). Each time you heal it gains a counter. On death or sacrifice: heal you 1 HP per counter. Sacrifice available on your turn.',
+ crit:'Enters with +2 counters.', miss:null, critmiss:'Take 2 damage.' },
  { id:'sh14', name:'Fissure', tier:2, type:'damage', risk:8,
  hit:'Deal 3 Nature damage. Deal 7 instead if target is below half HP.',
  crit:'Deal double damage.', miss:null, critmiss:'Take 4 damage.' },
@@ -962,10 +962,10 @@ const CARDS = {
  hit:'Deal 5 ice damage. Double damage if target is below half HP.',
  crit:'Deal double damage.', miss:null, critmiss:'Take 4 damage.' },
  { id:'sh22', name:'Mana Spring Totem', tier:2, type:'target', risk:6,
- hit:'Place a Mana Spring Totem — draw 1 extra card per turn for 3 turns.',
+ hit:'Place a Mana Spring Totem (1 HP, no taunt). Passive: +1 card draw while alive.',
  crit:'Play another card.', miss:null, critmiss:'Take 2 damage.' },
  { id:'sh23', name:'Grace of Air Totem', tier:2, type:'target', risk:6,
- hit:'Place a Grace of Air Totem — grant +1 to all rolls for 3 turns.',
+ hit:'Place a Grace of Air Totem (1 HP, no taunt). Passive: +2 to all rolls while alive.',
  crit:'Play another card.', miss:null, critmiss:'Take 2 damage. -2 to your next roll.' },
  { id:'sh24', name:'Frost Bite', tier:2, type:'damage', risk:8,
  hit:'Deal 2 ice melee damage. Target takes +2 ice damage this turn. Play another card.',
@@ -1533,7 +1533,7 @@ const HEROES = {
  lore:"He speaks for the trees. The trees speak through his fists.",
  ability:(char,roll,C)=>{ if(roll>=8){C._elswornShield=true;return{success:true,msg:`Nature's Wrath! Half damage + reflect this turn!`};}return{success:false,msg:`Nature's Wrath fades. (rolled ${roll}, need 8+)`};}
  },
- { id:'axilea', unlockCost:0, name:"Axilea, Gaia's Chosen", icon:'🌿', hp:24,
+ { id:'axilea', unlockCost:15, name:"Axilea, Gaia's Chosen", icon:'🌿', hp:24,
  abilityName:"Gaia's Blessing", abilityDesc:"Once per combat: Roll. On 6+, the next Restoration or Balance ability you play this turn resolves twice.", abilityDC:6,
  lore:"She doesn't speak to nature. Nature speaks through her.",
  ability:(char,roll,C)=>{ if(roll>=6){C._doubleNextRestoBalance=true;return{success:true,msg:`Gaia's Blessing! Next Restoration or Balance ability resolves twice!`};}return{success:false,msg:`Gaia's Blessing fades. (rolled ${roll}, need 6+)`};}
@@ -2661,7 +2661,7 @@ const CARD_TALENTS = {
   'Rapid Fire':'Marksmanship',
   'Aimed Shot':'Marksmanship',
   'Eagle Eye':'Survival',
-  'Ricocheting shot.II':'Marksmanship',
+  'Ricochet Shot':'Marksmanship',
   'Feign Death':'Survival',
   'Explosive Trap':'Survival',
   'Explosive trap':'Survival',
@@ -3212,19 +3212,19 @@ function showAdventureSelect() {
  ADVENTURES.forEach(adv=>{
  const card=document.createElement('div');
  card.className='adv-card'+(adv.locked?' locked':'');
- const tags=adv.tags.map(t=>`<span style="font-family:var(--font-pixel);font-size:5px;color:var(--parch-text-dim);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:2px 6px">${t}</span>`).join('');
+ const tags=adv.tags.map(t=>`<span style="font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:4px 8px">${t}</span>`).join('');
  card.innerHTML=`
- <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
- <div style="font-size:32px">${adv.icon}</div>
+ <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px">
+ <div style="font-size:44px">${adv.icon}</div>
  <div>
- <div style="font-family:var(--font-pixel);font-size:9px;color:var(--chrome-gold-hi);margin-bottom:4px">${adv.title}</div>
- <div style="font-family:var(--font-pixel);font-size:5px;color:var(--parch-text-dim)">📍 ${adv.subtitle}</div>
+ <div style="font-family:var(--font-pixel);font-size:14px;color:var(--chrome-gold-hi);margin-bottom:6px">${adv.title}</div>
+ <div style="font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim)">📍 ${adv.subtitle}</div>
  </div>
- ${adv.comingSoon?'<div style="margin-left:auto;font-family:var(--font-pixel);font-size:5px;color:var(--parch-text-dim);border:1px solid rgba(255,255,255,0.1);padding:3px 6px;border-radius:2px">COMING SOON</div>':''}
+ ${adv.comingSoon?'<div style="margin-left:auto;font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim);border:1px solid rgba(255,255,255,0.1);padding:5px 8px;border-radius:2px">COMING SOON</div>':''}
  </div>
- <div style="font-size:12px;color:var(--parch-text-dim);line-height:1.7;margin-bottom:12px">${adv.lore}</div>
- <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:${adv.unlocked?'12px':'0'}">${tags}</div>
- ${adv.unlocked?`<button class="btn btn-primary" style="width:100%" onclick="selectAdventure('${adv.id}')">⚔️ Enter ${adv.title}</button>`:''}
+ <div style="font-size:16px;color:var(--parch-text-dim);line-height:1.6;margin-bottom:14px">${adv.lore}</div>
+ <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:${adv.unlocked?'14px':'0'}">${tags}</div>
+ ${adv.unlocked?`<button class="btn btn-primary" style="width:100%;font-size:12px;padding:12px 16px" onclick="selectAdventure('${adv.id}')">⚔️ Enter ${adv.title}</button>`:''}
  `;
  grid.appendChild(card);
  });
@@ -3671,6 +3671,7 @@ function applyChoiceEffect(effect) {
 }
 
 function resolveChoice(enc, choice, idx) {
+ if(!G.char) return;
  let title, body, effectMsgs=[];
  if(!choice.skill){
  const out=enc.outcomes[idx];
@@ -3881,7 +3882,7 @@ function showCombatScreen(enc) {
  _hudLastHp:G.char.hp,
  _skipTurnEffectsApplied:false,
  _dmgDoubleActive:false,
- _treants:0,
+ _treants:0, _pets:[],
  _sprintRollBonus:0,
  _waitingForPicker:false,
  _lastTurnDamageTaken:0,
@@ -3937,6 +3938,40 @@ function renderEnemies() {
  const row=$('enemy-row');
  row.innerHTML='';
 
+ // Pet frame (between player and enemies)
+ (C._pets||[]).filter(p=>p.hp>0).forEach(p=>{
+ const def=getPetDef(p.id);
+ const hpPct=Math.max(0,Math.min(100,(p.hp/p.maxHP)*100));
+ const hpCol=hpPct>60?'var(--hp-full)':hpPct>30?'var(--hp-mid)':'var(--hp-low)';
+ const flags=[];
+ if(C._petShellActive&&p.id==='moonui')flags.push('🛡 Shell');
+ if(C._petReflectActive&&p.id==='moonui')flags.push('↩ Reflect');
+ if(C._tigerDoubleNext&&p.id==='bhengalesh')flags.push('⚡ Next x2');
+ if(p.id==='priestShadowFiend')flags.push(`🌑 ${p.counters||0}/5 counters`);
+ if(p.id==='shamanCloudBurst')flags.push(`☁️ ${p.counters||0} counters`);
+ if(def&&def.canToggleRedirect)flags.push(p._redirectActive?'🛡 Redirect ON':'⚪ Redirect OFF');
+ if(p.id==='warlockInfernal')flags.push(`⏱ Turn ${p._turnCount||0}/3`);
+ const rollRows=(def&&def.rollTable||[]).map(([r,t])=>`<div style="display:flex;gap:6px;line-height:1.35"><span style="color:var(--chrome-gold-hi);min-width:30px;flex:none">${r}</span><span style="color:var(--parch-text-dim)">${t}</span></div>`).join('');
+ const fixedLine=def&&def.fixedAction?`<div style="color:var(--parch-text-dim);line-height:1.4;text-align:center">${def.fixedAction}</div>`:'';
+ const frame=document.createElement('div');
+ frame.className='pet-frame';
+ frame.style.cssText='display:flex;flex-direction:column;align-items:center;padding:10px 14px;border:2px solid #60c060;border-radius:4px;background:rgba(40,80,40,0.25);min-width:200px;max-width:220px;flex:0 0 auto;order:-1';
+ frame.innerHTML=`
+ <div style="font-size:32px;line-height:1">${p.icon}</div>
+ <div style="font-family:var(--font-pixel);font-size:7px;color:#a0e0a0;margin-top:4px;text-align:center">${p.name}</div>
+ <div style="font-family:var(--font-pixel);font-size:6px;color:var(--parch-text-dim);margin-top:2px">${p.species} · ALLY</div>
+ <div style="width:100%;height:8px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:2px;margin-top:6px;overflow:hidden"><div style="width:${hpPct}%;height:100%;background:${hpCol};transition:width 0.2s"></div></div>
+ <div style="font-family:var(--font-pixel);font-size:7px;color:${hpCol};margin-top:2px">${p.hp}/${p.maxHP} HP</div>
+ ${flags.length?`<div style="font-family:var(--font-pixel);font-size:6px;color:var(--chrome-gold-hi);margin-top:4px;text-align:center">${flags.join(' · ')}</div>`:''}
+ ${rollRows?`<div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.1);width:100%"><div style="font-family:var(--font-pixel);font-size:5px;color:var(--chrome-gold-rim);letter-spacing:0.1em;margin-bottom:4px;text-align:center">TURN ROLL</div><div style="font-family:var(--font-pixel);font-size:6px;display:flex;flex-direction:column;gap:3px">${rollRows}</div></div>`:''}
+ ${fixedLine?`<div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.1);width:100%"><div style="font-family:var(--font-pixel);font-size:5px;color:var(--chrome-gold-rim);letter-spacing:0.1em;margin-bottom:4px;text-align:center">EACH TURN</div><div style="font-family:var(--font-pixel);font-size:6px">${fixedLine}</div></div>`:''}
+ ${def&&def.canToggleRedirect?`<button class="btn btn-sm" style="margin-top:8px;width:100%;font-size:6px;padding:4px" onclick="togglePetRedirect('${p.id}')">${p._redirectActive?'Disable Redirect':'Enable Redirect'}</button>`:''}
+ ${def&&def.canSacrifice&&p.id==='warlockVoidWalker'?`<button class="btn btn-primary btn-sm" style="margin-top:6px;width:100%;font-size:6px;padding:4px" onclick="sacrificeVoidWalker()">Sacrifice (heal 2× HP)</button>`:''}
+ ${def&&def.canSacrifice&&p.id==='shamanCloudBurst'?`<button class="btn btn-primary btn-sm" style="margin-top:6px;width:100%;font-size:6px;padding:4px" onclick="sacrificeCloudBurst()">Sacrifice (heal ${p.counters||0} HP)</button>`:''}
+ `;
+ row.appendChild(frame);
+ });
+
  function sc(icon,label,tip,type=''){
  const lines=tip.split('\n');
  const name=lines[0];
@@ -3973,6 +4008,8 @@ function renderEnemies() {
  if(d.id==='marked') chips+=sc('🎯','MARK',`Marked for Death\\nTakes +${d.stacks} damage from all attacks this turn.`,'debuff')+'</div>';
  if(d.id==='freeze') chips+=sc('❄️','FRZE','Frozen\nSkips next attack.','debuff')+'</div>';
  });
+ if(e._hunterMarked) chips+=sc('🎯','HMRK',"Hunter's Mark\n+1 ranged damage from you and pets\n+2 to rolls targeting this enemy",'debuff')+'</div>';
+ if((e._predatorMark||0)>0) chips+=sc('🎯',`PM${e._predatorMark}`,`Predator's Mark (${e._predatorMark}/3)\n+${e._predatorMark} damage per hit from you`,'debuff')+'</div>';
  if((e._stunnedTurns||0)>0) chips+=sc('💤','STUN',`Stunned (${e._stunnedTurns} turn${e._stunnedTurns!==1?'s':''} left)\nLoses their action each turn.\nStill takes damage from effects.`,'debuff')+'</div>';
  if(e._tookIceDamage) chips+=sc('❄️','ICE','Ice-touched\nIce Lance deals double damage.','debuff')+'</div>';
  if(e.statusEffects?.includes('shield')) chips+=sc('🛡','SHLD','Shielded\nTakes half damage from all sources.','buff')+'</div>';
@@ -4045,6 +4082,11 @@ function renderHUD() {
  const _healAmt=c.hp-C._hudLastHp;
  spawnPlayerFloat(`+${_healAmt}`,'heal');
  G.char.runHealingDone=(G.char.runHealingDone||0)+_healAmt;
+ // Cloud Burst Totem: +1 counter each time you heal
+ (C._pets||[]).filter(p=>p.id==='shamanCloudBurst'&&p.hp>0).forEach(p=>{
+ p.counters=(p.counters||0)+1;
+ log(`☁️ Cloud Burst Totem gains a counter (${p.counters}).`,'log-info');
+ });
  }
  if(C) C._hudLastHp=c.hp;
  const hpPct=Math.max(0,Math.min(100,c.hp/c.maxHP*100));
@@ -4295,7 +4337,6 @@ function renderBuffZone() {
  if(C._nextFireDouble) pills.push(pill('🔥','×2','Next Fire resolves twice'));
  if(C._shatterActive) pills.push(pill('❄️','SHT','Shatter: ice deals double to ice-touched targets','buff'));
  if(C._icyVeinsActive) pills.push(pill('❄️','IV','Icy Veins: first ice each turn = extra play','buff'));
- if((C._waterElementalTurns||0)>0) pills.push(pill('💧',C._waterElementalTurns,`Water Elemental: ${C._waterElementalTurns} turn${C._waterElementalTurns!==1?'s':''} left`,'buff'));
  if((c._iceArmorCharges||0)>0) pills.push(pill('🛡',c._iceArmorCharges,`Ice Armor: ${c._iceArmorCharges} charges`,'buff'));
  if((c._mageArmorCharges||0)>0) pills.push(pill('✨',c._mageArmorCharges,`Mage Armor: ${c._mageArmorCharges} charges`,'buff'));
  if(c._moltenArmorActive) pills.push(pill('🌋',c._moltenArmorCharges||0,'Molten Armor: retaliate on hits','buff'));
@@ -4312,6 +4353,11 @@ function renderBuffZone() {
  if(C._unstablePowerActive) pills.push(pill('💀','UP','Unstable Power: shadow ×2, take roll/5 dmg/turn','debuff'));
  if(C._blackOutActive) pills.push(pill('🌑','BO','Black Out: shadow damage doubled','buff'));
  if(C._lockAndLoadActive) pills.push(pill('🏹','L&L','Lock and Load: damage → roll 15+ for extra play','buff'));
+ if(C._aimedShotActive) pills.push(pill('🎯','AIM','Aimed Shot: next ranged card deals double damage','buff'));
+ if(C._aimedShotAutoCrit) pills.push(pill('🎯','AIM★','Aimed Shot (CRIT): next ranged card auto-crits','buff'));
+ if(G.char._aspectMonkey) pills.push(pill('🐒','MNK','Aspect of the Monkey: roll 11+ on attacks taken to halve damage','buff'));
+ if(C._aspectHawkActive) pills.push(pill('🦅','HWK',`Aspect of the Hawk: +${C._aspectHawkDmgDelta||1} ranged dmg, -${C._aspectHawkDrawPenalty||1} draw/turn`,'buff'));
+ if(C._aspectCheetahActive) pills.push(pill('🐆','CHT',`Aspect of the Cheetah: +${C._aspectCheetahRollDelta||1} rolls, +${C._aspectCheetahDrawDelta||1} draw/turn, +1 dmg taken`,'buff'));
  if(C._aspectNatureActive) pills.push(pill('🌿','AN','Aspect of Nature: nature hits 13+ for extra play','buff'));
  if(C._aspectFireActive) pills.push(pill('🔥','AF','Aspect of Fire: fire hits 13+ for extra play','buff'));
  if(C._aspectIceActive) pills.push(pill('❄️','AI','Aspect of Ice: ice hits 13+ for extra play','buff'));
@@ -4324,7 +4370,6 @@ function renderBuffZone() {
  if(C._dieBySwordActive) pills.push(pill('⚔️','DBtS','Die By the Sword: survive sub-max damage','buff'));
  if(C._indomitableActive) pills.push(pill('💪','INDOM',`Indomitable: HP floor ${C._indomitableMinHP}`,'buff'));
  if(C._consecrationActive) pills.push(pill('✨','CONSEC','Consecration: 1 holy/turn to all enemies','buff'));
- if((C._shadowFiendTurns||0)>0) pills.push(pill('🌑',C._shadowFiendTurns,`Shadow Fiend: ${C._shadowFiendTurns} turn(s) left`,'buff'));
  if(C._siphonLifeActive) pills.push(pill('💀','SIPH','Siphon Life: 1 shadow/turn to all (roll 8+)','buff'));
  if(C._unstableAfflictionTargetIdx>=0) pills.push(pill('💀','UA','Unstable Affliction active','buff'));
  if((C._soulHarvestCharges||0)>0) pills.push(pill('💀',C._soulHarvestCharges,`Soul Harvest: +${C._soulHarvestCharges} dmg`,'buff'));
@@ -4347,7 +4392,18 @@ function renderBuffZone() {
  [['melee','⚔️','_eqDmgMelee'],['ranged','🏹','_eqDmgRanged'],['fire','🔥','_eqDmgFire'],['frost','❄️','_eqDmgFrost'],['nature','🌿','_eqDmgNature'],['arcane','🔮','_eqDmgArcane'],['shadow','🌑','_eqDmgShadow'],['holy','✨','_eqDmgHoly']].forEach(([t,icon,prop])=>{ if((c[prop]||0)>0) pills.push(pill(icon,'+'+c[prop],`+${c[prop]} ${t} damage`,'buff')); });
  if(c.currentForm==='cat'||c.currentForm==='both') pills.push(pill('🐱','','Cat Form: melee +2 dmg','form'));
  if(c.currentForm==='bear'||c.currentForm==='both') pills.push(pill('🐻','','Bear Form: half damage taken','form'));
- (C.activeHoTs||[]).forEach(h=>pills.push(pill(h.icon,`+${h.healPerTurn}`,`${h.name}\n+${h.healPerTurn} HP/turn · ${h.turnsLeft} turns left${h.bloomAmt?'\nBlooms: +'+h.bloomAmt:''}` ,'hot')));
+ (C.activeHoTs||[]).forEach(h=>{
+ if(h.channel){
+ if(h.channelType==='damage'){
+ const nextDmg=(h.baseDmg||0)+h.bonusPerStack*((h.stack||0)+1);
+ pills.push(pill(h.icon,`${nextDmg}`,`${h.name} (channel)\nRoll ${h.dc}+ each turn to continue\nNext tick deals ${nextDmg} ice to all · tick ${(h.stack||0)+1}`,'debuff'));
+ } else {
+ const nextAmt=h.baseHeal+h.bonusPerStack*((h.stack||0)+1);
+ pills.push(pill(h.icon,`+${nextAmt}`,`${h.name} (channel)\nRoll ${h.dc}+ each turn to continue\nNext tick heals ${nextAmt} HP · tick ${(h.stack||0)+1}`,'hot'));
+ }
+ }
+ else pills.push(pill(h.icon,`+${h.healPerTurn}`,`${h.name}\n+${h.healPerTurn} HP/turn · ${h.turnsLeft} turns left${h.bloomAmt?'\nBlooms: +'+h.bloomAmt:''}` ,'hot'));
+ });
  (c.statusEffects||[]).forEach(se=>{
  if(se.id==='seared') pills.push(pill('🔥','SEAR','Seared: 2 fire dmg/turn','debuff'));
  if(se.id==='poison') pills.push(pill('☠',se.stacks||1,`Poison: ${se.stacks||1} dmg/turn`,'debuff'));
@@ -4763,6 +4819,21 @@ function doDraw() {
  // Tick HoTs
  if((C.activeHoTs||[]).length>0){
  C.activeHoTs=C.activeHoTs.filter(h=>{
+ if(h.channel){
+ const tRoll=d20()+(G.char.rollBonus||0);
+ if(tRoll<h.dc){log(`${h.icon} ${h.name} channel breaks! (rolled ${tRoll} vs DC ${h.dc})`,'log-miss');return false;}
+ h.stack=(h.stack||0)+1;
+ if(h.channelType==='damage'){
+ const dmg=(h.baseDmg||0)+h.bonusPerStack*h.stack;
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){dealEnemyDamage(e,dmg,ei);e._tookIceDamage=true;}});
+ log(`${h.icon} ${h.name} channels: ${dmg} ice to all (rolled ${tRoll}, tick ${h.stack})`,'log-hit');
+ return true;
+ }
+ const amt=h.baseHeal+h.bonusPerStack*h.stack+(G.char._hotBonus||0);
+ const _co=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+amt);
+ log(`${h.icon} ${h.name} channels: +${G.char.hp-_co} HP (rolled ${tRoll}, tick ${h.stack}) → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
+ return true;
+ }
  if(h.turnsLeft<=0){
  if(h.bloomAmt){const _blmOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+h.bloomAmt);log(`${h.icon} ${h.name} BLOOMS! Healed ${G.char.hp-_blmOld} HP`,'log-crit');}
  return false;
@@ -4786,7 +4857,10 @@ function doDraw() {
  setTimeout(doEnemyTurn,600);
  return;
  }
+ // Pet turn: rolls before player draws so buffs apply this turn
+ doPetTurn();
  let drawCount=3+(G.char.extraDraw||0)+(G.char._eqDraw||0);
+ if(C._aspectHawkActive)drawCount=Math.max(1,drawCount-(C._aspectHawkDrawPenalty||0));
  if(C.drawPenalty){drawCount=C.drawPenalty;C.drawPenalty=0;}
  if(C.bonusDrawNextTurn){drawCount+=C.bonusDrawNextTurn;C.bonusDrawNextTurn=0;}
  drawCount=Math.max(1,drawCount);
@@ -4828,10 +4902,12 @@ function playCard() {
 
  // Check for auto-hit/auto-crit conditions — skip dice roll
  const isFireCard = CARD_TALENTS[card.name]==='Fire';
+ const isRangedCard = getCardDmgType(card)==='ranged';
  const autoHit = C.autoHitCharges>0 || (isFireCard && C._nextFireAutoHit) || C._nextCardAutoHit;
- const autoCrit = (isFireCard && C._nextFireAutoCrit) || C._nextCardAutoCrit;
+ const autoCrit = (isFireCard && C._nextFireAutoCrit) || C._nextCardAutoCrit || (isRangedCard && C._aimedShotAutoCrit);
  if(autoHit&&C._nextCardAutoHit) C._nextCardAutoHit=false;
  if(autoCrit&&C._nextCardAutoCrit) C._nextCardAutoCrit=false;
+ if(autoCrit&&isRangedCard&&C._aimedShotAutoCrit) C._aimedShotAutoCrit=false;
 
  if(autoHit || autoCrit){
  // Show popup briefly with auto result (no rolling animation)
@@ -4885,7 +4961,9 @@ function finalizeCardPlay(card) {
   }
  }
  const raw=d20();
- const bonus=(G.char.rollBonus||0)+(C.bonusRoll||0)+(G.char._luckCharges>0?1:0)+(G.char._eqRoll||0);
+ const _markTgt=C.enemies&&C.enemies[C.targetIdx];
+ const _markBonus=(_markTgt&&_markTgt._hunterMarked)?2:0;
+ const bonus=(G.char.rollBonus||0)+(C.bonusRoll||0)+(G.char._luckCharges>0?1:0)+(G.char._eqRoll||0)+_markBonus;
  if(G.char._luckCharges>0)G.char._luckCharges--;
  C.bonusRoll=0;
  const critThresh=Math.max(15,(G.char.critThreshold||20)+(G.char._eqCritThresh||0));
@@ -4967,7 +5045,7 @@ function applyCombatEffect(card, outcomeType, target, doubleDmg) {
  // Pre-set override for all cards with explicit handlers (prevents generic double-damage)
  const _HANDLED_CARDS=new Set(['Adrenaline Rush','Ambush','Arcane Explosion','Arcane Missiles','Arcane Power','Backstab','Bash','Shapeshift: Bear','Bearzerk','Blade Flurry','Blast Wave','Shapeshift: Cat','Cheap Shot','Claw','Cloak of Shadows','Combustion','Cone of Cold','Conjure Food','Counterspell','Deadly Poison','Eviscerate','Fan of Knives','Feral Charge','Ferocious Bite','Fireball','Frost Nova','Frostbolt','Frozen Orb','Gouge','Healing Touch','Hibernate','Hot Streak','Ice Armor','Ice Lance','Killing Spree','Lifebloom','Mage Armor','Mangle','Marked for Death','Master of Shadows','Maul','Molten Armor','Moonfire','Mutilate','Obfuscate','Pick Pocket','Polymorph','Pounce','Premeditation','Prowl','Pyroblast','Ravage','Regrowth','Rejuvenation','Roll the Bones','Rupture','Savage Roar','Seal Fate','Shadow Step','Shiv','Shred','Sinister Strike','Sprint','Starfall','Stealth','Strangling Roots','Thorns','Time Stop','Tranquility','Vigor','Wild Growth','Wrath','Swipe',"Shapeshift: Cat",'Shapeshift: Bear','Shapeshift: Astral','Shapeshift: Tree of Life',"Nature\'s Might",'Maim','Sunfire','Overrun','Provoke','Shapeshift: Cat','Shapeshift: Bear',"King of the Jungle",'Solar Flare','Starfire','Nourish','Force of Nature','Rebirth','Heroic Strike','Slam','Rend','Battle Shout','Battle Stance','Intercept','Parry','Berserker Stance','Defensive Stance','Shield Bash','Hamstring','Pummel','Anger Management','Counter','Shield Wall','Taunt','Cleave','Charge','Bloodthirst','Whirlwind','Mortal Strike','Execute','Thunder Clap','Enrage','Devastate','Sweeping Strikes','Colossus Smash','Maddening Rage','Ignore Pain','Indomitable','Recklessness','Die By the Sword','Revenge','Onslaught','Blade Storm',
 'Arcane Shot','Kill Command','Aspect of the Monkey','Aspect of the Hawk','Aspect of the Cheetah','Serpent Sting','Concussive Shot','Steel Trap',"Hunter's Mark",'Careful Aim','Summon Animal Companion','Snipe','Multi Shot','Frost Trap','Frost trap','Rapid Fire','Aimed Shot','Explosive Trap','Explosive trap','Feign Death','Beastial Wrath','Disengage','Explosive Shot','Spirit Bond','Camouflage','Camoflage','Killer Instinct',
-"Predator's Mark",'Eagle Eye','Ricocheting shot.II','Apex Predator','Double Tap','Lock and Load','Guerrilla tactics','Scent of Blood','One With the Pack','Thrill of the Hunt',
+"Predator's Mark",'Eagle Eye','Ricochet Shot','Apex Predator','Double Tap','Lock and Load','Guerrilla tactics','Scent of Blood','One With the Pack','Thrill of the Hunt',
 'Heal','Smite','Divine Word: Shield','Divine Word: Fortitude','Resurrect','Shadow word: Pain','Shadow Word: Pain','Mind Control','Divine Word: Empower','Holy Fire','Holy Nova','Shadow Word: Death','Shadow word: Death','Dispersion','Shadow Infusion','Mind Blast','Greater Heal','Flash Heal','Devouring Plague','Divine Spirit','Desperate Plea','Divine Word: Enlighten','Consecration','Summon Shadow Fiend','Evangelism','Penance','Mind Flay','Noble Sacrifice','Lay on Hands','Wrath of God','Hells Advocate',
 'Sins of the Many','Damnation','Black Out','Inner Fire','Crusader Strike','Inner Focus','Lightwell',
 'Corruption','Curse of Weakness','Shadow Bolt','Immolate','Summon: Imp','Create: Health Stone','Create: Mana Stone','Fear','Siphon Life','Searing Pain','Summon: Fel Guard','Summon: Fel Hunter','Curse of Agony','Drain Life','Life Tap','Soul Fire','Conflagrate','Death Coil','Summon Void Walker','Unstable Affliction','Soul Harvest','Ritual of Doom',
@@ -4988,6 +5066,8 @@ const _cdt=getCardDmgType(card);if(_cdt&&DMG_TYPE_PROP[_cdt])bonusDmg+=(G.char[D
 if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonusDmg+=(G.char._eqDmgMagic||0);
  const isMelee=CARD_DAMAGE_TYPES[card.name]==='melee'||(card.hit||'').includes(' melee ');
  if(isMelee&&(G.char.currentForm==='cat'||G.char.currentForm==='both'))bonusDmg+=2+(G.char._catFormBonus||0);
+ if((C._petPlayerDmgBuff||0)>0)bonusDmg+=C._petPlayerDmgBuff;
+ if((C._felHunterShadowBuff||0)>0&&getCardDmgType(card)==='shadow')bonusDmg+=C._felHunterShadowBuff;
  if((G.char._moltenArmorFireBonus||0)>0&&CARD_TALENTS[card.name]==='Fire')bonusDmg+=G.char._moltenArmorFireBonus;
  if((C._nextFireDmgBonus||0)>0&&CARD_TALENTS[card.name]==='Fire'){bonusDmg+=C._nextFireDmgBonus;C._nextFireDmgBonus=0;}
  if((C._nextIceDmgBonus||0)>0&&CARD_TALENTS[card.name]==='Ice'){bonusDmg+=C._nextIceDmgBonus;C._nextIceDmgBonus=0;}
@@ -4995,9 +5075,14 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
 
  if((G.char._astralBonusDmg||0)>0&&CARD_TALENTS[card.name]==='Balance') bonusDmg+=G.char._astralBonusDmg; // Generic next-card bonus
  if(C.nextCardDmgBonus>0){bonusDmg+=C.nextCardDmgBonus;C.nextCardDmgBonus=0;}
+ // Shadow Fiend: gain a shadow counter each time player deals shadow magic damage (max 5)
+ if(_cdt==='shadow'&&(outcomeType==='hit'||outcomeType==='crit')){
+ const sf=(C._pets||[]).find(p=>p.id==='priestShadowFiend'&&p.hp>0);
+ if(sf){ sf.counters=Math.min(5,(sf.counters||0)+1); log(`🌑 Shadow Fiend gains a counter (${sf.counters}/5).`,'log-info'); }
+ }
  // Predator's Mark: marked target takes +mark stacks bonus damage
  if(target&&(target._predatorMark||0)>0)bonusDmg+=(target._predatorMark||0);
- // Hunter's Mark: +1 damage vs marked target
+ // Hunter's Mark: +1 damage of any type vs marked target
  if(target&&target._hunterMarked)bonusDmg+=1;
  // Killer Instinct: +3 dmg to targets below 50% HP
  if(C._killerInstinctActive&&target&&target.hp<=Math.ceil(target.maxHP/2))bonusDmg+=3;
@@ -5013,6 +5098,8 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  if(C._ritualOfDoomActive&&_cdt==='shadow'&&(outcomeType==='hit'||outcomeType==='crit'))bonusDmg+=dmg*2;
  // Camouflage: next ability deals double damage
  if(C._camouflageNextDouble&&(outcomeType==='hit'||outcomeType==='crit')){C._camouflageNextDouble=false;C._dmgDoubleActive=true;log('🎭 Camouflage: damage doubled!','log-info');}
+ // Aimed Shot: next ranged card deals double damage
+ if(C._aimedShotActive&&_cdt==='ranged'&&(outcomeType==='hit'||outcomeType==='crit')){C._aimedShotActive=false;C._dmgDoubleActive=true;log('🎯 Aimed Shot: ranged damage doubled!','log-info');}
  const stealthFx=(G.char.statusEffects||[]).find(s=>s.id==='stealth');
  const _wasStealthed = !!stealthFx; // capture BEFORE consumption for card handlers
  if(stealthFx && (card.type==='damage'||isMelee)){
@@ -5353,39 +5440,43 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  const asDmg=(2+bonusDmg)*(isCrit?2:1);
  if(target&&target.hp>0)dealEnemyDamage(target,asDmg,C.targetIdx);
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- C.bonusDrawNextTurn=(C.bonusDrawNextTurn||0)+1;
- log(`🏹 Arcane Shot: ${asDmg} ranged damage, draw +1 next turn, extra play!`,isCrit?'log-crit':'log-hit');
+ const asDrawCount=isCrit?2:1;
+ const asRes=drawFromDeck(C.deck,C.discard,asDrawCount);
+ C.deck=asRes.deck;C.discard=asRes.discard;C.hand=[...C.hand,...asRes.drawn];
+ log(`🏹 Arcane Shot: ${asDmg} ranged damage, drew ${asRes.drawn.length} card${asRes.drawn.length!==1?'s':''}, extra play!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Kill Command'&&(outcomeType==='hit'||outcomeType==='crit')){
- const hasPet=(C._treants||0)>0||G.char._petActive;
+ const hasPet=(C._treants||0)>0||G.char._petActive||hasLivingPet();
  const kcDmg=(hasPet?6:3+bonusDmg)*(isCrit?2:1);
  if(target&&target.hp>0)dealEnemyDamage(target,kcDmg,C.targetIdx);
  log(`🐺 Kill Command: ${kcDmg} damage${hasPet?' (pet bonus!)':''}!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Aspect of the Monkey'&&(outcomeType==='hit'||outcomeType==='crit')){
- G.char._aspectMonkey=true;
+ if(!G.char._aspectMonkey){ G.char._aspectMonkey=true; C._aspectMonkeyFromCombat=true; }
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log('🐒 Aspect of the Monkey: each attack, roll — >10 = half damage taken! Extra play!','log-info');
+ log('🐒 Aspect of the Monkey: each attack, roll — 11+ = half damage taken! Extra play!','log-info');
  C._shredOverrideFired=true;
  }
  if(card.name==='Aspect of the Hawk'&&(outcomeType==='hit'||outcomeType==='crit')){
- G.char.dmgBonus=(G.char.dmgBonus||0)+1;
- log('🦅 Aspect of the Hawk: +1 ranged damage (persistent). Draw -1 per turn.','log-info');
- C.drawPenalty=Math.max(1,(C.drawPenalty||3)-1);
+ G.char.dmgBonus=(G.char.dmgBonus||0)+1; C._aspectHawkDmgDelta=(C._aspectHawkDmgDelta||0)+1;
+ C._aspectHawkActive=true; C._aspectHawkDrawPenalty=(C._aspectHawkDrawPenalty||0)+1;
+ log('🦅 Aspect of the Hawk: +1 ranged damage. Draw -1 per turn.','log-info');
  C._shredOverrideFired=true;
  }
  if(card.name==='Aspect of the Cheetah'&&(outcomeType==='hit'||outcomeType==='crit')){
- G.char.rollBonus=(G.char.rollBonus||0)+1;
- G.char.extraDraw=(G.char.extraDraw||0)+1;
+ G.char.rollBonus=(G.char.rollBonus||0)+1; C._aspectCheetahRollDelta=(C._aspectCheetahRollDelta||0)+1;
+ G.char.extraDraw=(G.char.extraDraw||0)+1; C._aspectCheetahDrawDelta=(C._aspectCheetahDrawDelta||0)+1;
+ C._aspectCheetahActive=true;
  log('🐆 Aspect of the Cheetah: +1 to all rolls, draw +1 per turn, take +1 from attacks.','log-info');
  C._shredOverrideFired=true;
  }
  if(card.name==='Serpent Sting'&&(outcomeType==='hit'||outcomeType==='crit')){
- const ssDmg=(3+bonusDmg)*(isCrit?2:1);
- if(target&&target.hp>0){dealEnemyDamage(target,ssDmg,C.targetIdx);target.debuffs=target.debuffs||[];const px=target.debuffs.find(d=>d.id==='poison');if(px)px.stacks+=isCrit?2:1;else target.debuffs.push({id:'poison',stacks:isCrit?2:1});}
- log(`🐍 Serpent Sting: ${ssDmg} ranged damage + ${isCrit?2:1} Poison!`,isCrit?'log-crit':'log-hit');
+ const ssDmg=(isCrit?4:3)+bonusDmg;
+ const stacks=isCrit?5:3;
+ if(target&&target.hp>0){dealEnemyDamage(target,ssDmg,C.targetIdx);target.debuffs=target.debuffs||[];const px=target.debuffs.find(d=>d.id==='poison');if(px)px.stacks+=stacks;else target.debuffs.push({id:'poison',stacks});}
+ log(`🐍 Serpent Sting: ${ssDmg} ranged damage + ${stacks} Poison stacks!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Concussive Shot'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -5401,16 +5492,12 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Summon Animal Companion'&&(outcomeType==='hit'||outcomeType==='crit')){
- const petRoll=d20()+(G.char.rollBonus||0);
- let petType='Wolf';let petBonus='';
- if(petRoll>=17){petType='Raptor';petBonus='+3 melee damage when pet is active';}
- else if(petRoll>=13){petType='Hawk';petBonus='Draw +1 card per turn';}
- else if(petRoll>=9){petType='Bear';petBonus='Take half damage when pet active';}
- else if(petRoll>=5){petType='Turtle';petBonus='+2 armor while pet active';}
- else{petType='Wolf';petBonus='+2 to all rolls';}
- G.char._petActive=petType;G.char._petBonus=petBonus;
- C._treants=(C._treants||0)+1; // pet acts as a treant for combat purposes
- log(`🐾 Summoned ${petType} Companion (rolled ${petRoll})! ${petBonus}`,isCrit?'log-crit':'log-hit');
+ const petRoll=Math.max(1,Math.min(20,d20()+(G.char.rollBonus||0)));
+ const petDef=pickHunterPetByRoll(petRoll);
+ const replaced=(C._pets||[]).filter(p=>p.hp>0).map(p=>p.name);
+ if(replaced.length) log(`💨 ${replaced.join(' & ')} replaced by ${petDef.name}.`,'log-system');
+ summonPet(petDef);
+ log(`🐾 Summoned ${petDef.name} (rolled ${petRoll})! HP ${petDef.maxHP}/${petDef.maxHP}.`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Snipe'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -5433,9 +5520,10 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Aimed Shot'&&(outcomeType==='hit'||outcomeType==='crit')){
- C._aimedShotActive=true;
+ if(isCrit) C._aimedShotAutoCrit=true;
+ else C._aimedShotActive=true;
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log('🎯 Aimed Shot: next ranged ability deals double damage (needs +3 to roll)!','log-info');
+ log(isCrit?'🎯 Aimed Shot CRIT: next ranged card auto-crits! Extra play!':'🎯 Aimed Shot: next ranged card deals double damage! Extra play!','log-info');
  C._shredOverrideFired=true;
  }
  if(card.name==='Feign Death'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -5447,7 +5535,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==="Predator's Mark"&&(outcomeType==='hit'||outcomeType==='crit')){
- if(target&&target.hp>0){target._predatorMark=Math.min((target._predatorMark||0)+(isCrit?3:1),3);}
+ if(target&&target.hp>0){target._hunterMarked=false;target._markType='predator';target._predatorMark=Math.min((target._predatorMark||0)+(isCrit?3:1),3);}
  log(`🎯 Predator's Mark: ${target?._predatorMark||0}/3 stacks on ${target?.name||'target'} (+${target?._predatorMark||0} dmg/hit)!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
@@ -5457,10 +5545,25 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  log(`🦅 Eagle Eye: draw ${isCrit?3:2} extra next turn! Extra play!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
- if(card.name==='Ricocheting shot.II'&&(outcomeType==='hit'||outcomeType==='crit')){
- const rrDmg=(4+bonusDmg)*(isCrit?2:1);let rrTotal=0;
- C.enemies.filter(e=>e.hp>0).slice(0,3).forEach(e=>{const ei=C.enemies.indexOf(e);dealEnemyDamage(e,rrDmg,ei);rrTotal+=rrDmg;});
- log(`🏹 Ricocheting Shot II: ${rrDmg} ranged to up to 3 targets! Total: ${rrTotal}!`,isCrit?'log-crit':'log-hit');
+ if(card.name==='Ricochet Shot'&&(outcomeType==='hit'||outcomeType==='crit')){
+ const firstDmg=(4+bonusDmg)*(isCrit?2:1);
+ const hitTargets=[];
+ if(target&&target.hp>0){dealEnemyDamage(target,firstDmg,C.targetIdx);hitTargets.push(target);}
+ let rrTotal=firstDmg;
+ const dc=card.risk;
+ for(let hops=1;hops<3;hops++){
+ const pool=C.enemies.filter(e=>e.hp>0&&!hitTargets.includes(e));
+ if(!pool.length){log(`🏹 Ricochet Shot: no new targets — stopped.`,'log-info');break;}
+ const rc=d20()+(G.char.rollBonus||0)+(G.char._eqRoll||0);
+ if(rc<dc){log(`🏹 Ricochet Shot reroll ${hops+1}: rolled ${rc} vs DC ${dc} — bounce missed.`,'log-miss');break;}
+ const next=pool[Math.floor(Math.random()*pool.length)];
+ const ni=C.enemies.indexOf(next);
+ const hopDmg=4+bonusDmg;
+ dealEnemyDamage(next,hopDmg,ni);
+ hitTargets.push(next);rrTotal+=hopDmg;
+ log(`🏹 Ricochet Shot bounces to ${next.name} (rolled ${rc}) for ${hopDmg}!`,'log-hit');
+ }
+ log(`🏹 Ricochet Shot: ${hitTargets.length} hit(s), ${rrTotal} total ranged damage!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Apex Predator'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -5500,8 +5603,9 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==="Hunter's Mark"&&(outcomeType==='hit'||outcomeType==='crit')){
- if(isCrit){C.enemies.forEach(e=>{if(e.hp>0)e._hunterMarked=true;});log("🎯 Hunter's Mark CRIT: ALL enemies marked! (+1 dmg, DC -2 each)",'log-crit');}
- else{if(target&&target.hp>0){target._hunterMarked=true;C._hunterMarkTargetIdx=C.targetIdx;}log(`🎯 Hunter's Mark: ${target?.name||'target'} marked (+1 dmg, DC -2 vs them)`,'log-hit');}
+ const applyHMark=e=>{e._predatorMark=0;e._hunterMarked=true;e._markType='hunter';};
+ if(isCrit){C.enemies.forEach(e=>{if(e.hp>0)applyHMark(e);});log("🎯 Hunter's Mark CRIT: ALL enemies marked! (+1 ranged dmg, +2 rolls vs them)",'log-crit');}
+ else{if(target&&target.hp>0){applyHMark(target);C._hunterMarkTargetIdx=C.targetIdx;}log(`🎯 Hunter's Mark: ${target?.name||'target'} marked (+1 ranged dmg, +2 rolls vs them)`,'log-hit');}
  C._shredOverrideFired=true;}
  if(card.name==='Careful Aim'&&(outcomeType==='hit'||outcomeType==='crit')){
  C._carefulAimActive=true;
@@ -5783,8 +5887,10 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  else log(`✨ Consecration: ${csDmg} holy to ALL enemies! Repeats each round (persistent)!`,'log-hit');
  C._shredOverrideFired=true;}
  if(card.name==='Summon Shadow Fiend'&&(outcomeType==='hit'||outcomeType==='crit')){
- C._shadowFiendTurns=(isCrit?8:5);
- log(`🌑 Shadow Fiend summoned! 3 shadow damage/turn for ${C._shadowFiendTurns} turns!`,isCrit?'log-crit':'log-hit');
+ summonPetById('priestShadowFiend');
+ const sf=firstLivingPet();
+ if(isCrit&&sf){ sf.counters=Math.min(5,(sf.counters||0)+2); log(`🌑 Shadow Fiend CRIT: summoned with ${sf.counters} shadow counters!`,'log-crit'); }
+ else log('🌑 Shadow Fiend summoned! (1 counter — scales as you deal shadow damage)','log-hit');
  C._shredOverrideFired=true;}
  if(card.name==='Evangelism'&&(outcomeType==='hit'||outcomeType==='crit')){
  C._evangelismActive=true;C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
@@ -5819,13 +5925,12 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  log(`🔥 Immolate: ${imDmg} fire damage + ${isCrit?2:1} Ignite!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
- if((card.name==='Summon: Imp'||card.name==='Summon: Fel Guard'||card.name==='Summon: Fel Hunter'||card.name==='Summon Void Walker')&&(outcomeType==='hit'||outcomeType==='crit')){
- const demonNames={'Summon: Imp':'🔴 Imp','Summon: Fel Guard':'🟢 Fel Guard','Summon: Fel Hunter':'🔵 Fel Hunter','Summon Void Walker':'🟣 Void Walker'};
- const demonDmg={'Summon: Imp':2,'Summon: Fel Guard':4,'Summon: Fel Hunter':3,'Summon Void Walker':3};
- const demon=demonNames[card.name]||'Demon';
- G.char._petActive=card.name; C._treants=(C._treants||0)+1;
- const dmgPer=demonDmg[card.name]||2;
- log(`💀 ${demon} summoned! Deals ${dmgPer} Shadow damage per turn.`,isCrit?'log-crit':'log-hit');
+ if((card.name==='Summon: Imp'||card.name==='Summon: Fel Guard'||card.name==='Summon: Fel Hunter'||card.name==='Summon Void Walker'||card.name==='Summon: Infernal')&&(outcomeType==='hit'||outcomeType==='crit')){
+ const petIdByCard={'Summon: Imp':'warlockImp','Summon: Fel Guard':'warlockFelGuard','Summon: Fel Hunter':'warlockFelHunter','Summon Void Walker':'warlockVoidWalker','Summon: Infernal':'warlockInfernal'};
+ const petId=petIdByCard[card.name];
+ if(petId) summonPetById(petId);
+ if(isCrit) C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
+ log(`💀 ${card.name} resolves.${isCrit?' Extra play!':''}`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Create: Health Stone'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -6044,26 +6149,39 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  log('⚡ Ancestral Knowledge: retrieve and play a card from discard!','log-info');
  C._shredOverrideFired=true;
  }
- if((card.name==='Healing Spring Totem'||card.name==='Cloud Burst Totem')&&(outcomeType==='hit'||outcomeType==='crit')){
- C.activeHoTs=C.activeHoTs||[];
- C.activeHoTs.push({name:card.name,icon:'⚡',healPerTurn:isCrit?3:2,turnsLeft:4});
- log(`⚡ ${card.name}: healing totem placed! Heals ${isCrit?3:2} HP/turn for 4 turns!`,isCrit?'log-crit':'log-hit');
+ if(card.name==='Healing Spring Totem'&&(outcomeType==='hit'||outcomeType==='crit')){
+ summonPetById('shamanHealingSpring',{append:true});
+ // On-summon heal + start of each subsequent turn
+ const _hsOld=G.char.hp;
+ G.char.hp=Math.min(G.char.maxHP,G.char.hp+(isCrit?2:1));
+ if(G.char.hp>_hsOld) log(`💧 Healing Spring Totem placed — healed you ${G.char.hp-_hsOld} HP.`,isCrit?'log-crit':'log-hit');
+ else log('💧 Healing Spring Totem placed.',isCrit?'log-crit':'log-hit');
+ if(isCrit) C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
+ renderHUD();
+ C._shredOverrideFired=true;
+ }
+ if(card.name==='Cloud Burst Totem'&&(outcomeType==='hit'||outcomeType==='crit')){
+ summonPetById('shamanCloudBurst',{append:true});
+ if(isCrit){ const p=C._pets[C._pets.length-1]; if(p){ p.counters=(p.counters||0)+2; } }
+ log('☁️ Cloud Burst Totem placed.',isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Searing Totem'&&(outcomeType==='hit'||outcomeType==='crit')){
- C._treants=(C._treants||0)+1; // totem acts as attacker
- log(`🔥 Searing Totem: fires for 2 fire damage per turn!`,isCrit?'log-crit':'log-hit');
+ summonPetById('shamanSearing',{append:true});
+ if(isCrit) C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
+ log('🔥 Searing Totem placed.',isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Fire Nova Totem'&&(outcomeType==='hit'||outcomeType==='crit')){
- const fntDmg=(2+bonusDmg)*(isCrit?2:1);
- C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,fntDmg,ei);});
- log(`🔥 Fire Nova Totem: ${fntDmg} fire to ALL enemies!`,isCrit?'log-crit':'log-hit');
+ summonPetById('shamanFireNova',{append:true});
+ if(isCrit) C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
+ log('💥 Fire Nova Totem placed — detonates at end of your turn.',isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
- if(card.name==='Stoneskin Totem'&&(outcomeType==='hit'||outcomeType==='crit')){
- G.char.dmgReduction=(G.char.dmgReduction||0)+(isCrit?2:1);
- log(`⚡ Stoneskin Totem: +${isCrit?2:1} damage reduction for rest of combat!`,'log-info');
+ if((card.name==='Stoneskin Totem'||card.name==='Stone Skin Totem')&&(outcomeType==='hit'||outcomeType==='crit')){
+ summonPetById('shamanStoneSkin',{append:true});
+ if(isCrit){ const p=C._pets[C._pets.length-1]; if(p){ p.maxHP+=2; p.hp=p.maxHP; } }
+ log(`🪨 Stone Skin Totem placed${isCrit?' (+2 max HP)':''}.`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Healing Surge'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -6141,16 +6259,15 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Mana Spring Totem'&&(outcomeType==='hit'||outcomeType==='crit')){
- C._manaSpringTurns=(C._manaSpringTurns||0)+3;
- if(isCrit)C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log(`💧 Mana Spring Totem: draw +1/turn for 3 turns!${isCrit?' Extra play!':''}`,isCrit?'log-crit':'log-hit');
+ summonPetById('shamanManaSpring',{append:true});
+ if(isCrit) C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
+ log('💠 Mana Spring Totem placed.',isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Grace of Air Totem'&&(outcomeType==='hit'||outcomeType==='crit')){
- C._graceOfAirTurns=(C._graceOfAirTurns||0)+3;
- G.char.rollBonus=(G.char.rollBonus||0)+1;
- if(isCrit)C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log(`💨 Grace of Air Totem: +1 to all rolls for 3 turns!${isCrit?' Extra play!':''}`,isCrit?'log-crit':'log-hit');
+ summonPetById('shamanGraceOfAir',{append:true});
+ if(isCrit) C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
+ log('💨 Grace of Air Totem placed.',isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Frost Bite'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -7068,17 +7185,14 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
 
- // Force of Nature: summon 1-3 Treants based on the combat roll
+ // Force of Nature: summon 3 Treant companions (stacks with existing treants)
  if(card.name==='Force of Nature'&&(outcomeType==='hit'||outcomeType==='crit')){
- // Use the roll that resolved this card (stored in finalizeCardPlay as lastRoll)
- // We re-roll internally since we don't have access to the original roll here
- const fonRoll=d20()+(G.char.rollBonus||0)+(G.char._eqRoll||0);
- let treants=1;
- if(fonRoll>=16) treants=3;
- else if(fonRoll>=9) treants=2;
- if(isCrit) treants=Math.min(3,treants+1); // crit adds 1 extra treant
- C._treants=(C._treants||0)+treants;
- log(`🌳 Force of Nature: summoned ${treants} Treant${treants>1?'s':''} (rolled ${fonRoll})! ${C._treants} total active.`,'log-crit');
+ const treantDef=CLASS_PETS.druidTreant;
+ for(let i=0;i<3;i++){
+ summonPet(treantDef,{append:true});
+ if(isCrit){const newest=C._pets[C._pets.length-1]; if(newest){newest.maxHP+=2; newest.hp=newest.maxHP;}}
+ }
+ log(isCrit?'🌳 Force of Nature CRIT: 3 Treants summoned (+2 max HP each)!':'🌳 Force of Nature: 3 Treants summoned!',isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
 
@@ -7152,11 +7266,14 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
 
- // Tranquility crit: heal double
+ // Tranquility: initial heal + channeled HoT that keeps healing until DC roll fails
  if(card.name==='Tranquility'&&(outcomeType==='hit'||outcomeType==='crit')){
  const tranqAmt=4*(isCrit?2:1);
  const _tqOld=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+tranqAmt);
- log(`🌿 Tranquility: healed ${G.char.hp-_tqOld} HP → ${G.char.hp}/${G.char.maxHP}`,isCrit?'log-crit':'log-hit');
+ log(`🌿 Tranquility: healed ${G.char.hp-_tqOld} HP → ${G.char.hp}/${G.char.maxHP}. Channel begins!`,isCrit?'log-crit':'log-hit');
+ C.activeHoTs=C.activeHoTs||[];
+ C.activeHoTs=C.activeHoTs.filter(h=>h.name!=='Tranquility');
+ C.activeHoTs.push({name:'Tranquility',icon:'🌿',channel:true,dc:8,stack:0,baseHeal:4,bonusPerStack:2,healPerTurn:0,turnsLeft:99});
  renderHUD();
  C._shredOverrideFired=true;
  }
@@ -7359,14 +7476,22 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  }
  // ── MAGE TIER III/IV HANDLERS ──────────────────────────────────────
  if(card.name==='Water Elemental'&&(outcomeType==='hit'||outcomeType==='crit')){
-  C._waterElementalTurns=isCrit?5:3;
-  log(`💧 Water Elemental summoned! Attacks for 2 frost/turn (${C._waterElementalTurns} turns)!`,isCrit?'log-crit':'log-hit');
+  summonPetById('mageWaterElemental');
+  const newest=C._pets&&C._pets[C._pets.length-1];
+  if(isCrit&&newest){ newest.maxHP+=3; newest.hp=newest.maxHP; }
+  // On-summon AoE: 2 ice magic damage to all enemies
+  const weSummonDmg=2+bonusDmg;
+  C.enemies.forEach((e,ei)=>{if(e.hp>0){dealEnemyDamage(e,weSummonDmg,ei);e._tookIceDamage=true;}});
+  log(`💧 Water Elemental summoned!${isCrit?' (+3 max HP)':''} Blasted all enemies for ${weSummonDmg} ice.`,isCrit?'log-crit':'log-hit');
   C._shredOverrideFired=true;
  }
  if(card.name==='Blizzard'&&(outcomeType==='hit'||outcomeType==='crit')){
   const bDmg=(2+bonusDmg)*(isCrit?2:1);
-  C.enemies.forEach((e,ei)=>{if(e.hp>0){const d=(C._shatterActive&&e._tookIceDamage)?bDmg*2:bDmg;dealEnemyDamage(e,d,ei);e._halfAttackNextTurn=true;e._tookIceDamage=true;}});
-  log(`❄️ Blizzard: ${bDmg} ice to all. All enemies attack at half!`,isCrit?'log-crit':'log-hit');
+  C.enemies.forEach((e,ei)=>{if(e.hp>0){const d=(C._shatterActive&&e._tookIceDamage)?bDmg*2:bDmg;dealEnemyDamage(e,d,ei);e._tookIceDamage=true;}});
+  log(`❄️ Blizzard: ${bDmg} ice to all. Channel begins!`,isCrit?'log-crit':'log-hit');
+  C.activeHoTs=C.activeHoTs||[];
+  C.activeHoTs=C.activeHoTs.filter(h=>h.name!=='Blizzard');
+  C.activeHoTs.push({name:'Blizzard',icon:'❄️',channel:true,channelType:'damage',dc:12,stack:0,baseDmg:2,bonusPerStack:1,turnsLeft:99});
   C._shredOverrideFired=true;
  }
  if(card.name==='Blizzard'&&outcomeType==='critmiss'){
@@ -7846,6 +7971,341 @@ function spawnPlayerFloat(text,type){
  spawnFloatText(text,$('player-hp-center'),type);
 }
 
+// ── PETS ──────────────────────────────────────────────────────────
+const HUNTER_PETS = [
+ { id:'harou',      name:'Harou the Wolf',         icon:'🐺', species:'Wolf',    maxHP:6,  cls:'Hunter', range:[1,3],
+   rollTable:[['1-5','1 melee dmg; +1 your dmg this turn'],['6-10','2 melee dmg; +1 your dmg this turn'],['11-19','3 melee dmg; +1 your dmg this turn'],['20','3 melee dmg; +2 your dmg this turn']] },
+ { id:'kuma',       name:'Kuma the Bear',          icon:'🐻', species:'Bear',    maxHP:10, cls:'Hunter', range:[4,7],
+   rollTable:[['1-5','Kuma heals 3 HP'],['6-10','2 melee to 2 enemies'],['11-19','5 melee to 1 enemy'],['20','5 melee to all; enemies deal half dmg this turn']] },
+ { id:'siku',       name:'Siku the Hawk',          icon:'🦅', species:'Hawk',    maxHP:5,  cls:'Hunter', range:[8,10],
+   rollTable:[['1-5','Fetch tier 1 loot'],['6-10','1 melee dmg + fetch tier 2 loot'],['11-19','3 melee dmg; target takes +2 dmg this turn'],['20','Sacrifice Siku: 10 melee to 1 enemy']] },
+ { id:'bhengalesh', name:'Bhengalesh the Tiger',   icon:'🐅', species:'Tiger',   maxHP:8,  cls:'Hunter', range:[11,14],
+   rollTable:[['1-5',"Double Bhengalesh's next damage (no stack)"],['6-10','3 melee dmg'],['11-19','5 melee dmg'],['20','8 melee dmg; roll again']] },
+ { id:'chichwa',    name:'Chichwa the Gorilla',    icon:'🦍', species:'Gorilla', maxHP:7,  cls:'Hunter', range:[15,17],
+   rollTable:[['1-5','Heal Chichwa 2 HP; play another card'],['6-10','3 melee dmg'],['11-19','3 melee to all enemies'],['20','6 melee dmg; play another card']] },
+ { id:'moonui',     name:"Mo'o Nui the Turtle",    icon:'🐢', species:'Turtle',  maxHP:6,  cls:'Hunter', range:[18,20],
+   rollTable:[['1-5','Shell: pet damage capped at 1 per source this turn'],['6-10','3 melee dmg'],['11-19','Prevent attack dmg to you; reflect it back'],['20','3 melee dmg; next ability auto-crits']] },
+];
+const CLASS_PETS = {
+ druidTreant:       { id:'druidTreant',        name:'Treant',          icon:'🌳', species:'Treant',    maxHP:4, cls:'Druid',
+   fixedAction:'Start of each turn: 2 melee damage to a random enemy. Taunts attacks.' },
+ mageWaterElemental:{ id:'mageWaterElemental', name:'Water Elemental', icon:'💧', species:'Elemental', maxHP:6, cls:'Mage',
+   fixedAction:'Start of each turn: 2 ice magic damage to ALL enemies. Taunts attacks.' },
+ priestShadowFiend: { id:'priestShadowFiend',  name:'Shadow Fiend',    icon:'🌑', species:'Spirit',    maxHP:6, cls:'Priest', noTaunt:true,
+   fixedAction:'Starts with 1 shadow counter (max 5). Gains a counter each time you deal shadow magic damage. Start of each turn: deals counter-value shadow magic to a random enemy. Does not taunt attacks.' },
+ warlockImp:         { id:'warlockImp',         name:'Imp',             icon:'🔴', species:'Demon',     maxHP:2,  cls:'Warlock', canToggleRedirect:true,
+   passiveBuffs:{maxHP:3},
+   fixedAction:'Grants +3 max HP while alive. Start of each turn: roll. On >5 deal 1 fire magic to a random enemy. You may redirect incoming damage to the Imp (toggle).' },
+ warlockFelHunter:   { id:'warlockFelHunter',   name:'Fel Hunter',      icon:'🔵', species:'Demon',     maxHP:3,  cls:'Warlock', canToggleRedirect:true,
+   fixedAction:'Start of each turn: roll. On >7 you deal +2 shadow magic damage this turn. You may redirect incoming damage to the Fel Hunter (toggle).' },
+ warlockFelGuard:    { id:'warlockFelGuard',    name:'Fel Guard',       icon:'🟢', species:'Demon',     maxHP:6,  cls:'Warlock', canToggleRedirect:true, dmgReduction:2,
+   fixedAction:'Takes -2 damage from all sources. Start of each turn: roll. On >7 Fel Guard heals 2 HP. You may redirect incoming damage to the Fel Guard (toggle).' },
+ warlockVoidWalker:  { id:'warlockVoidWalker',  name:'Void Walker',     icon:'🟣', species:'Demon',     maxHP:4,  cls:'Warlock', canToggleRedirect:true, canSacrifice:true,
+   passiveBuffs:{extraDraw:1, rollBonus:1},
+   fixedAction:'Grants +1 card draw and +1 to rolls while alive. Start of each turn: roll. On >10 gain +3 to rolls this turn. Sacrifice: heal you for 2× its current HP. You may redirect incoming damage to the Void Walker (toggle).' },
+ warlockInfernal:    { id:'warlockInfernal',    name:'Infernal',        icon:'🔥', species:'Demon',     maxHP:15, cls:'Warlock', canToggleRedirect:true,
+   fixedAction:'Start of each turn: 1 fire magic to you AND all enemies, then roll. On >8 deal 5 fire magic to all enemies. After 3 turns it breaks control and leaves (a hostile Infernal remains).' },
+ shamanHealingSpring:{ id:'shamanHealingSpring',name:'Healing Spring Totem', icon:'💧', species:'Totem', maxHP:1,  cls:'Shaman', canToggleRedirect:true, defaultRedirect:false, stackable:true,
+   fixedAction:'Start of each turn: heal you for 1 HP. Taunt toggle (default off).' },
+ shamanManaSpring:   { id:'shamanManaSpring',   name:'Mana Spring Totem',    icon:'💠', species:'Totem', maxHP:1,  cls:'Shaman', canToggleRedirect:true, defaultRedirect:false, stackable:true,
+   passiveBuffs:{extraDraw:1},
+   fixedAction:'Passive: +1 card draw while alive. Taunt toggle (default off).' },
+ shamanSearing:      { id:'shamanSearing',      name:'Searing Totem',        icon:'🔥', species:'Totem', maxHP:1,  cls:'Shaman', canToggleRedirect:true, defaultRedirect:false, stackable:true,
+   fixedAction:'Start of each turn: deal 1 fire magic to a random enemy. Taunt toggle (default off).' },
+ shamanFireNova:     { id:'shamanFireNova',     name:'Fire Nova Totem',      icon:'💥', species:'Totem', maxHP:1,  cls:'Shaman', canToggleRedirect:true, defaultRedirect:false, stackable:true,
+   fixedAction:'At end of your turn: self-destruct and deal 3 fire magic to every enemy. Taunt toggle (default off).' },
+ shamanStoneSkin:    { id:'shamanStoneSkin',    name:'Stone Skin Totem',     icon:'🪨', species:'Totem', maxHP:4,  cls:'Shaman', stackable:true, dmgReduction:1,
+   fixedAction:'Always taunts attacks. Takes -1 damage from all sources (minimum 1).' },
+ shamanGraceOfAir:   { id:'shamanGraceOfAir',   name:'Grace of Air Totem',   icon:'💨', species:'Totem', maxHP:1,  cls:'Shaman', canToggleRedirect:true, defaultRedirect:false, stackable:true,
+   passiveBuffs:{rollBonus:2},
+   fixedAction:'Passive: +2 to all rolls while alive. Taunt toggle (default off).' },
+ shamanCloudBurst:   { id:'shamanCloudBurst',   name:'Cloud Burst Totem',    icon:'☁️', species:'Totem', maxHP:1,  cls:'Shaman', canToggleRedirect:true, defaultRedirect:false, stackable:true, canSacrifice:true,
+   fixedAction:'Each time you heal, gain a counter. On death or sacrifice: heal you for 1 HP per counter. Sacrifice available on your turn. Taunt toggle (default off).' },
+};
+function getPetDef(petId){ return HUNTER_PETS.find(p=>p.id===petId)||CLASS_PETS[petId]||null; }
+function summonPetById(petId,opts={}){ const def=getPetDef(petId); if(!def)return; if(!opts.append){ const replaced=(C._pets||[]).filter(p=>p.hp>0).map(p=>p.name); if(replaced.length) log(`💨 ${replaced.join(' & ')} replaced by ${def.name}.`,'log-system'); } summonPet(def,opts); }
+function pickHunterPetByRoll(roll){
+ const clamped=Math.max(1,Math.min(20,roll));
+ return HUNTER_PETS.find(p=>clamped>=p.range[0]&&clamped<=p.range[1])||HUNTER_PETS[0];
+}
+function firstLivingPet(){ return (C._pets||[]).find(p=>p.hp>0)||null; }
+function hasLivingPet(){ return (C._pets||[]).some(p=>p.hp>0); }
+function _petTaunts(p){
+ if(!p||p.hp<=0) return false;
+ const def=getPetDef(p.id)||{};
+ if(def.noTaunt) return false;
+ if(def.canToggleRedirect) return p._redirectActive!==false;
+ return true;
+}
+function firstTauntingPet(){ return (C._pets||[]).find(_petTaunts)||null; }
+function hasTauntingPet(){ return (C._pets||[]).some(_petTaunts); }
+function _makePetInstance(petDef){
+ const inst={id:petDef.id,name:petDef.name,icon:petDef.icon,species:petDef.species,hp:petDef.maxHP,maxHP:petDef.maxHP,cls:petDef.cls};
+ if(petDef.id==='priestShadowFiend') inst.counters=1;
+ if(petDef.canToggleRedirect) inst._redirectActive=petDef.defaultRedirect!==false;
+ inst._turnCount=0;
+ inst._buffsApplied=null;
+ return inst;
+}
+function _applyPetPassive(pet){
+ const def=getPetDef(pet.id); if(!def||!def.passiveBuffs) return;
+ const applied={};
+ if(def.passiveBuffs.maxHP){ G.char.maxHP+=def.passiveBuffs.maxHP; G.char.hp=Math.min(G.char.maxHP,G.char.hp+def.passiveBuffs.maxHP); applied.maxHP=def.passiveBuffs.maxHP; }
+ if(def.passiveBuffs.rollBonus){ G.char.rollBonus=(G.char.rollBonus||0)+def.passiveBuffs.rollBonus; applied.rollBonus=def.passiveBuffs.rollBonus; }
+ if(def.passiveBuffs.extraDraw){ G.char.extraDraw=(G.char.extraDraw||0)+def.passiveBuffs.extraDraw; applied.extraDraw=def.passiveBuffs.extraDraw; }
+ pet._buffsApplied=applied;
+ const parts=Object.entries(applied).map(([k,v])=>`+${v} ${k}`).join(', ');
+ if(parts) log(`${pet.icon} ${pet.name} grants: ${parts}.`,'log-info');
+}
+function _removePetPassive(pet){
+ if(!pet||!pet._buffsApplied) return;
+ const a=pet._buffsApplied;
+ if(a.maxHP){ G.char.maxHP=Math.max(1,G.char.maxHP-a.maxHP); G.char.hp=Math.min(G.char.hp,G.char.maxHP); }
+ if(a.rollBonus) G.char.rollBonus=Math.max(0,(G.char.rollBonus||0)-a.rollBonus);
+ if(a.extraDraw) G.char.extraDraw=Math.max(0,(G.char.extraDraw||0)-a.extraDraw);
+ pet._buffsApplied=null;
+}
+function summonPet(petDef,opts={}){
+ C._pets=C._pets||[];
+ if(!opts.append){
+ // Non-stackable summon: revert existing pets' passives, then clear
+ (C._pets||[]).forEach(p=>_removePetPassive(p));
+ C._pets=[];
+ C._tigerDoubleNext=false; C._petShellActive=false; C._petReflectActive=false;
+ }
+ const inst=_makePetInstance(petDef);
+ C._pets.push(inst);
+ _applyPetPassive(inst);
+ // legacy mirror (used by Kill Command + a few checks)
+ G.char._petActive=petDef.species;
+ G.char._petBonus=petDef.name;
+}
+function dealPetDamage(amount,source,petRef){
+ C._pets=C._pets||[];
+ const pet=petRef||firstLivingPet();
+ if(!pet) return;
+ const def=getPetDef(pet.id)||{};
+ // Mo'o Nui 1-5 shell: clamp incoming damage to 1 per source this turn
+ if(C._petShellActive&&pet.id==='moonui') amount=Math.min(amount,1);
+ // Fel Guard / generic pet damage reduction
+ if(def.dmgReduction) amount=Math.max(0,amount-def.dmgReduction);
+ if(amount<=0){ log(`💢 ${pet.name} absorbs the hit from ${source}!`,'log-info'); renderCombat(); return; }
+ pet.hp=Math.max(0,pet.hp-amount);
+ log(`💢 ${pet.name} takes ${amount} from ${source}! (${pet.hp}/${pet.maxHP} HP)`,'log-dmg');
+ if(pet.hp<=0){
+ log(`💀 ${pet.name} has fallen!`,'log-critmiss');
+ // Cloud Burst Totem: heal on death by counter value
+ if(pet.id==='shamanCloudBurst'&&(pet.counters||0)>0){
+ const _o=G.char.hp;
+ G.char.hp=Math.min(G.char.maxHP,G.char.hp+pet.counters);
+ log(`☁️ Cloud Burst bursts: healed ${G.char.hp-_o} HP (${pet.counters} counters).`,'log-crit');
+ }
+ _removePetPassive(pet);
+ C._pets=C._pets.filter(p=>p.hp>0);
+ if(!hasLivingPet()){
+ G.char._petActive=null; G.char._petBonus=null;
+ C._tigerDoubleNext=false; C._petShellActive=false; C._petReflectActive=false;
+ }
+ }
+ renderCombat();
+}
+function _petTargetRandomLiving(){
+ const living=C.enemies.filter(e=>e.hp>0);
+ if(!living.length)return {tgt:null,idx:-1};
+ const tgt=living[Math.floor(Math.random()*living.length)];
+ return {tgt,idx:C.enemies.indexOf(tgt)};
+}
+function _petDealDamage(tgt,idx,amt,consumeTigerDouble){
+ if(!tgt||tgt.hp<=0)return 0;
+ let finalAmt=amt;
+ if(consumeTigerDouble&&C._tigerDoubleNext){finalAmt*=2;C._tigerDoubleNext=false;log(`🐅 Bhengalesh's ferocity doubles damage!`,'log-crit');}
+ dealEnemyDamage(tgt,finalAmt,idx);
+ return finalAmt;
+}
+function doPetTurn(){
+ const pets=(C._pets||[]).filter(p=>p.hp>0);
+ if(!pets.length) return;
+ pets.forEach(p=>{ if(p.hp>0) doPetAction(p); });
+}
+function doPetAction(p){
+ if(!p||p.hp<=0) return;
+ p._turnCount=(p._turnCount||0)+1;
+ // Warlock demons
+ if(p.id==='warlockImp'){
+ const r=d20();
+ if(r>5){const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,1,idx); log(`🔴 Imp (${r}): 1 fire magic${tgt?' to '+tgt.name:''}.`,'log-hit');}
+ else log(`🔴 Imp (${r}) fizzles.`,'log-miss');
+ renderCombat(); return;
+ }
+ if(p.id==='warlockFelHunter'){
+ const r=d20();
+ if(r>7){C._felHunterShadowBuff=2; log(`🔵 Fel Hunter (${r}): +2 shadow magic damage this turn.`,'log-info');}
+ else log(`🔵 Fel Hunter (${r}) finds no edge.`,'log-miss');
+ renderCombat(); return;
+ }
+ if(p.id==='warlockFelGuard'){
+ const r=d20();
+ if(r>7){const heal=Math.min(p.maxHP,p.hp+2); log(`🟢 Fel Guard (${r}) heals ${heal-p.hp} HP.`,'log-hit'); p.hp=heal;}
+ else log(`🟢 Fel Guard (${r}) stands watch.`,'log-info');
+ renderCombat(); return;
+ }
+ if(p.id==='warlockVoidWalker'){
+ const r=d20();
+ if(r>10){C.bonusRoll=(C.bonusRoll||0)+3; C._voidWalkerRollBuff=3; log(`🟣 Void Walker (${r}): +3 rolls this turn.`,'log-info');}
+ else log(`🟣 Void Walker (${r}) watches the void.`,'log-info');
+ renderCombat(); return;
+ }
+ if(p.id==='warlockInfernal'){
+ // Each turn: 1 fire to player + all enemies
+ dealPlayerDamage(1,'Infernal',true);
+ C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,1,ei);});
+ log('🔥 Infernal burns all sides for 1 fire magic.','log-info');
+ const r=d20();
+ if(r>8){ C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,5,ei);}); log(`🔥 Infernal (${r}): 5 fire magic to ALL enemies!`,'log-crit'); }
+ else log(`🔥 Infernal (${r}) seethes.`,'log-info');
+ // After 3 turns: break free and leave (hostile conversion planned)
+ if(p._turnCount>=3){
+ log('🔥 Infernal breaks free of your binding and escapes!','log-critmiss');
+ _removePetPassive(p); p.hp=0;
+ C._pets=(C._pets||[]).filter(x=>x.hp>0);
+ if(!hasLivingPet()){G.char._petActive=null;G.char._petBonus=null;}
+ }
+ renderCombat(); return;
+ }
+ // Shaman totems
+ if(p.id==='shamanHealingSpring'){
+ const _o=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);
+ if(G.char.hp>_o) log(`💧 Healing Spring Totem heals you for ${G.char.hp-_o} HP.`,'log-hit');
+ renderCombat(); return;
+ }
+ if(p.id==='shamanSearing'){
+ const {tgt,idx}=_petTargetRandomLiving();
+ if(tgt){dealEnemyDamage(tgt,1,idx); log(`🔥 Searing Totem: 1 fire magic to ${tgt.name}.`,'log-hit');}
+ renderCombat(); return;
+ }
+ if(p.id==='shamanStoneSkin'){
+ renderCombat(); return; // passive only
+ }
+ if(p.id==='shamanGraceOfAir'||p.id==='shamanManaSpring'){
+ renderCombat(); return; // passive only
+ }
+ if(p.id==='shamanFireNova'||p.id==='shamanCloudBurst'){
+ renderCombat(); return; // acts at end of turn / on sacrifice
+ }
+ // Fixed-action pets (Druid Treant, Mage Water Elemental)
+ if(p.id==='druidTreant'){
+ const {tgt,idx}=_petTargetRandomLiving();
+ if(tgt){dealEnemyDamage(tgt,2,idx); log(`🌳 Treant strikes ${tgt.name} for 2 nature damage.`,'log-hit');}
+ else log('🌳 Treant has no targets.','log-info');
+ renderCombat();
+ return;
+ }
+ if(p.id==='priestShadowFiend'){
+ const {tgt,idx}=_petTargetRandomLiving();
+ const dmg=p.counters||1;
+ if(tgt){dealEnemyDamage(tgt,dmg,idx); log(`🌑 Shadow Fiend: ${dmg} shadow magic to ${tgt.name} (${p.counters||0} counters).`,'log-hit');}
+ else log('🌑 Shadow Fiend has no targets.','log-info');
+ renderCombat();
+ return;
+ }
+ if(p.id==='mageWaterElemental'){
+ const living=C.enemies.filter(e=>e.hp>0);
+ if(living.length){
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){dealEnemyDamage(e,2,ei); e._tookIceDamage=true;}});
+ log(`💧 Water Elemental: 2 frost to all enemies.`,'log-hit');
+ } else log('💧 Water Elemental has no targets.','log-info');
+ renderCombat();
+ return;
+ }
+ const roll=d20();
+ log(`🎲 ${p.name} acts (rolled ${roll})…`,'log-system');
+ if(p.id==='harou'){
+ const {tgt,idx}=_petTargetRandomLiving();
+ if(roll<=5){ if(tgt)dealEnemyDamage(tgt,1,idx); C._petPlayerDmgBuff=(C._petPlayerDmgBuff||0)+1; log(`🐺 Harou snaps: 1 melee${tgt?' to '+tgt.name:''}, +1 your damage this turn.`,'log-hit'); }
+ else if(roll<=10){ if(tgt)dealEnemyDamage(tgt,2,idx); C._petPlayerDmgBuff=(C._petPlayerDmgBuff||0)+1; log(`🐺 Harou bites: 2 melee${tgt?' to '+tgt.name:''}, +1 your damage this turn.`,'log-hit'); }
+ else if(roll<=19){ if(tgt)dealEnemyDamage(tgt,3,idx); C._petPlayerDmgBuff=(C._petPlayerDmgBuff||0)+1; log(`🐺 Harou tears: 3 melee${tgt?' to '+tgt.name:''}, allies +1 damage this turn.`,'log-hit'); }
+ else { if(tgt)dealEnemyDamage(tgt,3,idx); C._petPlayerDmgBuff=(C._petPlayerDmgBuff||0)+2; log(`🐺 Harou (NAT 20): 3 melee${tgt?' to '+tgt.name:''}, allies +2 damage this turn!`,'log-crit'); }
+ }
+ else if(p.id==='kuma'){
+ if(roll<=5){ const h=Math.min(p.maxHP,p.hp+3); log(`🐻 Kuma heals ${h-p.hp} HP (${h}/${p.maxHP}).`,'log-hit'); p.hp=h; }
+ else if(roll<=10){ const liv=C.enemies.filter(e=>e.hp>0); const tgs=[]; for(let i=0;i<2&&liv.length;i++){const e=liv.splice(Math.floor(Math.random()*liv.length),1)[0]; dealEnemyDamage(e,2,C.enemies.indexOf(e)); tgs.push(e.name);} log(`🐻 Kuma mauls: 2 melee to ${tgs.join(' & ')||'-'}.`,'log-hit'); }
+ else if(roll<=19){ const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,5,idx); log(`🐻 Kuma crushes: 5 melee${tgt?' to '+tgt.name:''}.`,'log-hit'); }
+ else { C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,5,ei);}); C._petEnemiesHalfDmg=true; log(`🐻 Kuma (NAT 20): 5 melee to ALL. Enemies deal half damage this turn!`,'log-crit'); }
+ }
+ else if(p.id==='siku'){
+ if(roll<=5){ _sikuDrawLoot(1); }
+ else if(roll<=10){ const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,1,idx); _sikuDrawLoot(2); log(`🦅 Siku dives: 1 melee${tgt?' to '+tgt.name:''}.`,'log-hit'); }
+ else if(roll<=19){ const {tgt,idx}=_petTargetRandomLiving(); if(tgt){dealEnemyDamage(tgt,3,idx); tgt._petBonusDmgThisTurn=(tgt._petBonusDmgThisTurn||0)+2;} log(`🦅 Siku strikes: 3 melee${tgt?' to '+tgt.name+' (+2 dmg taken this turn)':''}.`,'log-hit'); }
+ else { const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,10,idx); log(`🦅 Siku SACRIFICES itself: 10 melee${tgt?' to '+tgt.name:''}!`,'log-crit'); p.hp=0; C._pets=(C._pets||[]).filter(x=>x.hp>0); if(!hasLivingPet()){G.char._petActive=null;G.char._petBonus=null;} }
+ }
+ else if(p.id==='bhengalesh'){
+ if(roll<=5){ C._tigerDoubleNext=true; log(`🐅 Bhengalesh coils: next damage he deals is doubled (does not stack).`,'log-info'); }
+ else if(roll<=10){ const {tgt,idx}=_petTargetRandomLiving(); _petDealDamage(tgt,idx,3,true); log(`🐅 Bhengalesh strikes${tgt?' '+tgt.name:''}.`,'log-hit'); }
+ else if(roll<=19){ const {tgt,idx}=_petTargetRandomLiving(); _petDealDamage(tgt,idx,5,true); log(`🐅 Bhengalesh rips${tgt?' '+tgt.name:''}.`,'log-hit'); }
+ else { const {tgt,idx}=_petTargetRandomLiving(); _petDealDamage(tgt,idx,8,true); log(`🐅 Bhengalesh (NAT 20): 8 melee${tgt?' to '+tgt.name:''}. Rolls again!`,'log-crit'); if(p&&p.hp>0) doPetAction(p); }
+ }
+ else if(p.id==='chichwa'){
+ if(roll<=5){ const h=Math.min(p.maxHP,p.hp+2); log(`🦍 Chichwa heals ${h-p.hp} HP. You may play another card.`,'log-hit'); p.hp=h; C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1; }
+ else if(roll<=10){ const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,3,idx); log(`🦍 Chichwa pummels${tgt?' '+tgt.name:''}: 3 melee.`,'log-hit'); }
+ else if(roll<=19){ C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,3,ei);}); log(`🦍 Chichwa sweeps: 3 melee to ALL enemies.`,'log-hit'); }
+ else { const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,6,idx); C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1; log(`🦍 Chichwa (NAT 20): 6 melee${tgt?' to '+tgt.name:''}. You may play another card.`,'log-crit'); }
+ }
+ else if(p.id==='moonui'){
+ if(roll<=5){ C._petShellActive=true; log(`🐢 Mo'o Nui shells up: incoming damage to it is capped at 1 per source this turn.`,'log-info'); }
+ else if(roll<=10){ const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,3,idx); log(`🐢 Mo'o Nui slams${tgt?' '+tgt.name:''}: 3 melee.`,'log-hit'); }
+ else if(roll<=19){ C._petReflectActive=true; log(`🐢 Mo'o Nui prepares to reflect: attack damage to you is prevented and returned this turn.`,'log-info'); }
+ else { const {tgt,idx}=_petTargetRandomLiving(); if(tgt)dealEnemyDamage(tgt,3,idx); C._nextCardAutoCrit=true; log(`🐢 Mo'o Nui (NAT 20): 3 melee${tgt?' to '+tgt.name:''}. Your next ability auto-crits!`,'log-crit'); }
+ }
+ renderCombat();
+}
+function togglePetRedirect(petId){
+ const pet=(C._pets||[]).find(p=>p.id===petId);
+ if(!pet) return;
+ pet._redirectActive=!pet._redirectActive;
+ log(`${pet.icon} ${pet.name} redirect: ${pet._redirectActive?'ON':'OFF'}`,'log-info');
+ renderCombat();
+}
+function sacrificeVoidWalker(){
+ const pet=(C._pets||[]).find(p=>p.id==='warlockVoidWalker'&&p.hp>0);
+ if(!pet) return;
+ const heal=pet.hp*2; const _old=G.char.hp;
+ G.char.hp=Math.min(G.char.maxHP,G.char.hp+heal);
+ log(`🟣 Sacrificed ${pet.name}! Healed ${G.char.hp-_old} HP (${heal} potential).`,'log-crit');
+ _removePetPassive(pet); pet.hp=0;
+ C._pets=(C._pets||[]).filter(p=>p.hp>0);
+ if(!hasLivingPet()){G.char._petActive=null;G.char._petBonus=null;}
+ renderCombat(); renderHUD();
+}
+function sacrificeCloudBurst(){
+ const pet=(C._pets||[]).find(p=>p.id==='shamanCloudBurst'&&p.hp>0);
+ if(!pet) return;
+ triggerCloudBurst(pet,'sacrificed');
+}
+function triggerCloudBurst(pet,reason){
+ const count=pet.counters||0;
+ if(count>0){
+ const _o=G.char.hp;
+ G.char.hp=Math.min(G.char.maxHP,G.char.hp+count);
+ log(`☁️ Cloud Burst Totem ${reason}: healed ${G.char.hp-_o} HP (${count} counters).`,'log-crit');
+ } else log(`☁️ Cloud Burst Totem ${reason}: no counters to release.`,'log-info');
+ pet.hp=0;
+ C._pets=(C._pets||[]).filter(p=>p.hp>0);
+ if(!hasLivingPet()){G.char._petActive=null;G.char._petBonus=null;}
+ renderCombat(); renderHUD();
+}
+function _sikuDrawLoot(tier){
+ const tier1=[{id:'antidote'},{id:'healpotion'},{id:'sharpeningstone'}];
+ const tier2=[{id:'luckycharm'},{id:'smokebomb'},{id:'greaterpotion'}];
+ const pool=tier===1?tier1:tier2;
+ const pick=pool[Math.floor(Math.random()*pool.length)];
+ const shopItem=SHOP&&SHOP.find?SHOP.find(s=>s.id===pick.id):null;
+ const inventoryItem=shopItem?{id:shopItem.id,name:shopItem.name,icon:shopItem.icon,desc:shopItem.desc}:{id:pick.id,name:pick.id,icon:'📦',desc:''};
+ G.char.inventory=G.char.inventory||[];
+ G.char.inventory.push(inventoryItem);
+ log(`🦅 Siku drops loot: ${inventoryItem.icon} ${inventoryItem.name}!`,'log-hit');
+ toast(`${inventoryItem.icon} Siku fetched ${inventoryItem.name}!`,'success');
+}
+
 // ── DEAL DAMAGE ───────────────────────────────────────────────────
 function dealEnemyDamage(enemy, amount, idx) {
  // Apply Prowl/Shadow Step/Stealth double damage flag
@@ -7856,6 +8316,8 @@ function dealEnemyDamage(enemy, amount, idx) {
  // Marked for Death: +stacks bonus damage
  const mark=(enemy.debuffs||[]).find(d=>d.id==='marked');
  if(mark&&mark.stacks>0) amount+=mark.stacks;
+ // Siku pet: bonus damage this turn to marked enemy
+ if((enemy._petBonusDmgThisTurn||0)>0) amount+=enemy._petBonusDmgThisTurn;
  // Sneed's damage reduction: -2 from player abilities (DoTs bypass this via direct hp manipulation)
  if(enemy.id==='sneed') amount=Math.max(1,amount-2);
  // Sneed's Shredder ongoing: takes -1 damage (DoTs bypass via direct hp manipulation)
@@ -7924,6 +8386,25 @@ function dealEnemyDamage(enemy, amount, idx) {
 
 function dealPlayerDamage(amount, source, isAbilityDmg=false, sourceEnemy=null, bypassMitigation=false) {
  if(amount<=0)return;
+ // Pet: enemies deal half damage this turn (Kuma NAT 20)
+ if(!bypassMitigation&&!isAbilityDmg&&C._petEnemiesHalfDmg) amount=Math.ceil(amount/2);
+ // Stone Skin Totem: -1 damage to you (min 1) while alive
+ if(!bypassMitigation&&amount>0&&(C._pets||[]).some(p=>p.id==='shamanStoneSkin'&&p.hp>0)) amount=Math.max(1,amount-1);
+ // Pet: Mo'o Nui reflect — prevent attack damage to player, reflect back to attacker
+ if(!bypassMitigation&&!isAbilityDmg&&C._petReflectActive){
+ if(sourceEnemy&&sourceEnemy.hp>0){
+ dealEnemyDamage(sourceEnemy,amount,C.enemies.indexOf(sourceEnemy));
+ log(`🐢 Mo'o Nui reflects ${amount} back to ${sourceEnemy.name}!`,'log-hit');
+ } else {
+ log(`🐢 Mo'o Nui absorbs ${amount} (no attacker to reflect).`,'log-info');
+ }
+ return;
+ }
+ // Pet: taunt — attack damage is redirected to the first living *taunting* pet
+ if(!bypassMitigation&&!isAbilityDmg&&hasTauntingPet()){
+ dealPetDamage(amount,source,firstTauntingPet());
+ return;
+ }
  // Temporal Abstraction: buffer damage until next turn (not for critmiss self-damage)
  if(!bypassMitigation&&C._temporalAbstractionActive){C._temporalDmgBuffer=(C._temporalDmgBuffer||0)+amount;log(`⏳ Temporal Abstraction: ${amount} damage from ${source} delayed!`,'log-info');return;}
  // Iron Hide: each physical attack, roll >8 → -1 damage (bear form auto-success)
@@ -7963,8 +8444,9 @@ function dealPlayerDamage(amount, source, isAbilityDmg=false, sourceEnemy=null, 
  // Aspect of the Monkey: roll to halve damage (not critmiss)
  if(!bypassMitigation&&!isAbilityDmg&&G.char._aspectMonkey&&amount>0){
  const monkRoll=d20();
- if(monkRoll>10){amount=Math.ceil(amount/2);log(`🐒 Aspect of the Monkey: rolled ${monkRoll} — half damage!`,'log-info');}
+ if(monkRoll>=11){amount=Math.ceil(amount/2);log(`🐒 Aspect of the Monkey: rolled ${monkRoll} — half damage!`,'log-info');}
  }
+ if(!bypassMitigation&&!isAbilityDmg&&C._aspectCheetahActive&&amount>0){amount+=1;}
  if(!bypassMitigation&&(G.char.currentForm==='bear'||G.char.currentForm==='both'))amount=Math.ceil(amount/2);
  if(!bypassMitigation&&C._camouflageHalfDmg)amount=Math.ceil(amount/2);
  if(!bypassMitigation&&!isAbilityDmg && C._provokeDmgReduction) amount=Math.ceil(amount/2);
@@ -8053,6 +8535,22 @@ function doEnemyTurn() {
  C._beastialWrathActive=false;
  C._eruptionHitThisTurn=false;
  C._camouflageHalfDmg=false;
+ // Fire Nova Totem: at end of player turn, self-destruct and AoE fire
+ (C._pets||[]).filter(p=>p.id==='shamanFireNova'&&p.hp>0).forEach(p=>{
+ C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,3,ei);});
+ log('💥 Fire Nova Totem detonates: 3 fire magic to all enemies.','log-crit');
+ _removePetPassive(p); p.hp=0;
+ });
+ C._pets=(C._pets||[]).filter(p=>p.hp>0);
+ if(!hasLivingPet()){G.char._petActive=null;G.char._petBonus=null;}
+ // Pet per-turn buffs fall off at end of player turn
+ C._petPlayerDmgBuff=0;
+ C._petEnemiesHalfDmg=false;
+ C._petShellActive=false;
+ C._petReflectActive=false;
+ C._felHunterShadowBuff=0;
+ C._voidWalkerRollBuff=0;
+ C.enemies.forEach(e=>{e._petBonusDmgThisTurn=0;});
  // Hot Streak auto-counter
  if(C._hotStreakActive&&C._dealtFireLastTurn){
  C._hotStreakCounters=Math.min(3,(C._hotStreakCounters||0)+1);
@@ -8113,13 +8611,7 @@ function doEnemyTurn() {
  }
  }
 
- // Water Elemental attacks each round
- if((C._waterElementalTurns||0)>0){
- const weTarget=C.enemies.find(e=>e.hp>0);
- if(weTarget){const weTIdx=C.enemies.indexOf(weTarget);dealEnemyDamage(weTarget,2,weTIdx);weTarget._tookIceDamage=true;log(`💧 Water Elemental: 2 frost to ${weTarget.name}!`,'log-hit');}
- C._waterElementalTurns--;
- if(C._waterElementalTurns===0)log('💧 Water Elemental dissipates.','log-system');
- }
+ // Water Elemental now handled via C._pets (see doPetTurn)
 
  // Meteor crit: repeat effect at end of next turn
  if(C._meteorRepeat){
@@ -8166,10 +8658,7 @@ function doEnemyTurn() {
  }
  // Lightwell healing
  if(C._lightwellActive){const lwR=d20();if(lwR>=13){const _lwOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+2);log(`✨ Lightwell: rolled ${lwR} — healed ${G.char.hp-_lwOld} HP!`,'log-hit');renderHUD();}}
- // Mana Spring Totem: +1 draw next turn
- if((C._manaSpringTurns||0)>0){C.bonusDrawNextTurn=(C.bonusDrawNextTurn||0)+1;C._manaSpringTurns--;if(C._manaSpringTurns===0)log('💧 Mana Spring Totem fades.','log-system');}
- // Grace of Air Totem: countdown, remove bonus when expired
- if((C._graceOfAirTurns||0)>0){C._graceOfAirTurns--;if(C._graceOfAirTurns===0){G.char.rollBonus=Math.max(0,(G.char.rollBonus||0)-1);log('💨 Grace of Air Totem fades. -1 to rolls.','log-system');}}
+ // Mana Spring / Grace of Air now handled as pets (see CLASS_PETS)
  // Temporal Abstraction: deal buffered damage at end of turn
  if((C._temporalDmgBuffer||0)>0){const td=C._temporalDmgBuffer;C._temporalDmgBuffer=0;C._temporalAbstractionActive=false;dealPlayerDamage(td,'Temporal Abstraction (delayed)',true);log(`⏳ Temporal Abstraction: ${td} delayed damage resolved!`,'log-hit');}
  else C._temporalAbstractionActive=false;
@@ -8177,8 +8666,7 @@ function doEnemyTurn() {
  if(C._unstablePowerActive){const upR=d20();const upDmg=Math.max(1,Math.ceil(upR/5));dealPlayerDamage(upDmg,'Unstable Power',true);log(`💀 Unstable Power: rolled ${upR} — ${upDmg} self-damage!`,'log-hit');}
  // Consecration: 1 holy damage to all enemies each round
  if(C._consecrationActive){C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,1,ei);});log('✨ Consecration: 1 holy damage to all enemies!','log-hit');}
- // Shadow Fiend attacks
- if((C._shadowFiendTurns||0)>0){const sfT=C.enemies.find(e=>e.hp>0);if(sfT){dealEnemyDamage(sfT,3,C.enemies.indexOf(sfT));log(`🌑 Shadow Fiend: 3 shadow to ${sfT.name}!`,'log-hit');}C._shadowFiendTurns--;if(C._shadowFiendTurns===0)log('🌑 Shadow Fiend fades.','log-system');}
+ // Shadow Fiend now handled via C._pets (see doPetTurn)
  // Siphon Life: repeat on roll 8+
  if(C._siphonLifeActive){const slR=d20();if(slR>=8){const slLiving=C.enemies.filter(e=>e.hp>0);slLiving.forEach(e=>{dealEnemyDamage(e,1,C.enemies.indexOf(e));});log(`💀 Siphon Life: rolled ${slR} — 1 shadow to all enemies!`,'log-hit');}else{C._siphonLifeActive=false;log(`💀 Siphon Life fades (rolled ${slR}, need 8+).`,'log-system');}}
  // Unstable Affliction: 5 shadow/turn, jumps on roll 7 or less
@@ -8403,6 +8891,21 @@ function doEnemyTurn() {
  if(C.enemies.every(e=>e.hp<=0)){setTimeout(onCombatWin,400);return;}
  if(!C._skipTurnEffectsApplied&&(C.activeHoTs||[]).length>0){
  C.activeHoTs=C.activeHoTs.filter(h=>{
+ if(h.channel){
+ const tRoll=d20()+(G.char.rollBonus||0);
+ if(tRoll<h.dc){log(`${h.icon} ${h.name} channel breaks! (rolled ${tRoll} vs DC ${h.dc})`,'log-miss');return false;}
+ h.stack=(h.stack||0)+1;
+ if(h.channelType==='damage'){
+ const dmg=(h.baseDmg||0)+h.bonusPerStack*h.stack;
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){dealEnemyDamage(e,dmg,ei);e._tookIceDamage=true;}});
+ log(`${h.icon} ${h.name} channels: ${dmg} ice to all (rolled ${tRoll}, tick ${h.stack})`,'log-hit');
+ return true;
+ }
+ const amt=h.baseHeal+h.bonusPerStack*h.stack+(G.char._hotBonus||0);
+ const _co=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+amt);
+ log(`${h.icon} ${h.name} channels: +${G.char.hp-_co} HP (rolled ${tRoll}, tick ${h.stack}) → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
+ return true;
+ }
  if(h.turnsLeft<=0){
  if(h.bloomAmt){const _blmOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+h.bloomAmt);log(`${h.icon} ${h.name} BLOOMS! Healed ${G.char.hp-_blmOld} HP → ${G.char.hp}/${G.char.maxHP}`,'log-crit');}
  return false;
@@ -8584,6 +9087,17 @@ function onCombatWin() {
  G.char.deck=[...C.deck,...C.discard,...C.hand];
  G.char.currentForm=null;G.char.statusEffects=[];
  G.char._stance=null; // stances expire at end of combat
+ // Hunter aspects: rollback per-combat stat deltas, clear flags
+ if(C._aspectHawkDmgDelta) G.char.dmgBonus=Math.max(0,(G.char.dmgBonus||0)-C._aspectHawkDmgDelta);
+ if(C._aspectCheetahRollDelta) G.char.rollBonus=Math.max(0,(G.char.rollBonus||0)-C._aspectCheetahRollDelta);
+ if(C._aspectCheetahDrawDelta) G.char.extraDraw=Math.max(0,(G.char.extraDraw||0)-C._aspectCheetahDrawDelta);
+ if(C._aspectMonkeyFromCombat) G.char._aspectMonkey=false;
+ // Pets fade at combat end — revert passives, clear list
+ (C._pets||[]).forEach(p=>_removePetPassive(p));
+ C._pets=[]; G.char._petActive=null; G.char._petBonus=null;
+ C._tigerDoubleNext=false; C._petShellActive=false; C._petReflectActive=false;
+ C._petPlayerDmgBuff=0; C._petEnemiesHalfDmg=false;
+ C._felHunterShadowBuff=0; C._voidWalkerRollBuff=0;
  // Per-kill XP/gold already awarded in dealEnemyDamage — just add encounter bonus here
  const xp=enc.xpBonus||0;
  const gold=(G.char.goldBonus||0);
@@ -9229,6 +9743,16 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  const canAfford=!isBoss&&lp>=(lpCost||0);
  const statsStr=Object.entries(eq.stats||{}).filter(([k,v])=>v&&typeof v==='number').map(([k,v])=>`${v>0?'+':''}${v} ${k}`).join('<br>');
  const bossName=isBoss?getBossNameForItem(eq.id):null;
+ if(isBoss&&!isUnlocked){
+ detail.innerHTML=`
+ <div class="lv-detail-icon" style="filter:grayscale(1) brightness(0.4)">❓</div>
+ <div class="lv-detail-name" style="color:var(--parch-text-dim)">??? </div>
+ <div class="lv-detail-desc" style="color:var(--parch-text-dim);font-style:italic">This relic has not yet been found.</div>
+ <div class="lv-detail-cost" style="color:rgba(255,120,120,0.7)">🔒 Defeat ${bossName} to discover it</div>
+ <div class="lv-detail-btn" style="display:flex;flex-direction:column;gap:6px">
+ <button class="btn btn-ghost" style="width:100%" disabled>🔒 Not yet found</button>
+ </div>`;
+ } else {
  detail.innerHTML=`
  <div class="lv-detail-icon" style="${rar?`filter:drop-shadow(0 0 12px ${rar.color}88)`:''}">${eq.icon}</div>
  ${rar?`<div style="font-family:var(--font-pixel);font-size:6px;color:${rar.color};letter-spacing:0.12em;margin-bottom:4px">${rar.label.toUpperCase()}</div>`:''}
@@ -9237,17 +9761,16 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  ${statsStr?`<div class="lv-detail-stats">${statsStr}</div>`:''}
  <div class="lv-detail-desc">${eq.desc}</div>
  ${isBoss?`<div style="font-family:var(--font-pixel);font-size:5px;color:rgba(200,160,40,0.6);margin-bottom:4px">Drop: ${bossName}</div>`:''}
- ${isUnlocked?`<div class="lv-detail-cost">✔ ${isBoss?'Found':'Unlocked'}</div>`:isBoss?`<div class="lv-detail-cost" style="color:rgba(255,120,120,0.7)">🔒 Defeat ${bossName}</div>`:`<div class="lv-detail-cost">⚡ ${lpCost} LP to unlock</div>`}
+ ${isUnlocked?`<div class="lv-detail-cost">✔ ${isBoss?'Found':'Unlocked'}</div>`:`<div class="lv-detail-cost">⚡ ${lpCost} LP to unlock</div>`}
  <div class="lv-detail-btn" style="display:flex;flex-direction:column;gap:6px">
  ${isUnlocked
  ?isStart
   ?`<button class="btn btn-ghost" style="width:100%" onclick="toggleStartEquip('${eq.id}','${eq.slot}',false)">✕ Remove from loadout</button>`
   :`<button class="btn btn-primary" style="width:100%" onclick="toggleStartEquip('${eq.id}','${eq.slot}',true)">★ Set as starting ${eq.slot}</button>`
- :isBoss
-  ?`<button class="btn btn-ghost" style="width:100%" disabled>🔒 Find by defeating ${bossName}</button>`
-  :`<button class="btn btn-primary${canAfford?'':' btn-ghost'}" style="width:100%" ${canAfford?'':'disabled'} onclick="buyLegacyEquip('${eq.id}')">⚡${lpCost} LP — Unlock</button>`
+ :`<button class="btn btn-primary${canAfford?'':' btn-ghost'}" style="width:100%" ${canAfford?'':'disabled'} onclick="buyLegacyEquip('${eq.id}')">⚡${lpCost} LP — Unlock</button>`
  }
  </div>`;
+ }
  }
  } else if(window._lgTab==='heroes'){
  const classHeroes=HEROES[selClass]||[];
@@ -9334,6 +9857,16 @@ function renderLvDetail(sel) {
  const canAfford=!isBoss&&lp>=(lpCost||0);
  const statsStr=Object.entries(eq.stats||{}).filter(([k,v])=>v&&typeof v==='number').map(([k,v])=>`${v>0?'+':''}${v} ${k}`).join('<br>');
  const bossName=isBoss?getBossNameForItem(eq.id):null;
+ if(isBoss&&!isUnlocked){
+ detailEl.innerHTML=`
+ <div class="lv-detail-icon" style="filter:grayscale(1) brightness(0.4)">❓</div>
+ <div class="lv-detail-name" style="color:var(--parch-text-dim)">??? </div>
+ <div class="lv-detail-desc" style="color:var(--parch-text-dim);font-style:italic">This relic has not yet been found.</div>
+ <div class="lv-detail-cost" style="color:rgba(255,120,120,0.7)">🔒 Defeat ${bossName} to discover it</div>
+ <div class="lv-detail-btn" style="display:flex;flex-direction:column;gap:6px">
+ <button class="btn btn-ghost" style="width:100%" disabled>🔒 Not yet found</button>
+ </div>`;
+ } else {
  detailEl.innerHTML=`
  <div class="lv-detail-icon" style="${rar?`filter:drop-shadow(0 0 12px ${rar.color}88)`:''}">${eq.icon}</div>
  ${rar?`<div style="font-family:var(--font-pixel);font-size:6px;color:${rar.color};letter-spacing:0.12em;margin-bottom:4px">${rar.label.toUpperCase()}</div>`:''}
@@ -9342,17 +9875,16 @@ function renderLvDetail(sel) {
  ${statsStr?`<div class="lv-detail-stats">${statsStr}</div>`:''}
  <div class="lv-detail-desc">${eq.desc}</div>
  ${isBoss?`<div style="font-family:var(--font-pixel);font-size:5px;color:rgba(200,160,40,0.6);margin-bottom:4px">Drop: ${bossName}</div>`:''}
- ${isUnlocked?`<div class="lv-detail-cost">✔ ${isBoss?'Found':'Unlocked'}</div>`:isBoss?`<div class="lv-detail-cost" style="color:rgba(255,120,120,0.7)">🔒 Defeat ${bossName}</div>`:`<div class="lv-detail-cost">⚡ ${lpCost} LP to unlock</div>`}
+ ${isUnlocked?`<div class="lv-detail-cost">✔ ${isBoss?'Found':'Unlocked'}</div>`:`<div class="lv-detail-cost">⚡ ${lpCost} LP to unlock</div>`}
  <div class="lv-detail-btn" style="display:flex;flex-direction:column;gap:6px">
  ${isUnlocked
  ?isStart
   ?`<button class="btn btn-ghost" style="width:100%" onclick="toggleStartEquip('${eq.id}','${eq.slot}',false)">✕ Remove from loadout</button>`
   :`<button class="btn btn-primary" style="width:100%" onclick="toggleStartEquip('${eq.id}','${eq.slot}',true)">★ Set as starting ${eq.slot}</button>`
- :isBoss
-  ?`<button class="btn btn-ghost" style="width:100%" disabled>🔒 Find by defeating ${bossName}</button>`
-  :`<button class="btn btn-primary${canAfford?'':' btn-ghost'}" style="width:100%" ${canAfford?'':'disabled'} onclick="buyLegacyEquip('${eq.id}')">⚡${lpCost} LP — Unlock</button>`
+ :`<button class="btn btn-primary${canAfford?'':' btn-ghost'}" style="width:100%" ${canAfford?'':'disabled'} onclick="buyLegacyEquip('${eq.id}')">⚡${lpCost} LP — Unlock</button>`
  }
  </div>`;
+ }
 
  } else if(tab==='heroes'){
  const classHeroes=HEROES[selClass]||[];
