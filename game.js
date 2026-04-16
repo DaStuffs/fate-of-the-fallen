@@ -452,8 +452,8 @@ const CARDS = {
  crit:'All enemy attacks deal 3 less damage for 3 turns. Gain +1 damage reduction. Play another card.',
  miss:null, critmiss:'Your growl falls flat. Take 2 damage.' },
  { id:'d47', name:'Swift Mend', tier:3, type:'health', risk:7,
- hit:'You may instantly resolve any HoT effect on target ally. Play another card.',
- crit:'Refresh all hots on target ally.', miss:null, critmiss:null },
+ hit:'Consume all active HoTs on you and heal for their total remaining value. Gain +1 play this turn.',
+ crit:'Healing is doubled.', miss:null, critmiss:null },
  { id:'d48', name:'Innervate', tier:3, type:'target', risk:11,
  hit:'Draw 3 cards. Play 2 additional cards this turn. +3 on all rolls this turn.',
  crit:'Repeat this ability on the next round', miss:null, critmiss:'Target ally only may draw 1 card on their next turn and recieves -3 on their next roll' },
@@ -461,8 +461,8 @@ const CARDS = {
  hit:'Summon 3 Treant companions (4 HP each). Each turn every Treant deals 2 nature damage to an enemy and taunts attacks. Stacks with existing Treants.',
  crit:'Each summoned Treant enters play with +2 max HP.', miss:null, critmiss:null },
  { id:'d50', name:"Gaia's Bounty", tier:4, type:'health', risk:12,
- hit:'Refresh the count on all hots you have in play and apply each hot to a second ally not currently benefiting from it.',
- crit:'Apply your hots to a 3rd target', miss:null, critmiss:null },
+ hit:'Refresh the turns left on every active HoT on you back to their full duration. Draw 1 card.',
+ crit:'HoT durations are doubled instead.', miss:null, critmiss:null },
  { id:'d51', name:'Astral Alignment', tier:4, type:'damage', risk:6,
  hit:'Astral form gains: Each time you succeed a roll deal 2 arcane or nature damage to an enemy. (Max 3 times per turn).',
  crit:null, miss:null, critmiss:null },
@@ -1245,124 +1245,123 @@ const ENEMIES = {
 
  // ── SHADOWFANG KEEP ──
  feralWorgen: { id:'feralWorgen', name:'Feral Worgen', portrait:'🐺',
- tier:1, maxHP:18, atk:3, type:'minion',
+ tier:1, maxHP:36, atk:6, type:'minion',
  ongoing:'Melee hits apply 1 Bleed (Hemorrhage stack) to you.',
  surge:'Deal 5 melee damage and apply 2 Bleed stacks.',
  bleedOnHit:true, xp:45 },
  wailingSpirit: { id:'wailingSpirit', name:'Wailing Spirit', portrait:'👻',
- tier:1, maxHP:14, atk:2, type:'minion',
+ tier:1, maxHP:28, atk:4, type:'minion',
  ongoing:'Deals shadow magic damage that bypasses armor.',
  surge:'Scream — deal 4 shadow magic damage and draw 1 less card next turn.',
  shadowMagic:true, xp:55 },
  frostwolfHunter: { id:'frostwolfHunter', name:'Frostwolf Hunter', portrait:'🐺',
- tier:2, maxHP:20, atk:3, type:'minion',
+ tier:2, maxHP:40, atk:6, type:'minion',
  ongoing:'Ranged ice attack — +1 to all damage vs. frozen targets.',
  surge:'Deal 4 ice damage and apply Frozen to you (lose 1 play next turn).',
  xp:60 },
  rethilgore: { id:'rethilgore', name:'Rethilgore the Jailer', portrait:'🦇',
- tier:2, maxHP:90, atk:4, type:'boss',
+ tier:2, maxHP:180, atk:8, type:'boss',
  ongoing:'Each hit applies 2 Bleed stacks. At end of round roll DC 10 — on success he drains 2 HP per Bleed stack on you.',
  surge:'Rip and Tear — 6 damage and +3 Bleed stacks to you.',
  xp:90, gold:30,
  bleedOnHit:2 },
  razorclaw: { id:'razorclaw', name:'Razorclaw the Butcher', portrait:'🪓',
- tier:3, maxHP:75, atk:5, type:'boss',
- ongoing:'Frenzy — +1 damage to attacks for every 10% below 50% HP you are.',
+ tier:3, maxHP:150, atk:10, type:'boss',
+ ongoing:'Blood Frenzy — +1 damage per 10% of his own max HP lost. While you are below 50% HP, he attacks twice each round.',
  surge:'Cleave — 5 damage to you + 3 Bleed stacks.',
- xp:120, gold:40,
- frenzyFromLowHp:true },
+ xp:120, gold:40 },
  baronSilverlaine: { id:'baronSilverlaine', name:'Baron Silverlaine', portrait:'🧛',
- tier:3, maxHP:110, atk:4, type:'boss',
+ tier:3, maxHP:220, atk:8, type:'boss',
  ongoing:'Mark of the Wolf on start: -1 to all rolls while he lives. Each end of round rolls DC 10 — fail drains 2 HP.',
  surge:'Fear — applies Feared (+3 shadow dmg taken) and stuns you 1 turn.',
  xp:140, gold:40,
  baronCurse:true,
- phase2HP:40, phase2Spawns:'wailingSpirit' },
+ phase2HP:80, phase2Spawns:'wailingSpirit' },
  archmageArugal: { id:'archmageArugal', name:'Archmage Arugal', portrait:'🧙',
- tier:5, maxHP:160, atk:6, type:'boss',
+ tier:5, maxHP:320, atk:12, type:'boss',
  ongoing:'Shadow Nova on even turns: 3 shadow magic to you. Ice Barrier: -2 damage taken until broken by a crit.',
  surge:'Void Bolt barrage — 6 shadow + 4 ice magic damage.',
  xp:300, gold:100, isFinalBoss:true,
- phase2HP:80, phase2Spawns:'wailingSpirit',
+ phase2HP:160, phase2Spawns:'wailingSpirit',
  arugalBarrier:true,
  spawnsMinion:'feralWorgen', spawnRate:3 },
  commanderSpringvale: { id:'commanderSpringvale', name:'Commander Springvale', portrait:'🗡️',
- tier:2, maxHP:85, atk:4, type:'boss',
+ tier:2, maxHP:170, atk:8, type:'boss',
  ongoing:'Armored: takes -1 damage from all sources. Each even round, rallies — summons a Feral Worgen.',
  surge:'Shield Bash — 5 damage, stuns for 1 turn.',
  xp:100, gold:35,
  armoredNegOne:true, spawnsMinion:'feralWorgen', spawnRate:2, shieldBashSurge:true },
  odoBlindwatcher: { id:'odoBlindwatcher', name:'Odo the Blindwatcher', portrait:'🏹',
- tier:2, maxHP:90, atk:5, type:'boss',
+ tier:2, maxHP:180, atk:10, type:'boss',
  ongoing:'Ranged — his attacks are untyped ranged. Deadeye: his first crit each combat is automatic.',
  surge:'Piercing Volley — 7 ranged damage. Ignores armor.',
  xp:110, gold:35,
  rangedIgnoreArmor:true, deadeyeAuto:true },
  fenrusDevourer: { id:'fenrusDevourer', name:'Fenrus the Devourer', portrait:'🐺',
- tier:3, maxHP:100, atk:5, type:'boss',
- ongoing:'Shadow Howl: at end of round, roll DC 10. On success applies Feared (+2 dmg taken 2 turns). Heals 2 HP per Bleed stack on you each round.',
- surge:'Devour — deals 6 shadow damage and heals for double.',
+ tier:3, maxHP:200, atk:10, type:'boss',
+ ongoing:'Each hit applies 2 Bleed stacks. Shadow Howl: at end of round, roll DC 10. On success applies Feared (+2 dmg taken 2 turns). Heals 2 HP per Bleed stack on you each round.',
+ surge:'Devour — applies 3 Bleed stacks, then for each Bleed stack on you deals 3 shadow damage and heals Fenrus for 6.',
  xp:130, gold:40,
- fenrusHowl:true, bleedFeed:true },
+ bleedOnHit:2, fenrusHowl:true, bleedFeed:true },
 
  // ── RAGEFIRE CHASM ──
  ragefireTrogg: { id:'ragefireTrogg', name:'Ragefire Trogg', portrait:'🪨',
- tier:1, maxHP:16, atk:3, type:'minion',
+ tier:1, maxHP:32, atk:6, type:'minion',
  ongoing:'Takes -1 from magic sources (thick hide).',
  surge:'Thunderclap — 3 damage to you.',
  xp:40 },
  searingCultist: { id:'searingCultist', name:'Searing Blade Cultist', portrait:'🔪',
- tier:1, maxHP:14, atk:2, type:'minion',
+ tier:1, maxHP:28, atk:4, type:'minion',
  ongoing:'Chants — at end of turn roll: on 10+ apply 1 Seared to you.',
  surge:'Blood pact — deal 4 fire magic damage to you.',
  xp:50 },
  lavaImp: { id:'lavaImp', name:'Lava Imp', portrait:'🔥',
- tier:2, maxHP:10, atk:3, type:'minion',
+ tier:2, maxHP:20, atk:6, type:'minion',
  ongoing:'On death: explodes for 3 fire to you.',
  surge:'Fireball — 5 fire magic damage to you.',
  xp:55 },
  oggleflint: { id:'oggleflint', name:'Oggleflint', portrait:'🪨',
- tier:2, maxHP:65, atk:5, type:'boss',
- ongoing:'Enrages at ≤30 HP: +3 attack. Summons a Ragefire Trogg every 3 rounds.',
+ tier:2, maxHP:130, atk:10, type:'boss',
+ ongoing:'Enrages at ≤60 HP: +3 attack. Summons a Ragefire Trogg every 3 rounds.',
  surge:'Berserk — strikes twice this turn.',
  xp:100, gold:30,
- enrageThreshold:30,
+ enrageThreshold:60,
  spawnsMinion:'ragefireTrogg', spawnRate:3,
  doubleAttackOnSurge:true },
  jergosh: { id:'jergosh', name:'Jergosh the Invoker', portrait:'📕',
- tier:3, maxHP:90, atk:3, type:'boss',
+ tier:3, maxHP:180, atk:6, type:'boss',
  ongoing:'All his attack damage counts as shadow magic. Each end of round, DC 12 — on success applies 3 Corruption stacks to you.',
  surge:'Word of Pain — 5 shadow magic + 3 Corruption stacks.',
  xp:130, gold:40,
  jergoshCorruption:true, shadowAttacks:true,
  spawnsMinion:'searingCultist', spawnRate:3 },
  bazzalan: { id:'bazzalan', name:'Bazzalan', portrait:'🗡️',
- tier:3, maxHP:110, atk:5, type:'boss',
+ tier:3, maxHP:220, atk:10, type:'boss',
  ongoing:'Poison on hit. Attacks ignore 1 armor.',
  surge:'Shadow Strike — 6 melee + 2 Poison stacks.',
  xp:130, gold:40, poisonOnHit:true, ignoreArmor:1 },
  taragaman: { id:'taragaman', name:'Taragaman the Hungerer', portrait:'👹',
- tier:5, maxHP:150, atk:6, type:'boss',
+ tier:5, maxHP:300, atk:12, type:'boss',
  ongoing:'Fire Aura: 1 fire magic to you at the end of every round. At 50% HP: Shadow Cloak (-3 damage from all sources, consumed by a crit).',
  surge:'Consume — 4 fire + 4 shadow damage, heals himself for half the damage dealt.',
  xp:300, gold:100, isFinalBoss:true,
- phase2HP:75, phase2Spawns:'lavaImp',
- fireAura:true, shadowCloakAt:75,
+ phase2HP:150, phase2Spawns:'lavaImp',
+ fireAura:true, shadowCloakAt:150,
  spawnsMinion:'lavaImp', spawnRate:4 },
  maggotEye: { id:'maggotEye', name:'Maggot Eye', portrait:'👁️',
- tier:2, maxHP:80, atk:4, type:'boss',
+ tier:2, maxHP:160, atk:8, type:'boss',
  ongoing:'Many-Eyed: takes +1 damage from crits. Each end of round, rolls DC 10 — on success applies 2 Poison stacks to you.',
  surge:'Paralytic Gaze — 3 damage and you lose 1 play next turn.',
  xp:100, gold:30,
  maggotEyePoison:true, paralyticSurge:true },
  zelemar: { id:'zelemar', name:'Zelemar the Wrathful', portrait:'🧛',
- tier:3, maxHP:110, atk:4, type:'boss',
+ tier:3, maxHP:220, atk:8, type:'boss',
  ongoing:'Hellfire: all his attacks are shadow magic. Each round gains 1 wrath stack (+1 attack per stack, max 5).',
  surge:'Shadow Nova — 6 shadow + 3 Corruption stacks applied.',
  xp:130, gold:40,
  zelemarWrath:true, shadowAttacks:true },
  forgemaster: { id:'forgemaster', name:'The Forgemaster', portrait:'⚒️',
- tier:3, maxHP:115, atk:5, type:'boss',
+ tier:3, maxHP:230, atk:10, type:'boss',
  ongoing:'Superheated: at end of every round, deals 2 fire magic to all allies AND enemies (including himself). Fire immune — takes no fire damage.',
  surge:'Molten Smash — 7 fire damage and applies 2 Ignite stacks to you.',
  xp:130, gold:40,
@@ -1734,7 +1733,7 @@ const ENCOUNTERS_SHADOWFANG = [
  { id:'sfk_razorclaw', type:'encounter', title:'The Butcher', icon:'🪓',
    text:`A huge worgen drags a cleaver across the flagstones, tongue lolling.\n\n"Meat. Fresh meat. Bleed for Razorclaw."`,
    enemies:['razorclaw','feralWorgen','feralWorgen'],
-   onWin:`Razorclaw's hunger is sated — with his own blood.`, xpBonus:25 },
+   onWin:`Razorclaw's hunger is sated — with his own blood.`, xpBonus:75 },
 
  // ── ACT 3: THE LORD'S HALLS ──────────────────────────────
  { id:'sfk_library', type:'story', title:'Arugal\'s Library', icon:'📚',
@@ -3148,6 +3147,12 @@ const SHOP = [
  use:(c)=>{ c.hp=Math.min(c.maxHP,c.hp+25); return 'Restored 25 HP!'; } },
  { id:'antidote', name:'Antidote', cost:15, icon:'💊', desc:'Remove all Poison. Use from inventory during combat.',
  use:(c)=>{ c.statusEffects=(c.statusEffects||[]).filter(s=>s.id!=='poison'); return 'All Poison cured!'; } },
+ { id:'bandage', name:'Field Bandage', cost:15, icon:'🩹', desc:'Remove all Bleed stacks. Use from inventory during combat.',
+ use:(c)=>{ c._bleedStacks=0; return 'Bleeding staunched!'; } },
+ { id:'coolingsalve', name:'Cooling Salve', cost:15, icon:'🧴', desc:'Remove Sear. Use from inventory during combat.',
+ use:(c)=>{ c.statusEffects=(c.statusEffects||[]).filter(s=>s.id!=='seared'); return 'Sear cooled!'; } },
+ { id:'purifyingincense',name:'Purifying Incense', cost:20, icon:'🌿', desc:'Cleanse Corruption. Use from inventory during combat.',
+ use:(c)=>{ c._corruptionTurns=0; c._corruptionDmg=0; return 'Corruption cleansed!'; } },
  { id:'scrollpower', name:'Scroll of Power', cost:50, icon:'📜', desc:'Your next ability deals double damage. Use during combat.',
  use:(c)=>{ c._nextDoubleDmg=true; return 'Next ability: double damage!'; } },
  { id:'luckycharm', name:'Lucky Charm', cost:35, icon:'🍀', desc:'+3 to your next 3 dice rolls. Use during combat.',
@@ -3632,10 +3637,34 @@ function sfx(name) { /* stub */ }
 
 // ── MUSIC MANAGEMENT ──────────────────────────────────────
 const _BATTLE_TRACKS = ['battle-music-1','battle-music-2','battle-music-3'];
+const _BOSS_TRACKS = ['boss-music-1','boss-music-2','boss-music-3'];
+const ADVENTURE_MUSIC = {
+ shadowfang: {
+  battle: ['sfk-battle-1','sfk-battle-2','sfk-battle-3','sfk-battle-4'],
+  boss: ['sfk-boss-1','sfk-boss-2'],
+  victory: 'sfk-victory'
+ }
+};
+function _adventureTracks(kind){
+ const m = ADVENTURE_MUSIC[G.currentAdventure];
+ if(m && m[kind]) return m[kind];
+ if(kind==='battle') return _BATTLE_TRACKS;
+ if(kind==='boss') return _BOSS_TRACKS;
+ return null;
+}
+function _allTrackIds(){
+ const base=['title-music','battle-music-1','battle-music-2','battle-music-3','boss-music-1','boss-music-2','boss-music-3','gameover-music','victory-music'];
+ Object.values(ADVENTURE_MUSIC).forEach(m=>{
+  (m.battle||[]).forEach(id=>base.push(id));
+  (m.boss||[]).forEach(id=>base.push(id));
+  if(m.victory) base.push(m.victory);
+ });
+ return base;
+}
 let _currentBattleTrack = null;
 
 function stopAllMusic() {
- ['title-music','battle-music-1','battle-music-2','battle-music-3','boss-music-1','boss-music-2','gameover-music'].forEach(id=>{
+ _allTrackIds().forEach(id=>{
   const el=document.getElementById(id);
   if(el){ el.onended=null; if(!el.paused){ el.pause(); el.currentTime=0; } }
  });
@@ -3652,22 +3681,22 @@ function _setVol(m){ try{ const sv=localStorage.getItem('musicVolume'); m.volume
 function playBattleMusic(isBoss=false) {
  stopAllMusic();
  if(isBoss){
-  // Boss tracks: alternate between boss-music-1 and boss-music-2 until combat ends
-  const bossTrackId = (G.char.runKills||0)%2===0 ? 'boss-music-1' : 'boss-music-2';
-  const altBossId = bossTrackId==='boss-music-1' ? 'boss-music-2' : 'boss-music-1';
-  const playBoss = (id, nextId) => {
+  const bossTracks = _adventureTracks('boss');
+  const idx = (G.char.runKills||0)%bossTracks.length;
+  const playBoss = (i) => {
+   const id = bossTracks[i%bossTracks.length];
    const m = document.getElementById(id);
    if(!m) return;
    _setVol(m);
-   m.onended = ()=>playBoss(nextId, id);
+   m.onended = ()=>playBoss(i+1);
    m.play().catch(()=>{});
   };
-  playBoss(bossTrackId, altBossId);
+  playBoss(idx);
  } else {
-  // Pick a random battle track (different from last), advance to another on end
+  const battleTracks = _adventureTracks('battle');
   const advance = () => {
-   let choices = _BATTLE_TRACKS.filter(t=>t!==_currentBattleTrack);
-   if(!choices.length) choices = _BATTLE_TRACKS;
+   let choices = battleTracks.filter(t=>t!==_currentBattleTrack);
+   if(!choices.length) choices = battleTracks;
    _currentBattleTrack = choices[Math.floor(Math.random()*choices.length)];
    const m = document.getElementById(_currentBattleTrack);
    if(!m) return;
@@ -3887,8 +3916,7 @@ function setMusicVolume(val) {
  const volume = parseInt(val) / 100;
  const lbl = document.getElementById('volume-label');
  if(lbl) lbl.textContent = val + '%';
- const tracks = ['title-music','battle-music-1','battle-music-2','battle-music-3','boss-music-1','boss-music-2','gameover-music'];
- tracks.forEach(id => {
+ _allTrackIds().forEach(id => {
  const el = document.getElementById(id);
  if(el) el.volume = volume;
  });
@@ -4381,7 +4409,7 @@ function showDraftScreen() {
  const maxTier=getLevelTier(G.char.level);
  $('draft-title-txt').textContent=draftIsInitial?`STARTING DECK — CARD ${draftInitialCount+1} OF 6`:'DRAFT A NEW CARD';
  $('draft-sub-txt').textContent=draftIsInitial?'Build your starting deck one card at a time.':'Choose one card to add to your deck.';
- const options=getDraftOptions(cls, maxTier, draftIsInitial?[]:G.char.deck.map(id=>{const c=getCardById(id);return c?c.name:'';}).filter(Boolean));
+ const options=getDraftOptions(cls, maxTier, draftIsInitial?[]:G.char.deck.map(id=>{const c=getCardById(id);return c?c.name:'';}).filter(Boolean), G.char._draftChoices||3);
  const container=$('draft-cards-row');
  container.innerHTML='';
  if(!options.length){container.innerHTML='<p style="color:var(--parch-text-dim);font-family:var(--font-pixel);font-size:8px;text-align:center;padding:20px">No cards available.</p>';}
@@ -4487,6 +4515,7 @@ function runEncounter(idx) {
 
 function showPreparationScreen(enc){
  show('screen-adventure');
+ if(window._titleMusicUnlocked && window._runStarted) playBattleMusic(false);
  const mainEl=document.querySelector('.adv-main');
  if(!mainEl)return;
  renderSidebar();
@@ -4521,6 +4550,7 @@ function showPreparationScreen(enc){
 
 function showCardRemovalScreen(enc){
  show('screen-adventure');
+ if(window._titleMusicUnlocked && window._runStarted) playBattleMusic(false);
  const mainEl=document.querySelector('.adv-main');
  if(!mainEl)return;
  renderSidebar();
@@ -4554,7 +4584,7 @@ function showCardRemovalScreen(enc){
  const card=getCardById(id);
  if(!card)return;
  const btn=document.createElement('div');
- btn.className='choice';
+ btn.className='choice-option';
  btn.style.cssText='margin:4px 0';
  const count=deck.filter(x=>x===id).length;
  btn.innerHTML=`<div class="choice-bullet">✂</div><span class="choice-text">${card.name} <span style="color:var(--parch-text-dim);font-size:11px">(Tier ${card.tier}${count>1?' · '+count+' copies':''})</span></span>`;
@@ -4578,6 +4608,16 @@ function showAdventureScreen(enc) {
  // Play battle music for story/encounter beats too
  if(window._titleMusicUnlocked && window._runStarted) {
  playBattleMusic(false);
+ }
+ // Rebuild .adv-main — previous rooms (card removal, preparation) may have clobbered the static structure
+ const mainEl=document.querySelector('.adv-main');
+ if(mainEl && !document.getElementById('enc-badge')){
+ mainEl.innerHTML=`
+ <div id="enc-badge" class="quest-type-badge badge-story">STORY</div>
+ <div class="enc-title"><span id="enc-title-icon">⚔️</span> <span id="enc-title-text">Encounter</span></div>
+ <div id="enc-text" class="enc-text"></div>
+ <div id="enc-choices"></div>
+ `;
  }
  renderSidebar();
  const typeMap={story:'badge-story',skill_check:'badge-skill'};
@@ -5415,7 +5455,7 @@ function renderBuffZone() {
  if((C._soulHarvestCharges||0)>0) pills.push(pill('💀',C._soulHarvestCharges,`Soul Harvest: +${C._soulHarvestCharges} dmg`,'buff'));
  if((C._hellsAdvocateCharges||0)>0) pills.push(pill('👿',C._hellsAdvocateCharges,`Hell's Advocate: ${C._hellsAdvocateCharges} double-shadow charge(s)`,'buff'));
  if(C._ironHideActive) pills.push(pill('🐻','IRON','Iron Hide: roll >8 → -1 physical damage','buff'));
- if(C._tigersRuryActive) pills.push(pill('🐯','TIGER',"Tiger's Fury: +melee damage",'buff'));
+ if(C._tigersRuryActive) pills.push(pill('🐯',`+${C._tigersFuryStacks||0}`,`Tiger's Fury: +${C._tigersFuryStacks||0} melee damage (persistent, stacks each cast)`,'buff'));
  if(C._maelstromActive) pills.push(pill('⚡',C._maelstromCharges||0,`Maelstrom Weapon: ${C._maelstromCharges||0}/5 charges`,'buff'));
  if((C._gravityBeamCounters||0)>0) pills.push(pill('⏳',C._gravityBeamCounters,`Gravity Beam: ${C._gravityBeamCounters} counter(s)`,'buff'));
  if(C._killerInstinctActive) pills.push(pill('🎯','KI','Killer Instinct: +3 dmg vs <50% HP','buff'));
@@ -5869,7 +5909,7 @@ function doDraw() {
  if((C.activeHoTs||[]).length>0){
  C.activeHoTs=C.activeHoTs.filter(h=>{
  if(h.channel){
- const tRoll=d20()+(G.char.rollBonus||0);
+ const tRoll=d20()+(h.name==='Tranquility'?0:(G.char.rollBonus||0));
  if(tRoll<h.dc){log(`${h.icon} ${h.name} channel breaks! (rolled ${tRoll} vs DC ${h.dc})`,'log-miss');return false;}
  h.stack=(h.stack||0)+1;
  if(h.channelType==='damage'){
@@ -6850,7 +6890,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  const dpStacks=isCrit?4:2;
  if(target&&target.hp>0){target.debuffs=target.debuffs||[];const px=target.debuffs.find(d=>d.id==='poison');if(px)px.stacks+=dpStacks;else target.debuffs.push({id:'poison',stacks:dpStacks});}
  C.activeHoTs=C.activeHoTs||[];
- C.activeHoTs.push({name:'Devouring Plague',icon:'🌑',healPerTurn:1,turnsLeft:4});
+ C.activeHoTs.push({name:'Devouring Plague',icon:'🌑',healPerTurn:1,turnsLeft:4,baseDuration:4});
  log(`🌑 Devouring Plague: ${dpStacks} Shadow DoT stacks on target, heal 1/turn for 4 rounds!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
@@ -8192,14 +8232,13 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
 
- // Mangle: damage + bleed
+ // Mangle: 3× damage per previous Mangle play this combat
  if(card.name==='Mangle'&&(outcomeType==='hit'||outcomeType==='crit')){
- const repeats=isCrit?2:1;
- for(let r=0;r<repeats;r++){
- const mgDmg=(3+bonusDmg)*(isCrit&&r===0?2:1);
+ C._mangleCount=(C._mangleCount||0)+1;
+ const base=3*C._mangleCount;
+ const mgDmg=(base+bonusDmg)*(isCrit?2:1);
  if(target&&target.hp>0) dealEnemyDamage(target,mgDmg,C.targetIdx);
- }
- log(`🗡️ Mangle: damage${isCrit?' (×2 — resolved twice)':''}!`,isCrit?'log-crit':'log-hit');
+ log(`🗡️ Mangle #${C._mangleCount}: ${mgDmg} damage${isCrit?' (CRIT ×2)':''}!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
 
@@ -8773,18 +8812,6 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  log('🐻 Bear Form: Take half damage. Extra play!','log-info');
  if(isCrit){ C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1; log('🐻 Bear Form CRIT: +2 extra plays!','log-crit'); }
  }
- if(card.name==="Shapeshift: Cat"&&(outcomeType==='hit'||outcomeType==='crit')){
- G.char.currentForm='cat';
- C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log('🐱 Shapeshift: Cat Form. Melee +2 damage. Extra play!','log-info');
- if(isCrit){ C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1; }
- }
- if(card.name==='Shapeshift: Bear'&&(outcomeType==='hit'||outcomeType==='crit')){
- G.char.currentForm='bear';
- C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log('🐻 Shapeshift: Bear Form. Take half damage. Extra play!','log-info');
- if(isCrit){ C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1; }
- }
  if(card.name==='Shapeshift: Astral'&&(outcomeType==='hit'||outcomeType==='crit')){
  G.char.currentForm='astral'; // excludes Shapeshift: Astral (d37) from draws
  G.char._astralBonusDmg=(G.char._astralBonusDmg||0)+1; // +1 nature & arcane damage
@@ -8805,27 +8832,34 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
  log('🐾 King of the Jungle: Cat + Bear dual form! Extra play!','log-crit');
  }
- // Swift Mend: instantly apply all HoT healing + clear them + extra play
+ // Swift Mend: consume all non-channel HoTs, heal for their remaining total, grant an action
  if(card.name==='Swift Mend'&&(outcomeType==='hit'||outcomeType==='crit')){
-  if(isCrit){
-   C.activeHoTs=C.activeHoTs.map(h=>({...h,turnsLeft:4}));
-   log(`🌿 Swift Mend CRIT: all HoTs refreshed to 4 turns!`,'log-crit');
-  } else {
-   let smTotal=0;
-   C.activeHoTs.forEach(h=>{const heal=h.turnsLeft*(h.healPerTurn+(G.char._hotBonus||0))+(h.bloomAmt||0);smTotal+=heal;});
-   if(smTotal>0){const oldHp=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+smTotal);log(`🌿 Swift Mend: instantly resolved all HoTs — healed ${G.char.hp-oldHp} HP!`,'log-hit');}
-   else log('🌿 Swift Mend: no active HoTs to resolve.','log-info');
-   C.activeHoTs=[];
-  }
+  let smTotal=0;
+  (C.activeHoTs||[]).forEach(h=>{
+   if(h.channel) return;
+   const n=h.turnsLeft;
+   const base=(h.healPerTurn||0)+(G.char._hotBonus||0);
+   let heal=n*base;
+   if(h.growPerTurn) heal+=h.growPerTurn*n*(n-1)/2;
+   heal+=(h.bloomAmt||0);
+   smTotal+=heal;
+  });
+  if(isCrit) smTotal*=2;
+  if(smTotal>0){ const oldHp=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+smTotal); log(`🌿 Swift Mend: consumed all HoTs — healed ${G.char.hp-oldHp} HP!${isCrit?' (CRIT ×2!)':''}`,isCrit?'log-crit':'log-hit'); }
+  else log('🌿 Swift Mend: no active HoTs to consume.','log-info');
+  C.activeHoTs=(C.activeHoTs||[]).filter(h=>h.channel);
   C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
   C._shredOverrideFired=true;
  }
- // Gaia's Bounty: refresh all HoT durations + draw 1
+ // Gaia's Bounty: refresh all HoT durations to their original length + draw 1
  if(card.name==="Gaia's Bounty"&&(outcomeType==='hit'||outcomeType==='crit')){
-  const refresh=isCrit?6:4;
-  C.activeHoTs=C.activeHoTs.map(h=>({...h,turnsLeft:h.turnsLeft+refresh}));
+  let refreshed=0;
+  (C.activeHoTs||[]).forEach(h=>{
+   if(h.channel) return;
+   if(h.baseDuration){ h.turnsLeft=isCrit?h.baseDuration*2:h.baseDuration; refreshed++; }
+  });
   const gbRes=drawFromDeck(C.deck,C.discard,1);C.deck=gbRes.deck;C.discard=gbRes.discard;C.hand=[...C.hand,...gbRes.drawn];
-  log(`🌿 Gaia's Bounty: all HoTs extended by ${refresh} turns! Drew ${gbRes.drawn.length} card.`,isCrit?'log-crit':'log-hit');
+  log(`🌿 Gaia's Bounty: refreshed ${refreshed} HoT${refreshed!==1?'s':''} to full duration! Drew ${gbRes.drawn.length} card.${isCrit?' (CRIT: doubled!)':''}`,isCrit?'log-crit':'log-hit');
   renderHand();
   C._shredOverrideFired=true;
  }
@@ -8837,9 +8871,11 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  }
  if(card.name==="Tiger's Fury"&&(outcomeType==='hit'||outcomeType==='crit')){
  const tfBonus=(G.char.currentForm==='cat'||G.char.currentForm==='both')?2:1;
- G.char.dmgBonus=(G.char.dmgBonus||0)+tfBonus;C._tigersRuryActive=true;
+ G.char.dmgBonus=(G.char.dmgBonus||0)+tfBonus;
+ C._tigersFuryStacks=(C._tigersFuryStacks||0)+tfBonus;
+ C._tigersRuryActive=true;
  if(isCrit)C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log(`🐯 Tiger's Fury: +${tfBonus} melee damage (persistent)!${isCrit?' Extra play!':''}`,isCrit?'log-crit':'log-hit');
+ log(`🐯 Tiger's Fury: +${tfBonus} melee damage (total +${C._tigersFuryStacks})!${isCrit?' Extra play!':''}`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;}
  if(card.name==='Iron Hide'&&(outcomeType==='hit'||outcomeType==='crit')){
  C._ironHideActive=true;
@@ -8980,14 +9016,14 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  const h=isCrit?4:2;const _rjOld=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+h);
  log(`💚 Rejuvenation: healed ${G.char.hp-_rjOld} HP → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
  C.activeHoTs=C.activeHoTs||[];
- C.activeHoTs.push({name:'Rejuvenation',icon:'💚',healPerTurn:isCrit?6:3,turnsLeft:3});
+ C.activeHoTs.push({name:'Rejuvenation',icon:'💚',healPerTurn:isCrit?6:3,turnsLeft:3,baseDuration:3});
  C._shredOverrideFired=true;
  }
  if(card.name==='Regrowth'&&(outcomeType==='hit'||outcomeType==='crit')){
  const h=isCrit?10:5;const _rgOld=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+h);
  log(`🌿 Regrowth: healed ${G.char.hp-_rgOld} HP → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
  C.activeHoTs=C.activeHoTs||[];
- C.activeHoTs.push({name:'Regrowth',icon:'🌿',healPerTurn:isCrit?4:2,turnsLeft:4});
+ C.activeHoTs.push({name:'Regrowth',icon:'🌿',healPerTurn:isCrit?4:2,turnsLeft:4,baseDuration:4});
  C._shredOverrideFired=true;
  }
  if(card.name==='Wild Growth'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -8995,7 +9031,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  log(`🌿 Wild Growth: healed ${G.char.hp-_wgOld} HP → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
  C.activeHoTs=C.activeHoTs||[];
  const wgEx=C.activeHoTs.findIndex(h=>h.name==='Wild Growth');if(wgEx>=0)C.activeHoTs.splice(wgEx,1);
- C.activeHoTs.push({name:'Wild Growth',icon:'🌿',healPerTurn:isCrit?3:2,growPerTurn:1,turnsLeft:4});
+ C.activeHoTs.push({name:'Wild Growth',icon:'🌿',healPerTurn:isCrit?3:2,growPerTurn:1,turnsLeft:4,baseDuration:4});
  log(`🌿 Wild Growth HoT: +${isCrit?3:2}/turn for 4 turns, growing by +1 each tick.`,'log-info');
  C._shredOverrideFired=true;
  }
@@ -9006,8 +9042,8 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  const lbHot=s,lbBloom=s*3+(G.char._lifeboomBonus||0);
  C.activeHoTs=C.activeHoTs||[];
  const ex=C.activeHoTs.find(h=>h.name==='Lifebloom');
- if(ex){G.char.hp=Math.min(G.char.maxHP,G.char.hp+ex.bloomAmt);log(`🌸 Lifebloom BLOOMS! +${ex.bloomAmt} HP!`,'log-crit');ex.healPerTurn=lbHot;ex.bloomAmt=lbBloom;ex.turnsLeft=3;}
- else{C.activeHoTs.push({name:'Lifebloom',icon:s>=3?'🌺':'🌸',healPerTurn:lbHot,turnsLeft:3,bloomAmt:lbBloom});log(`🌸 Lifebloom ${s}× — HoT +${lbHot}/T for 3 turns, blooms +${lbBloom}`,'log-info');}
+ if(ex){G.char.hp=Math.min(G.char.maxHP,G.char.hp+ex.bloomAmt);log(`🌸 Lifebloom BLOOMS! +${ex.bloomAmt} HP!`,'log-crit');ex.healPerTurn=lbHot;ex.bloomAmt=lbBloom;ex.turnsLeft=3;ex.baseDuration=3;}
+ else{C.activeHoTs.push({name:'Lifebloom',icon:s>=3?'🌺':'🌸',healPerTurn:lbHot,turnsLeft:3,bloomAmt:lbBloom,baseDuration:3});log(`🌸 Lifebloom ${s}× — HoT +${lbHot}/T for 3 turns, blooms +${lbBloom}`,'log-info');}
  C._shredOverrideFired=true;
  }
  if(card.name==='Molten Armor'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -9886,6 +9922,15 @@ function doEnemyTurn() {
  const p=G.char.statusEffects.find(s=>s.id==='poison');
  if(p) p.stacks+=2; else G.char.statusEffects.push({id:'poison',stacks:2});
  log(`🗡️ Bazzalan Shadow Strikes — 6 damage + 2 Poison stacks.`,'log-surge');
+ } else if(enemy.id==='fenrusDevourer'){
+ G.char._bleedStacks=(G.char._bleedStacks||0)+3;
+ log(`🐺 Fenrus tears you open — +3 Bleed stacks (${G.char._bleedStacks} total).`,'log-dmg');
+ const stacks=G.char._bleedStacks;
+ const fenrusDmg=3*stacks;
+ const healAmt=6*stacks;
+ dealPlayerDamage(fenrusDmg,`${enemy.name} Devour`,false,enemy);
+ enemy.hp=Math.min(enemy.maxHP,enemy.hp+healAmt);
+ log(`🐺 Fenrus Devours ${stacks} Bleed stack${stacks!==1?'s':''} — ${fenrusDmg} shadow damage, heals for ${healAmt}!`,'log-surge');
  } else if(enemy.id==='archmageArugal'){
  dealPlayerDamage(10,`${enemy.name} Void Bolt barrage`,true,enemy);
  log(`🧙 Arugal unleashes a Void Bolt barrage — 10 combined shadow + ice damage.`,'log-surge');
@@ -9918,10 +9963,10 @@ function doEnemyTurn() {
  // Murloc Pirate aura: +1 damage per living Murloc in play (affects every enemy)
  const murlocCount=C.enemies.filter(e=>e.id==='murloc'&&e.hp>0).length;
  if(murlocCount>0) atk+=murlocCount;
- // Razorclaw Frenzy: +1 damage for every 10% below 50% player HP
- if(enemy.id==='razorclaw'&&enemy.frenzyFromLowHp){
- const pctHp=(G.char.hp/G.char.maxHP)*100;
- if(pctHp<50){ const bonus=Math.ceil((50-pctHp)/10); atk+=bonus; if(bonus>0) log(`🪓 Razorclaw frenzies: +${bonus} damage (you are below 50% HP).`,'log-info'); }
+ // Razorclaw Frenzy: +1 damage per 10% of own HP lost
+ if(enemy.id==='razorclaw'){
+ const lost=Math.floor(((enemy.maxHP-enemy.hp)/enemy.maxHP)*10);
+ if(lost>0){ atk+=lost; log(`🪓 Razorclaw frenzies: +${lost} damage (${lost*10}% of his HP gone).`,'log-info'); }
  }
  // Zelemar Wrath: +1 attack per stack (capped at 5)
  if(enemy.id==='zelemar'&&(enemy._wrathStacks||0)>0){ atk+=enemy._wrathStacks; }
@@ -10016,7 +10061,14 @@ function doEnemyTurn() {
  } else {
  const half=enemy._halfAttackNextTurn;
  if(half){enemy._halfAttackNextTurn=false;atk=Math.ceil(atk/2);}
+ const razorDouble=enemy.id==='razorclaw'&&(G.char.hp/G.char.maxHP)<0.5;
+ if(razorDouble){
+ dealPlayerDamage(atk,`${enemy.name} (Hit 1)`,false,enemy);
+ if(enemy.hp>0) dealPlayerDamage(atk,`${enemy.name} (Hit 2)`,false,enemy);
+ log(`🪓 Razorclaw smells blood — attacks twice!`,'log-dmg');
+ } else {
  dealPlayerDamage(atk,enemy.name,false,enemy);
+ }
  if(enemy.id==='cookie'){
  const sr=d20();
  if(sr<8&&!(G.char.statusEffects||[]).find(s=>s.id==='seared')){
@@ -10056,7 +10108,7 @@ function doEnemyTurn() {
  if(!C._skipTurnEffectsApplied&&(C.activeHoTs||[]).length>0){
  C.activeHoTs=C.activeHoTs.filter(h=>{
  if(h.channel){
- const tRoll=d20()+(G.char.rollBonus||0);
+ const tRoll=d20()+(h.name==='Tranquility'?0:(G.char.rollBonus||0));
  if(tRoll<h.dc){log(`${h.icon} ${h.name} channel breaks! (rolled ${tRoll} vs DC ${h.dc})`,'log-miss');return false;}
  h.stack=(h.stack||0)+1;
  if(h.channelType==='damage'){
@@ -10643,6 +10695,8 @@ function onCombatWin() {
  C._tigerDoubleNext=false; C._petShellActive=false; C._petReflectActive=false;
  C._petPlayerDmgBuff=0; C._petEnemiesHalfDmg=false;
  C._felHunterShadowBuff=0; C._voidWalkerRollBuff=0;
+ // Player bleed stacks fall off at end of combat
+ G.char._bleedStacks=0;
  // Per-kill XP/gold already awarded in dealEnemyDamage — just add encounter bonus here
  const xp=enc.xpBonus||0;
  const gold=(G.char.goldBonus||0);
@@ -11050,6 +11104,7 @@ function _doEquipFromInventoryInCombat(invIndex){
 }
 
 function useInventoryItem(itemId){
+ if(!C||C.phase==='enemy'){ toast('You can only use items on your turn.','danger'); return; }
  const item=SHOP.find(i=>i.id===itemId);
  if(!item){toast('Unknown item','danger');return;}
  G.char.inventory=G.char.inventory||[];
@@ -11068,7 +11123,11 @@ function useInventoryItem(itemId){
 // ── VICTORY ───────────────────────────────────────────────────────
 function endVictory() {
  recordRunResult(G.char,true);clearRun();
- stopAllMusic(); // stop battle music on victory
+ stopAllMusic();
+ const _vm = ADVENTURE_MUSIC[G.currentAdventure];
+ const victoryId = (_vm && _vm.victory) || 'victory-music';
+ const vEl = document.getElementById(victoryId);
+ if(vEl){ _setVol(vEl); vEl.play().catch(()=>{}); }
  show('screen-victory');
  const c=G.char;
  $('victory-name').textContent=`${c.name} Clears Fate of the Fallen!`;
@@ -11198,7 +11257,7 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  if(window._lgTab==='upgrades'){
  const k=selClass.toLowerCase().replace(/\s/g,'');
  const arsenalIds=[`lg_arsenal2_${k}`,`lg_arsenal3_${k}`,`lg_arsenal4_${k}`];
- const globalUpgs=LEGACY_UPGRADES.filter(u=>!u.class);
+ const globalUpgs=LEGACY_UPGRADES.filter(u=>!u.class&&!u.id.startsWith('lg_unlock_'));
  const arsenalUpgs=LEGACY_UPGRADES.filter(u=>arsenalIds.includes(u.id));
  const classUpgs=LEGACY_UPGRADES.filter(u=>u.class===selClass&&!arsenalIds.includes(u.id));
 
