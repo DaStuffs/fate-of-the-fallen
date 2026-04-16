@@ -299,7 +299,7 @@ const CARDS = {
  crit:'Deal double damage and +2 on your next roll.',
  miss:null, critmiss:'Take 2 damage.' },
  { id:'d03', name:'Ferocious Bite', tier:1, type:'damage', risk:8,
- hit:'Deal 6 melee damage.',
+ hit:'Deal 4 melee damage + 2 for each card (or repeat effect) you played before it this turn.',
  crit:'Deal double damage and deal +2 damage next round.',
  miss:null, critmiss:'Take 2 damage.' },
  { id:'d04', name:'Healing Touch', tier:1, type:'health', risk:8,
@@ -388,7 +388,7 @@ const CARDS = {
  crit:'Heal for all damage you deal this turn.',
  miss:null, critmiss:null },
  { id:'d25', name:'Wild Growth', tier:3, type:'health', risk:10,
- hit:'Heal yourself for 3. (Persists 4 rounds: decreasing heal each round.)',
+ hit:'Heal 3. Applies a HoT for 4 rounds that heals 2/turn and grows by +1 each tick (2 → 3 → 4 → 5).',
  crit:null, miss:null, critmiss:'Take 3 damage.' },
  // TIER IV
  { id:'d26', name:"King of the Jungle",tier:4,type:'cards', risk:6,
@@ -408,11 +408,11 @@ const CARDS = {
  hit:'Deal 3 nature magic damage to ALL enemies.',
  crit:'Deal double damage to ALL enemies.', miss:null, critmiss:'Take 2 damage.' },
  { id:'d31', name:'Swipe', tier:1, type:'damage', risk:8,
- hit:'Deal 3 melee damage to ALL enemies. Play another card.',
- crit:'Deal double damage to ALL enemies. Play another card.', miss:null, critmiss:'Take 2 damage.' },
+ hit:'Deal 3 melee damage to ALL enemies.',
+ crit:'Deal double damage to ALL enemies.', miss:null, critmiss:'Take 2 damage.' },
  { id:'d32', name:"Nature's Might", tier:1, type:'damage', risk:6,
- hit:'Target ally deals +3 melee damage this turn. You may play another card',
- crit:'All allies deal +3 damage this turn and gain +2 to their next roll', miss:null, critmiss:'Target ally deals -2 damage this turn' },
+ hit:'You deal +3 melee damage this turn. Play another card.',
+ crit:'+5 melee damage this turn and +2 to your next roll.', miss:null, critmiss:'Take 2 damage.' },
  { id:'d33', name:'Maim', tier:1, type:'damage', risk:8,
  hit:'Deal 3 melee damage. Target enemy takes +2 # melee damage from all sources this turn.',
  crit:'Hit all enemies', miss:null, critmiss:'take 2 damage' },
@@ -813,8 +813,8 @@ const CARDS = {
  hit:'Gain +1 extra play this turn and +1 card draw next turn. Add a Mana Stone (same effect) to your inventory.',
  crit:'Gain +2 extra plays. Add 2 Mana Stones to inventory.', miss:null, critmiss:'Draw only 1 card next turn.' },
  { id:'wl07', name:'Fear', tier:1, type:'damage', risk:8,
- hit:'Target takes +3 Shadow damage for 3 turns.',
- crit:'Affects all enemies.', miss:null, critmiss:'You take +1 damage from the next 3 hits.' },
+ hit:'Fear the target: +3 shadow damage taken for 3 turns, plus stunned for 1 turn (non-bosses only).',
+ crit:'Fears all enemies. Non-bosses stunned for 2 turns. Shadow amp still lasts 3 turns.', miss:null, critmiss:'You take +1 damage from the next 3 hits.' },
  { id:'wl08', name:'Siphon Life', tier:1, type:'damage', risk:6,
  hit:'Deal 1 shadow damage to all enemies and heal yourself for the total dealt. Channel begins: each subsequent turn rolls DC 8 before draining — channel breaks on a failed roll.',
  crit:'Initial drain deals double damage.', miss:null, critmiss:null },
@@ -828,11 +828,11 @@ const CARDS = {
  hit:'Summon a Fel Hunter (3 HP). Each turn: roll; on >7 you deal +2 shadow magic damage this turn. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 3 enemy appears.' },
  { id:'wl12', name:'Curse of Agony', tier:2, type:'damage', risk:8,
- hit:'Attach to target: deals escalating Shadow damage per turn (starts at 2, increases by 1 each turn).',
- crit:'Attach to a second target.', miss:null, critmiss:'Attach to an ally instead.' },
+ hit:'Apply Curse of Agony to target: deals 1 shadow damage next turn, then escalates by +1 every turn. Lasts until the enemy dies. Recasting adds +1 stack (accelerates the growth).',
+ crit:'Applies 2 stacks instead.', miss:null, critmiss:'Take 3 damage.' },
  { id:'wl13', name:'Drain Life', tier:2, type:'damage', risk:8,
- hit:'Deal 3 Shadow damage. Attach to target: deals 3 Shadow damage and heals you 3 HP per turn.',
- crit:'Effect lasts until target dies.', miss:null, critmiss:'Take 3 damage and heal all enemies.' },
+ hit:'Apply Drain Life to target: 3 shadow damage per turn for 3 turns, healing you for the damage dealt. Refreshes duration on recast; does not stack.',
+ crit:'Duration extended to 5 turns.', miss:null, critmiss:'Take 3 damage.' },
  { id:'wl14', name:'Life tap', tier:2, type:'damage', risk:8,
  hit:'Take up to 6 damage. Draw and play 1 extra card for every 2 damage taken.',
  crit:'Draw and play 1 extra card per damage taken.', miss:null, critmiss:'Take 6 damage.' },
@@ -1140,7 +1140,7 @@ const ENEMIES = {
  },
  mechanoguard: {
  id:'mechanoguard', name:'Mechanoguard', portrait:'🤖',
- tier:2, maxHP:12, atk:2, type:'minion',
+ tier:2, maxHP:15, atk:2, type:'minion',
  ongoing:'Each turn roll: 1-5 deal 3 dmg, 6-10 deal 2 dmg twice, 11-15 heal boss 5, 16-20 self-destruct (half current HP to all).',
  surge:'SELF-DESTRUCT! Deals half current HP to you.',
  specialOnDamage:'mechanoguard_roll',
@@ -1154,7 +1154,7 @@ const ENEMIES = {
  },
  murloc: {
  id:'murloc', name:'Murloc Pirate', portrait:'🐟',
- tier:2, maxHP:12, atk:2, type:'minion',
+ tier:2, maxHP:18, atk:2, type:'minion',
  ongoing:'All enemies deal +1 damage.',
  surge:'Deal 5 melee damage to you.',
  },
@@ -1200,7 +1200,7 @@ const ENEMIES = {
  },
  mrSmite: {
  id:'mrSmite', name:"Mr. Smite, 1st Mate", portrait:'⚓',
- tier:4, maxHP:90, atk:5, type:'boss',
+ tier:4, maxHP:110, atk:5, type:'boss',
  ongoing:'Deals +2 damage. Start of each turn: equip a random weapon.',
  surge:'You take 2 damage and lose your next turn. Permanently equip 1 weapon.',
  xp:150, gold:45,
@@ -1228,20 +1228,145 @@ const ENEMIES = {
  captainGreenskin: {
  id:'captainGreenskin', name:'Captain Greenskin', portrait:'🏴‍☠️',
  tier:3, maxHP:90, atk:4, type:'boss',
- ongoing:'First time you deal damage each combat: -5 on your next roll and draw 1 less card. When Greenskin deals damage, apply 1 Poison counter.',
- surge:'You critically fail your next ability. Summon 2 crewmates.',
+ ongoing:'First time you damage Greenskin each round: -5 on your next roll and draw 1 less card next turn. When Greenskin deals damage, apply 1 Poison counter.',
+ surge:'You critically fail your next ability. A Defias Wizard and a Shadow Guard board.',
  xp:140, gold:40,
  poisonOnHit:true,
  },
  edwinVanCleef: {
  id:'edwinVanCleef', name:'Edwin VanCleef', portrait:'🗡️',
- tier:5, maxHP:120, atk:6, type:'boss',
+ tier:5, maxHP:150, atk:6, type:'boss',
  ongoing:'Deals +X damage per turn where X = Poison counters ÷ adventurers. Every 30 HP lost: summon 2 Shadow Guards.',
  surge:'Apply 2 Poison counters to you.',
  xp:300, gold:100,
  isFinalBoss:true,
  phase2HP:60, phase2Spawns:'shadowGuard',
  },
+
+ // ── SHADOWFANG KEEP ──
+ feralWorgen: { id:'feralWorgen', name:'Feral Worgen', portrait:'🐺',
+ tier:1, maxHP:18, atk:3, type:'minion',
+ ongoing:'Melee hits apply 1 Bleed (Hemorrhage stack) to you.',
+ surge:'Deal 5 melee damage and apply 2 Bleed stacks.',
+ bleedOnHit:true, xp:45 },
+ wailingSpirit: { id:'wailingSpirit', name:'Wailing Spirit', portrait:'👻',
+ tier:1, maxHP:14, atk:2, type:'minion',
+ ongoing:'Deals shadow magic damage that bypasses armor.',
+ surge:'Scream — deal 4 shadow magic damage and draw 1 less card next turn.',
+ shadowMagic:true, xp:55 },
+ frostwolfHunter: { id:'frostwolfHunter', name:'Frostwolf Hunter', portrait:'🐺',
+ tier:2, maxHP:20, atk:3, type:'minion',
+ ongoing:'Ranged ice attack — +1 to all damage vs. frozen targets.',
+ surge:'Deal 4 ice damage and apply Frozen to you (lose 1 play next turn).',
+ xp:60 },
+ rethilgore: { id:'rethilgore', name:'Rethilgore the Jailer', portrait:'🦇',
+ tier:2, maxHP:90, atk:4, type:'boss',
+ ongoing:'Each hit applies 2 Bleed stacks. At end of round roll DC 10 — on success he drains 2 HP per Bleed stack on you.',
+ surge:'Rip and Tear — 6 damage and +3 Bleed stacks to you.',
+ xp:90, gold:30,
+ bleedOnHit:2 },
+ razorclaw: { id:'razorclaw', name:'Razorclaw the Butcher', portrait:'🪓',
+ tier:3, maxHP:75, atk:5, type:'boss',
+ ongoing:'Frenzy — +1 damage to attacks for every 10% below 50% HP you are.',
+ surge:'Cleave — 5 damage to you + 3 Bleed stacks.',
+ xp:120, gold:40,
+ frenzyFromLowHp:true },
+ baronSilverlaine: { id:'baronSilverlaine', name:'Baron Silverlaine', portrait:'🧛',
+ tier:3, maxHP:110, atk:4, type:'boss',
+ ongoing:'Mark of the Wolf on start: -1 to all rolls while he lives. Each end of round rolls DC 10 — fail drains 2 HP.',
+ surge:'Fear — applies Feared (+3 shadow dmg taken) and stuns you 1 turn.',
+ xp:140, gold:40,
+ baronCurse:true,
+ phase2HP:40, phase2Spawns:'wailingSpirit' },
+ archmageArugal: { id:'archmageArugal', name:'Archmage Arugal', portrait:'🧙',
+ tier:5, maxHP:160, atk:6, type:'boss',
+ ongoing:'Shadow Nova on even turns: 3 shadow magic to you. Ice Barrier: -2 damage taken until broken by a crit.',
+ surge:'Void Bolt barrage — 6 shadow + 4 ice magic damage.',
+ xp:300, gold:100, isFinalBoss:true,
+ phase2HP:80, phase2Spawns:'wailingSpirit',
+ arugalBarrier:true,
+ spawnsMinion:'feralWorgen', spawnRate:3 },
+ commanderSpringvale: { id:'commanderSpringvale', name:'Commander Springvale', portrait:'🗡️',
+ tier:2, maxHP:85, atk:4, type:'boss',
+ ongoing:'Armored: takes -1 damage from all sources. Each even round, rallies — summons a Feral Worgen.',
+ surge:'Shield Bash — 5 damage, stuns for 1 turn.',
+ xp:100, gold:35,
+ armoredNegOne:true, spawnsMinion:'feralWorgen', spawnRate:2, shieldBashSurge:true },
+ odoBlindwatcher: { id:'odoBlindwatcher', name:'Odo the Blindwatcher', portrait:'🏹',
+ tier:2, maxHP:90, atk:5, type:'boss',
+ ongoing:'Ranged — his attacks are untyped ranged. Deadeye: his first crit each combat is automatic.',
+ surge:'Piercing Volley — 7 ranged damage. Ignores armor.',
+ xp:110, gold:35,
+ rangedIgnoreArmor:true, deadeyeAuto:true },
+ fenrusDevourer: { id:'fenrusDevourer', name:'Fenrus the Devourer', portrait:'🐺',
+ tier:3, maxHP:100, atk:5, type:'boss',
+ ongoing:'Shadow Howl: at end of round, roll DC 10. On success applies Feared (+2 dmg taken 2 turns). Heals 2 HP per Bleed stack on you each round.',
+ surge:'Devour — deals 6 shadow damage and heals for double.',
+ xp:130, gold:40,
+ fenrusHowl:true, bleedFeed:true },
+
+ // ── RAGEFIRE CHASM ──
+ ragefireTrogg: { id:'ragefireTrogg', name:'Ragefire Trogg', portrait:'🪨',
+ tier:1, maxHP:16, atk:3, type:'minion',
+ ongoing:'Takes -1 from magic sources (thick hide).',
+ surge:'Thunderclap — 3 damage to you.',
+ xp:40 },
+ searingCultist: { id:'searingCultist', name:'Searing Blade Cultist', portrait:'🔪',
+ tier:1, maxHP:14, atk:2, type:'minion',
+ ongoing:'Chants — at end of turn roll: on 10+ apply 1 Seared to you.',
+ surge:'Blood pact — deal 4 fire magic damage to you.',
+ xp:50 },
+ lavaImp: { id:'lavaImp', name:'Lava Imp', portrait:'🔥',
+ tier:2, maxHP:10, atk:3, type:'minion',
+ ongoing:'On death: explodes for 3 fire to you.',
+ surge:'Fireball — 5 fire magic damage to you.',
+ xp:55 },
+ oggleflint: { id:'oggleflint', name:'Oggleflint', portrait:'🪨',
+ tier:2, maxHP:65, atk:5, type:'boss',
+ ongoing:'Enrages at ≤30 HP: +3 attack. Summons a Ragefire Trogg every 3 rounds.',
+ surge:'Berserk — strikes twice this turn.',
+ xp:100, gold:30,
+ enrageThreshold:30,
+ spawnsMinion:'ragefireTrogg', spawnRate:3,
+ doubleAttackOnSurge:true },
+ jergosh: { id:'jergosh', name:'Jergosh the Invoker', portrait:'📕',
+ tier:3, maxHP:90, atk:3, type:'boss',
+ ongoing:'All his attack damage counts as shadow magic. Each end of round, DC 12 — on success applies 3 Corruption stacks to you.',
+ surge:'Word of Pain — 5 shadow magic + 3 Corruption stacks.',
+ xp:130, gold:40,
+ jergoshCorruption:true, shadowAttacks:true,
+ spawnsMinion:'searingCultist', spawnRate:3 },
+ bazzalan: { id:'bazzalan', name:'Bazzalan', portrait:'🗡️',
+ tier:3, maxHP:110, atk:5, type:'boss',
+ ongoing:'Poison on hit. Attacks ignore 1 armor.',
+ surge:'Shadow Strike — 6 melee + 2 Poison stacks.',
+ xp:130, gold:40, poisonOnHit:true, ignoreArmor:1 },
+ taragaman: { id:'taragaman', name:'Taragaman the Hungerer', portrait:'👹',
+ tier:5, maxHP:150, atk:6, type:'boss',
+ ongoing:'Fire Aura: 1 fire magic to you at the end of every round. At 50% HP: Shadow Cloak (-3 damage from all sources, consumed by a crit).',
+ surge:'Consume — 4 fire + 4 shadow damage, heals himself for half the damage dealt.',
+ xp:300, gold:100, isFinalBoss:true,
+ phase2HP:75, phase2Spawns:'lavaImp',
+ fireAura:true, shadowCloakAt:75,
+ spawnsMinion:'lavaImp', spawnRate:4 },
+ maggotEye: { id:'maggotEye', name:'Maggot Eye', portrait:'👁️',
+ tier:2, maxHP:80, atk:4, type:'boss',
+ ongoing:'Many-Eyed: takes +1 damage from crits. Each end of round, rolls DC 10 — on success applies 2 Poison stacks to you.',
+ surge:'Paralytic Gaze — 3 damage and you lose 1 play next turn.',
+ xp:100, gold:30,
+ maggotEyePoison:true, paralyticSurge:true },
+ zelemar: { id:'zelemar', name:'Zelemar the Wrathful', portrait:'🧛',
+ tier:3, maxHP:110, atk:4, type:'boss',
+ ongoing:'Hellfire: all his attacks are shadow magic. Each round gains 1 wrath stack (+1 attack per stack, max 5).',
+ surge:'Shadow Nova — 6 shadow + 3 Corruption stacks applied.',
+ xp:130, gold:40,
+ zelemarWrath:true, shadowAttacks:true },
+ forgemaster: { id:'forgemaster', name:'The Forgemaster', portrait:'⚒️',
+ tier:3, maxHP:115, atk:5, type:'boss',
+ ongoing:'Superheated: at end of every round, deals 2 fire magic to all allies AND enemies (including himself). Fire immune — takes no fire damage.',
+ surge:'Molten Smash — 7 fire damage and applies 2 Ignite stacks to you.',
+ xp:130, gold:40,
+ fireImmune:true, forgeAura:true },
 };
 const STATUS = {
  seared: {
@@ -1295,24 +1420,24 @@ const ADVENTURES = [
  title: 'Shadowfang Keep',
  subtitle: 'Silverpine Forest',
  icon: '🏰',
- difficulty: 'Intermediate',
+ difficulty: 'Beginner',
  difficultyColor: ' ',
- lore: 'The cursed keep of Shadowfang looms over Silverpine Forest. Worgen haunt its halls. Coming soon.',
- tags: ['Coming Soon'],
+ lore: 'The cursed keep of Shadowfang looms over Silverpine Forest. Worgen stalk the halls, wailing spirits cling to the walls, and Archmage Arugal commands them all. Unlock via the Legacy Vault.',
+ tags: ['DoTs', 'Shadow', 'Ice & Bleed'],
  unlocked: false,
- comingSoon: true,
+ requiresUpgrade: 'lg_unlock_shadowfang',
  },
  {
  id: 'ragefire',
  title: 'Ragefire Chasm',
  subtitle: 'Orgrimmar',
  icon: '🔥',
- difficulty: 'Intermediate',
+ difficulty: 'Beginner',
  difficultyColor: ' ',
- lore: 'Deep beneath Orgrimmar, the Burning Blade cult plots in secret. Coming soon.',
- tags: ['Coming Soon'],
+ lore: 'Deep beneath Orgrimmar, the Searing Blade cult summons elementals of fire and shadow in service of a shadowy patron. Unlock via the Legacy Vault.',
+ tags: ['Fire', 'Shadow', 'Cultists'],
  unlocked: false,
- comingSoon: true,
+ requiresUpgrade: 'lg_unlock_ragefire',
  },
 ];
 const ENCOUNTERS = [
@@ -1388,6 +1513,10 @@ const ENCOUNTERS = [
  text:`A massive ogre blocks the passage to the lower mine.\n\n"RHAHK'ZOR SMASH! RHAHK'ZOR KILL!"`,
  enemies:['rhahkZor'], onWin:`The ogre lies still. You pry a heavy iron keyring from his belt.`, xpBonus:25,
  },
+ {
+ id:'dm_scrapheap', type:'cardRemoval', title:'Scrapheap Forge', icon:'🔨',
+ text:`A broken-down forge smolders in a rusted alcove. You could throw a card you'd rather not have into the embers — letting it burn away.`,
+ },
  // ── ACT 2: THE FOUNDRY ───────────────────────────────────────────
  {
  id:'foundry_approach', type:'story', title:'The Foundry Level', icon:'🔥',
@@ -1449,6 +1578,10 @@ const ENCOUNTERS = [
  enemies:['cookie'], onWin:`Cookie is defeated. You find a key to the captain's quarters.`, xpBonus:25,
  },
  {
+ id:'dm_captains_ledger', type:'cardRemoval', title:"Captain's Cabin", icon:'📜',
+ text:`You slip into an empty cabin. A ledger on the desk shows the pirates' weapon caches. You could take a moment to strip a flawed card from your own playbook while you're here.`,
+ },
+ {
  id:'greenskin', type:'encounter', title:'Battle for the Quarterdeck', icon:'🏴\u200d☠️',
  text:`Captain Greenskin draws a gleaming cutlass.\n\n"You want VanCleef? You'll have to go through every one of my crew."`,
  enemies:['captainGreenskin','defiastRogue'], onWin:`Greenskin slumps. The path to VanCleef's quarters is clear.`, xpBonus:35,
@@ -1477,6 +1610,275 @@ const ENCOUNTERS = [
  xpBonus:60, isFinalBoss:true,
  },
 ];
+
+// ── SHADOWFANG KEEP ENCOUNTERS ─────────────────────────────────────
+const ENCOUNTERS_SHADOWFANG = [
+ // ── ACT 1: THE COURTYARD ─────────────────────────────────
+ { id:'sfk_gate', type:'story', title:'Gates of Shadowfang', icon:'🏰',
+   text:`The iron gate groans open at your touch. Silver mist rolls from the halls — smelling of wet fur and old blood. Deep in the keep, something howls.\n\nThe sound echoes too long. Too many throats to count.`,
+   choices:[
+   { text:'Bar the gate behind you',           skill:null, dc:0 },
+   { text:'Scout the courtyard quietly',        skill:'Stealth', dc:8 },
+   { text:'March straight in, cloak flying',     skill:null, dc:0 },
+   ],
+   outcomes:[
+   { result:`You wedge the gate shut with a fallen beam. Nothing follows you in — and nothing gets out. You breathe easier.`,
+     effect:{ hp:3 } },
+   { success:`You slip past a sleeping worgen and lift a coin purse from its belt. Nothing stirs.`,
+     fail:`A loose stone betrays your footing. The courtyard howls to life — take 3 damage as a worgen strikes before you regain balance.`,
+     successEffect:{ gold:15 }, failEffect:{ hp:-3 } },
+   { result:`The worgen raise their heads as one. Let them see you coming. You draw a little menace around you — +2 to your next combat roll.`,
+     effect:{ nextCombatRollBonus:2 } },
+   ] },
+ { id:'sfk_worgen_pack', type:'encounter', title:'Worgen Ambush', icon:'🐺',
+   text:`A pack of worgen peels from the shadows of the broken fountain. Teeth and claws and the glint of torchlight on their fur.`,
+   enemies:['feralWorgen','feralWorgen'],
+   onWin:`The pack lies still. Their bones crack under your boots as you push on.`, xpBonus:10 },
+ { id:'sfk_springvale', type:'encounter', title:'Commander Springvale', icon:'🗡️',
+   text:`A worgen in the gleaming plate of the old human garrison steps forward, sword in hand.\n\n"Strangers bleed here. That is the law. That is my law."`,
+   enemies:['commanderSpringvale','feralWorgen'],
+   onWin:`Springvale crumples. You pry his crest from his breastplate — a token for later.`, xpBonus:22 },
+ { id:'sfk_shrine_regret', type:'cardRemoval', title:'Shrine of Regret', icon:'⛲',
+   text:`A silver basin bubbles in an alcove, moonlight suspended inside like oil on water. A voice — soft, not unkind — offers to burn one weakness out of your hand.\n\n(You may remove one card from your deck.)` },
+ { id:'sfk_moonlit_court', type:'story', title:'The Moonlit Courtyard', icon:'🌕',
+   text:`A fountain of black water catches the moon. A dead worgen lies beside it, claws locked around a crumpled letter. A side passage leads to a cellar door, chained and padlocked.\n\nYou have a moment to choose how you approach the night.`,
+   choices:[
+   { text:'Read the letter (it might explain this place)', skill:'Investigation', dc:9 },
+   { text:'Smash the cellar padlock',                       skill:'Athletics',      dc:8 },
+   { text:'Drink from the black fountain',                   skill:'Constitution',   dc:10 },
+   ],
+   outcomes:[
+   { success:`"...Arugal's cursed howl takes us all in the end. Burn the library if you can — that's where he keeps us bound." You tuck the letter into your belt. +1 to all rolls this run.`,
+     fail:`The ink smears. The page is gibberish — but you pocket a silver bracelet for your trouble.`,
+     successEffect:{ rollBonus:1 }, failEffect:{ gold:10 } },
+   { success:`The padlock shatters. Inside: a crate of preserved supplies. +20g and +4 HP.`,
+     fail:`The padlock holds — and something hears you. Take 3 damage as a worgen charges you through the gloom.`,
+     successEffect:{ gold:20, hp:4 }, failEffect:{ hp:-3 } },
+   { success:`The water burns going down — then settles cold and steady. You feel sharper, more alert. +2 Lucky rolls.`,
+     fail:`The water tastes of iron and something fouler. You retch — lose 4 HP but shake the curse off your tongue.`,
+     successEffect:{ luckCharges:2 }, failEffect:{ hp:-4 } },
+   ] },
+
+ // ── ACT 2: THE DUNGEONS ──────────────────────────────────
+ { id:'sfk_bleeding_hall', type:'encounter', title:'The Bleeding Hall', icon:'🩸',
+   text:`The stones weep red. A wailing spirit coils from the floor while a worgen drops from a rafter.`,
+   enemies:['wailingSpirit','feralWorgen'],
+   onWin:`The spirit dissipates with a final shriek. The bleeding slows to a trickle.`, xpBonus:12 },
+ { id:'sfk_prison', type:'story', title:'The Prison Wing', icon:'🔒',
+   text:`Dozens of cells line a blood-slick passage. Most are empty. One holds a human prisoner — half-mad, chained at the throat. The wall behind him is scratched raw with one word: ARUGAL.\n\nA pile of confiscated gear lies just out of his reach.`,
+   choices:[
+   { text:'Free the prisoner and get him out',   skill:'Perception', dc:9 },
+   { text:'Search the confiscated-gear pile',    skill:'Sleight of Hand', dc:7 },
+   { text:'Leave them all. You can\'t save everyone.', skill:null, dc:0 },
+   ],
+   outcomes:[
+   { success:`The prisoner slips you a small iron key before vanishing into the dark. "For the tower door. Burn the wizard." +1 damage this run, and +2 to your first roll against Arugal.`,
+     fail:`He thrashes as you turn the key — claws coming through his skin as the curse takes him. You take 4 damage putting him down.`,
+     successEffect:{ dmgBonus:1 }, failEffect:{ hp:-4 } },
+   { success:`Among the confiscated gear: a soldier's belt with 30g sewn into the lining, and a lucky copper talisman. +30g, +1 lucky roll.`,
+     fail:`A rusted trap snaps at your wrist — take 2 damage.`,
+     successEffect:{ gold:30, luckCharges:1 }, failEffect:{ hp:-2 } },
+   { result:`You close your ears to the prisoner's sobs and walk on. The keep approves. A shadow steadies your hand — +1 to all rolls this run.`,
+     effect:{ rollBonus:1 } },
+   ] },
+ { id:'sfk_rethilgore', type:'encounter', title:'Rethilgore the Jailer', icon:'🦇',
+   text:`The jailer unfolds from a cell doorway — all claws and dripping fangs. His keys jingle at his belt.\n\n"Another one for the cells. Bleed, then sleep."`,
+   enemies:['rethilgore','feralWorgen'],
+   onWin:`Rethilgore crumples. The keys clatter to the floor — you pocket them.`, xpBonus:20 },
+ { id:'sfk_frostwolf_pass', type:'encounter', title:'Frozen Barracks', icon:'❄️',
+   text:`The barracks is rimed with frost. Three hunters emerge from the cold — their breath crystallizing mid-snarl.`,
+   enemies:['frostwolfHunter','frostwolfHunter','feralWorgen'],
+   onWin:`Their cold bones litter the ground. The frost fades.`, xpBonus:15 },
+ { id:'sfk_odo', type:'encounter', title:'Odo the Blindwatcher', icon:'🏹',
+   text:`A giant worgen archer stands at a murder-slit of a window, eyes milk-white, a longbow drawn. His first arrow finds your chest before you see him.\n\n"Blind men see clearest."`,
+   enemies:['odoBlindwatcher','frostwolfHunter'],
+   onWin:`Odo slumps against the stone. His quiver holds silver-tipped arrows.`, xpBonus:24 },
+ { id:'sfk_razorclaw', type:'encounter', title:'The Butcher', icon:'🪓',
+   text:`A huge worgen drags a cleaver across the flagstones, tongue lolling.\n\n"Meat. Fresh meat. Bleed for Razorclaw."`,
+   enemies:['razorclaw','feralWorgen','feralWorgen'],
+   onWin:`Razorclaw's hunger is sated — with his own blood.`, xpBonus:25 },
+
+ // ── ACT 3: THE LORD'S HALLS ──────────────────────────────
+ { id:'sfk_library', type:'story', title:'Arugal\'s Library', icon:'📚',
+   text:`Towers of mouldering books line the walls. One tome lies open on a lectern, its runes pulsing in time with a heart you can't see. A silver-trimmed page flutters free. A brazier gutters beside the lectern.`,
+   choices:[
+   { text:'Read the open tome (forbidden knowledge)', skill:'Intelligence', dc:10 },
+   { text:'Pocket the silver-trimmed page',          skill:null, dc:0 },
+   { text:'Burn the library to spite its master',    skill:'Constitution', dc:8 },
+   ],
+   outcomes:[
+   { success:`A shard of forbidden knowledge cuts its way into your mind. You understand Arugal's weaving — permanent +1 to all rolls this run.`,
+     fail:`The runes scream in your head — take 5 damage and stagger away half-blind.`,
+     successEffect:{ rollBonus:1 }, failEffect:{ hp:-5 } },
+   { result:`The silver trim alone is worth a fortune to the right fence. +25g.`,
+     effect:{ gold:25 } },
+   { success:`You scorch the tome stacks. The keep itself shudders — Arugal's grip on his worgen weakens. +2 to your first roll against Arugal, and +15g from melted trinkets.`,
+     fail:`The flames lash back — 4 fire damage — but the fire still takes. A small mercy.`,
+     successEffect:{ nextCombatRollBonus:2, gold:15 }, failEffect:{ hp:-4 } },
+   ] },
+ { id:'sfk_moon_well', type:'cardRemoval', title:'Moon-Touched Well', icon:'🌙',
+   text:`Moonlight pools in a cracked well, luminous and still. Drinking deep would purify something from your kit.\n\n(You may remove one card from your deck.)` },
+ { id:'sfk_fenrus', type:'encounter', title:'Fenrus the Devourer', icon:'🐺',
+   text:`An enormous spirit-wolf rises from a pit of bones, fur black as burnt-out stars. Its howl shakes dust from the vaulted ceiling.`,
+   enemies:['fenrusDevourer','wailingSpirit'],
+   onWin:`Fenrus fades back into the shadow he came from. His collar clatters to the stone — an iron key threaded through it.`, xpBonus:28 },
+ { id:'sfk_baron', type:'encounter', title:'Baron Silverlaine', icon:'🧛',
+   text:`The Baron's eyes glow yellow as he rises from a throne of bones.\n\n"So. Another adventurer offered to Arugal. His hunger knows no limit — and neither does mine."`,
+   enemies:['baronSilverlaine','wailingSpirit','wailingSpirit'],
+   onWin:`The curse-lord falls. His signet ring gleams on the floor. You take it — a key to his master's tower.`, xpBonus:30 },
+
+ // ── ACT 4: ARUGAL ───────────────────────────────────────
+ { id:'sfk_arcane_door', type:'story', title:'The Arcane Door', icon:'🚪',
+   text:`A door wreathed in shadow-arcane runes bars the tower stair. Through the keyhole: candlelight, and the slow pacing of heavy robes.\n\nArugal is waiting.`,
+   choices:[
+   { text:'Force the door with sheer strength',      skill:'Strength',    dc:9 },
+   { text:'Unravel the wards with patience',         skill:'Intelligence', dc:11 },
+   { text:'Use Baron\'s signet (if you have it)',    skill:null, dc:0 },
+   ],
+   outcomes:[
+   { success:`The door shatters inward. You burst in unannounced — +3 to your first roll against Arugal.`,
+     fail:`The wards reject you — take 4 damage and announce yourself like a bell.`,
+     successEffect:{ nextCombatRollBonus:3 }, failEffect:{ hp:-4 } },
+   { success:`The weave unravels strand by strand. You slip in silently — +2 to all rolls next combat and gain Stealth.`,
+     fail:`Arcane feedback seizes your nerves — 4 damage and you stumble through.`,
+     successEffect:{ nextCombatRollBonus:2, stealth:1 }, failEffect:{ hp:-4 } },
+   { result:`The signet glows gold at the runes — and the door opens without a whisper. Arugal's own wards welcome you in. +1 lucky roll for the confidence.`,
+     effect:{ luckCharges:1 } },
+   ] },
+ { id:'sfk_arugal', type:'encounter', title:'Archmage Arugal', icon:'🧙',
+   text:`Arugal turns, and the shadows turn with him. His worgen kneel at his sides.\n\n"Another fool for my children to feed on. Come. Let us make this quick."`,
+   enemies:['archmageArugal','feralWorgen','wailingSpirit'],
+   onWin:`Arugal is no more. The keep's curse lifts with his final breath — and somewhere in the mist, the howling stops.`, xpBonus:60, isFinalBoss:true },
+];
+
+// ── RAGEFIRE CHASM ENCOUNTERS ─────────────────────────────────────
+const ENCOUNTERS_RAGEFIRE = [
+ // ── ACT 1: THE DESCENT ───────────────────────────────────
+ { id:'rfc_entrance', type:'story', title:'The Ragefire Descent', icon:'🌋',
+   text:`A narrow cleft in Orgrimmar's deepest quarter drops into heat and sulphur. Cultist braziers line the descent, their blue flames leaning upward as if breathing.\n\nSomething below is chanting.`,
+   choices:[
+   { text:'Climb down cautiously',                 skill:null, dc:0 },
+   { text:'Scout for hidden side-passages',         skill:'Perception', dc:9 },
+   { text:'Snuff the braziers as you descend',      skill:'Stealth', dc:10 },
+   ],
+   outcomes:[
+   { result:`You pick your way down in silence. The air grows thick and hot.` },
+   { success:`You find a mason's forgotten supply cache tucked behind a loose slab. +25g and +3 HP.`,
+     fail:`You misstep on a crumbling ledge. Take 3 damage from the fall.`,
+     successEffect:{ gold:25, hp:3 }, failEffect:{ hp:-3 } },
+   { success:`You smother three braziers — the chanting falters without their light. +2 to your first combat roll.`,
+     fail:`The flame licks your wrist — take 2 fire damage, and the chant rises sharper.`,
+     successEffect:{ nextCombatRollBonus:2 }, failEffect:{ hp:-2 } },
+   ] },
+ { id:'rfc_trogg_mob', type:'encounter', title:'Trogg Nest', icon:'🪨',
+   text:`A family of troggs hurls rocks from the shadows, snarling in a guttural tongue.`,
+   enemies:['ragefireTrogg','ragefireTrogg'],
+   onWin:`The trogg nest grows still. You pry a few valuables from their piled loot.`, xpBonus:10 },
+ { id:'rfc_oggleflint_early', type:'encounter', title:'Oggleflint, Trogg Warchief', icon:'🪨',
+   text:`A massive trogg chieftain roars from atop a throne of bones. Two of his kin flank him.\n\n"PINK-SKIN. SMASH. CRUSH. EAT."`,
+   enemies:['oggleflint','ragefireTrogg','ragefireTrogg'],
+   onWin:`Oggleflint falls with a crash that shakes dust from the ceiling.`, xpBonus:20 },
+ { id:'rfc_brazier', type:'cardRemoval', title:'Cleansing Brazier', icon:'🔥',
+   text:`A blue-flamed brazier burns coldly, untouched by the heat of the chasm. An acolyte once whispered that the flame devours what it touches — memories, most of all.\n\n(You may remove one card from your deck.)` },
+ { id:'rfc_cultist_patrol', type:'encounter', title:'Searing Blade Patrol', icon:'🔪',
+   text:`Masked cultists chant as fire dances along their blades. A lava imp scuttles at their heels, cackling.`,
+   enemies:['searingCultist','searingCultist','lavaImp'],
+   onWin:`Their chants die as they do. The imp pops like a cinder in the heat.`, xpBonus:15 },
+
+ // ── ACT 2: OGGLEFLINT'S WARRENS ──────────────────────────
+ { id:'rfc_shrine', type:'story', title:'Shrine of the Searing Blade', icon:'🗡️',
+   text:`A crude altar holds a blade wreathed in fire, its hilt wrapped in blood-runes. The runes pulse as if calling for a hand.\n\nPiled at the base: old offerings — coin, teeth, bones.`,
+   choices:[
+   { text:'Grip the blade (risk the curse)',      skill:'Constitution', dc:10 },
+   { text:'Smash the altar with a rock',          skill:'Strength',      dc:8 },
+   { text:'Rob the offerings, leave the blade',    skill:'Sleight of Hand', dc:7 },
+   ],
+   outcomes:[
+   { success:`The blade thrums in your grip, bonding with your weapon hand. +2 damage to all attacks this run.`,
+     fail:`The blade rejects you — a wave of fire roars from the runes. Take 5 fire damage.`,
+     successEffect:{ dmgBonus:2 }, failEffect:{ hp:-5 } },
+   { success:`The altar shatters with a crack. The fire-chant in the distance weakens. +2 to your first roll next combat.`,
+     fail:`Falling stone gashes you — take 3 damage — but the altar crumbles all the same.`,
+     successEffect:{ nextCombatRollBonus:2 }, failEffect:{ hp:-3 } },
+   { success:`You pocket a handful of bones-for-coin and a small iron idol. +30g.`,
+     fail:`Your hand brushes the blade's haft by accident. Take 2 fire damage — but you get 15g out of it.`,
+     successEffect:{ gold:30 }, failEffect:{ hp:-2, gold:15 } },
+   ] },
+ { id:'rfc_maggot_eye', type:'encounter', title:'Maggot Eye, Trogg Seer', icon:'👁️',
+   text:`A trogg with eyes like boils on every knuckle staggers into view, chanting in the tongue of the Searing Blade.`,
+   enemies:['maggotEye','ragefireTrogg'],
+   onWin:`Maggot Eye collapses, all his eyes rolling closed at once. A small jade idol drops from his belt.`, xpBonus:18 },
+ { id:'rfc_imp_swarm', type:'encounter', title:'Imp Swarm', icon:'🔥',
+   text:`Lava imps skitter from cracks in the wall, giggling and spitting fire.`,
+   enemies:['lavaImp','lavaImp','lavaImp'],
+   onWin:`The imps are soot and ash. Your ears ring from their giggling.`, xpBonus:15 },
+ { id:'rfc_forgemaster', type:'encounter', title:'The Forgemaster', icon:'⚒️',
+   text:`Deeper in the chasm, a being of living fire hammers at an anvil of molten rock. Each blow sends sparks the size of your fist into the air.\n\nThe Forgemaster turns to regard you as if weighing ore.`,
+   enemies:['forgemaster','lavaImp'],
+   onWin:`The Forgemaster cracks apart into cooling slag. From the anvil you salvage a still-hot ingot of rare metal.`, xpBonus:26 },
+ { id:'rfc_prisoner', type:'story', title:'The Blood-Marked Prisoner', icon:'⛓️',
+   text:`A blood-marked orc hangs from shackles above a fire-runed circle — prepared for sacrifice. His eyes track you.\n\n"Cut me down... or let them finish their work. Either way, the Hungerer wakes."`,
+   choices:[
+   { text:'Cut him down quickly',                      skill:'Dexterity', dc:9 },
+   { text:'Interrupt the ritual to free him (loud)',    skill:'Strength',    dc:10 },
+   { text:'Take the cultist offerings and leave him',   skill:null, dc:0 },
+   ],
+   outcomes:[
+   { success:`He falls into your arms and presses a fire-blessed talisman into your hand. "Take it — for when the Hungerer comes." +1 lucky roll and +2 to your first roll next combat.`,
+     fail:`He jerks as you cut the last rope — and the wards snap back on you. 3 damage, but he gets away.`,
+     successEffect:{ luckCharges:1, nextCombatRollBonus:2 }, failEffect:{ hp:-3 } },
+   { success:`You hammer the runes apart. The ritual circle sputters out, and Taragaman enters the fight weakened. His max HP is reduced by 20 for the final battle.`,
+     fail:`The wards explode outward — take 5 damage and leave the prisoner to burn.`,
+     successEffect:{ nextCombatRollBonus:3 }, failEffect:{ hp:-5 } },
+   { result:`You ignore his pleas and rifle the cultist offerings. +35g. The chant continues behind you.`,
+     effect:{ gold:35 } },
+   ] },
+
+ // ── ACT 3: THE CULTISTS ──────────────────────────────────
+ { id:'rfc_pool', type:'cardRemoval', title:'The Reforge Pool', icon:'🩹',
+   text:`A black pool reflects not the world but your own face — sharpened, surer. A voice in the lava beneath murmurs: erase one card from your repertoire.\n\n(You may remove one card from your deck.)` },
+ { id:'rfc_bazzalan', type:'encounter', title:'Bazzalan, Shadow Assassin', icon:'🗡️',
+   text:`A shadow detaches from the wall. Two curved blades gleam in the dark — and the faint shimmer of poison.`,
+   enemies:['bazzalan','searingCultist'],
+   onWin:`Bazzalan whispers something in an unknown tongue, then fades into the stone.`, xpBonus:25 },
+ { id:'rfc_zelemar', type:'encounter', title:'Zelemar the Wrathful', icon:'🧛',
+   text:`A robed warlock paces before a circle of screaming shades. Each step feeds him. Each step makes him stronger.\n\n"You are late, mortal. My wrath has been building."`,
+   enemies:['zelemar','searingCultist','lavaImp'],
+   onWin:`Zelemar collapses mid-incantation. The screaming shades go silent.`, xpBonus:28 },
+ { id:'rfc_jergosh', type:'encounter', title:'Jergosh the Invoker', icon:'📕',
+   text:`A cultist mage raises an open tome, his eyes rolling back. Pages flap of their own accord, and shadows writhe in the margins.\n\n"Your bones will feed the hunger below."`,
+   enemies:['jergosh','searingCultist','lavaImp'],
+   onWin:`Jergosh's tome crumbles to ash in his lifeless hands. The chant below grows louder.`, xpBonus:30 },
+
+ // ── ACT 4: THE HUNGERER ──────────────────────────────────
+ { id:'rfc_portal', type:'story', title:'The Hungerer\'s Portal', icon:'🕳️',
+   text:`The cultists' ritual circle pulses with shadow-fire at the chasm's floor. Through it, something enormous watches you with nine eyes.\n\nThis is the last door.`,
+   choices:[
+   { text:'Disrupt the ritual before entering',       skill:'Intelligence', dc:10 },
+   { text:'Use the prisoner\'s talisman, if you have it', skill:null, dc:0 },
+   { text:'Charge straight through',                   skill:null, dc:0 },
+   ],
+   outcomes:[
+   { success:`You disrupt the weave. Taragaman enters the fight wounded — +3 to your first roll, and his Shadow Cloak triggers at a lower threshold.`,
+     fail:`The backlash scorches you — 5 fire damage.`,
+     successEffect:{ nextCombatRollBonus:3 }, failEffect:{ hp:-5 } },
+   { result:`The talisman flares gold in the shadow-fire. You step through unnoticed — +2 lucky rolls and Stealth for the opening of the fight.`,
+     effect:{ luckCharges:2, stealth:1 } },
+   { result:`You leap through, cloak streaming. Taragaman is waiting, full-fed, teeth ready.` },
+   ] },
+ { id:'rfc_taragaman', type:'encounter', title:'Taragaman the Hungerer', icon:'👹',
+   text:`A colossal shadow-fire demon looms over you, smoke pouring from his shoulders.\n\n"Another morsel. Chew well, little one — I want to taste your fear."`,
+   enemies:['taragaman','lavaImp','lavaImp'],
+   onWin:`Taragaman is vanquished. The Searing Blade's ritual unravels, and the chasm begins to collapse above you. You have only moments to climb out.`, xpBonus:60, isFinalBoss:true },
+];
+
+const ADVENTURE_ENCOUNTERS = {
+ deadmines: ENCOUNTERS,
+ shadowfang: ENCOUNTERS_SHADOWFANG,
+ ragefire: ENCOUNTERS_RAGEFIRE,
+};
+function getCurrentEncounters(){ return ADVENTURE_ENCOUNTERS[G.currentAdventure] || ENCOUNTERS; }
+
 const HEROES = {
  Rogue: [
  { id:'brixx', unlockCost:0, name:"Brixx, The Silent Blade", icon:'🗡️', hp:23,
@@ -1529,9 +1931,18 @@ const HEROES = {
  ability:(char,roll,C)=>{ if(roll>=8){char.hp=Math.min(char.maxHP,char.hp+4);C.bonusDrawNextTurn=(C.bonusDrawNextTurn||0)+1;return{success:true,msg:`Nature's Bounty! Healed 4 HP and draw +1 next turn!`};}return{success:false,msg:`Nature's Bounty withers. (rolled ${roll}, need 8+)`};}
  },
  { id:'elsworn', unlockCost:25, name:"Elsworn, Nature's Advocate", icon:'🌲', hp:28,
- abilityName:"Nature's Wrath", abilityDesc:"Once per combat: Roll. On 8+, take half damage and reflect it back this turn.", abilityDC:8,
+ abilityName:"Nature's Wrath", abilityDesc:"Once per combat: Roll. On 6+, draw 1 card, your melee attacks deal +1 this turn, and your next Feral card resolves twice.", abilityDC:6,
  lore:"He speaks for the trees. The trees speak through his fists.",
- ability:(char,roll,C)=>{ if(roll>=8){C._elswornShield=true;return{success:true,msg:`Nature's Wrath! Half damage + reflect this turn!`};}return{success:false,msg:`Nature's Wrath fades. (rolled ${roll}, need 8+)`};}
+ ability:(char,roll,C)=>{
+ if(roll>=6){
+ const res=drawFromDeck(C.deck,C.discard,1);
+ C.deck=res.deck; C.discard=res.discard; C.hand=[...C.hand,...res.drawn];
+ C._meleeDmgBuffThisTurn=(C._meleeDmgBuffThisTurn||0)+1;
+ C._doubleNextFeral=true;
+ return{success:true,msg:`Nature's Wrath! Drew 1 card, +1 melee damage this turn, next Feral card resolves twice!`};
+ }
+ return{success:false,msg:`Nature's Wrath fades. (rolled ${roll}, need 6+)`};
+ }
  },
  { id:'axilea', unlockCost:15, name:"Axilea, Gaia's Chosen", icon:'🌿', hp:24,
  abilityName:"Gaia's Blessing", abilityDesc:"Once per combat: Roll. On 6+, the next Restoration or Balance ability you play this turn resolves twice.", abilityDC:6,
@@ -1662,6 +2073,21 @@ const LEGACY_UPGRADES = [
  { id:'lg_draft_choices', name:'More Options', icon:'🔀', cost:10, maxLevel:4,
  desc:(lvl)=>`See ${3+lvl} cards per draft pick instead of 3`,
  apply:(c,lvl)=>{ c._draftChoices=(c._draftChoices||3)+1; } },
+ { id:'lg_draft_rerolls', name:'Second Thoughts', icon:'♻️', cost:18, maxLevel:3,
+ desc:(lvl)=>`Each run: ${lvl} free draft reroll${lvl!==1?'s':''} — discard the offered cards and see a fresh set.`,
+ apply:(c,lvl)=>{ c._draftRerolls=(c._draftRerolls||0)+1; } },
+ { id:'lg_draft_tier_boost', name:'Savvy Drafter', icon:'⭐', cost:20, maxLevel:3,
+ desc:(lvl)=>`Drafts favor higher-tier cards (+${lvl*10}% chance a draft option is one tier above your minimum).`,
+ apply:(c,lvl)=>{ c._draftTierBoost=(c._draftTierBoost||0)+10; } },
+ { id:'lg_draft_keep_one', name:'Hoarder', icon:'🗃️', cost:15, maxLevel:1,
+ desc:(lvl)=>`Skipping a draft still gives you +15g compensation.`,
+ apply:(c,lvl)=>{ c._draftSkipGold=15; } },
+ { id:'lg_unlock_shadowfang', name:'Unlock: Shadowfang Keep', icon:'🏰', cost:60, maxLevel:1,
+ desc:(lvl)=>`Permanently unlocks Shadowfang Keep — a dungeon focused on bleed, shadow, and ice.`,
+ apply:(c,lvl)=>{ c._unlockShadowfang=true; } },
+ { id:'lg_unlock_ragefire', name:'Unlock: Ragefire Chasm', icon:'🔥', cost:60, maxLevel:1,
+ desc:(lvl)=>`Permanently unlocks Ragefire Chasm — a dungeon focused on fire and shadow cultists.`,
+ apply:(c,lvl)=>{ c._unlockRagefire=true; } },
  { id:'lg_max_hp', name:'Resilience', icon:'❤️', cost:8, maxLevel:8,
  desc:(lvl)=>`+${lvl*5} max HP`,
  apply:(c,lvl)=>{ c.maxHP=(c.maxHP||20)+5; c.hp=Math.min(c.hp||20,c.maxHP); } },
@@ -2189,6 +2615,23 @@ const EQUIPMENT_SHOP = [
  desc:'+2 shadow damage. +5 max HP.',
  stats:{ dmgShadow:2, hp:5 },
  apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c.maxHP=(c.maxHP||20)+5; c.hp=Math.min(c.hp+5,c.maxHP); } },
+ // ── HEALING GEAR ──────────────────────────────────────────────
+ { id:'eq_healers_band', slot:'trinket', name:"Healer's Band", icon:'💚', cost:55,
+ desc:'+2 to direct healing you cast (not HoT ticks).',
+ stats:{ healBonus:2 },
+ apply:(c)=>{ c._eqHealBonus=(c._eqHealBonus||0)+2; } },
+ { id:'eq_druids_pendant', slot:'trinket', name:"Druid's Pendant", icon:'🌿', cost:55,
+ desc:'+1 to every HoT tick (Rejuvenation, Regrowth, Wild Growth, Tranquility, Siphon Life, etc.).',
+ stats:{ hotBonus:1 },
+ apply:(c)=>{ c._hotBonus=(c._hotBonus||0)+1; } },
+ { id:'eq_benediction_staff', slot:'weapon', name:'Benediction Staff', icon:'🪄', cost:80,
+ desc:'+2 holy damage. +2 to direct healing. +1 to HoT ticks.',
+ stats:{ dmgHoly:2, healBonus:2, hotBonus:1 },
+ apply:(c)=>{ c._eqDmgHoly=(c._eqDmgHoly||0)+2; c._eqHealBonus=(c._eqHealBonus||0)+2; c._hotBonus=(c._hotBonus||0)+1; } },
+ { id:'eq_life_amulet', slot:'offhand', name:'Amulet of Life', icon:'💗', cost:60,
+ desc:'+3 to direct healing. +1 HoT tick.',
+ stats:{ healBonus:3, hotBonus:1 },
+ apply:(c)=>{ c._eqHealBonus=(c._eqHealBonus||0)+3; c._hotBonus=(c._hotBonus||0)+1; } },
 ];
 
 // ── RARITY ────────────────────────────────────────────────────────
@@ -2215,6 +2658,18 @@ const BOSS_LOOT = {
   { id:'bl_iron_ore', slot:'trinket', name:'Iron Ore Chunk', icon:'🪨', bossLoot:true, rarity:'uncommon', cost:0,
    desc:'+2 melee damage. Earn +5 bonus gold after each combat.',
    stats:{dmgMelee:2}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+2; c.goldBonus=(c.goldBonus||0)+5; } },
+  { id:'bl_prospector_rod', slot:'weapon', name:"Prospector's Rod", icon:'🪄', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 arcane damage. +1 to all rolls.',
+   stats:{dmgArcane:2,roll:1}, apply:(c)=>{ c._eqDmgArcane=(c._eqDmgArcane||0)+2; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_glowing_geode', slot:'trinket', name:'Glowing Geode', icon:'🔮', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 magic damage (all schools). The stone hums with buried power.',
+   stats:{dmgMagic:2}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+2; } },
+  { id:'bl_miners_flare', slot:'trinket', name:"Miner's Flare Gun", icon:'🎯', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 ranged damage. +1 to all rolls.',
+   stats:{dmgRanged:2,roll:1}, apply:(c)=>{ c._eqDmgRanged=(c._eqDmgRanged||0)+2; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_miners_kit', slot:'trinket', name:"Miner's First-Aid Kit", icon:'🩹', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+4 max HP. +1 to direct healing.',
+   stats:{hp:4,healBonus:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+4; c.hp=Math.min(c.hp+4,c.maxHP); c._eqHealBonus=(c._eqHealBonus||0)+1; } },
  ],
  sneed: [
   { id:'bl_taskmasters_whip', slot:'weapon', name:"Taskmaster's Whip", icon:'🪢', bossLoot:true, rarity:'uncommon', cost:0,
@@ -2229,6 +2684,15 @@ const BOSS_LOOT = {
   { id:'bl_overseers_coin', slot:'trinket', name:"Overseer's Coin", icon:'🪙', bossLoot:true, rarity:'uncommon', cost:0,
    desc:'+10 bonus gold earned from all sources.',
    stats:{}, apply:(c)=>{ c.goldBonus=(c.goldBonus||0)+10; } },
+  { id:'bl_defias_cipher', slot:'offhand', name:'Defias Cipher Book', icon:'📖', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 shadow damage. +1 card draw per turn.',
+   stats:{dmgShadow:2,draw:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._eqDraw=(c._eqDraw||0)+1; } },
+  { id:'bl_shrouded_mantle', slot:'armor', name:'Shrouded Mantle', icon:'🧙', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+6 max HP. +2 shadow damage. Whispers of the Brotherhood.',
+   stats:{hp:6,dmgShadow:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+6; c.hp=Math.min(c.hp+6,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; } },
+  { id:'bl_defias_crossbow', slot:'weapon', name:'Defias Crossbow', icon:'🏹', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+3 ranged damage. +1 card draw per turn.',
+   stats:{dmgRanged:3,draw:1}, apply:(c)=>{ c._eqDmgRanged=(c._eqDmgRanged||0)+3; c._eqDraw=(c._eqDraw||0)+1; } },
  ],
  rhahkZor: [
   { id:'bl_gnomish_tool', slot:'weapon', name:"Gnomish Multi-Tool", icon:'🔧', bossLoot:true, rarity:'rare', cost:0,
@@ -2243,6 +2707,12 @@ const BOSS_LOOT = {
   { id:'bl_bruiser_knuckle', slot:'trinket', name:"Rhahk'Zor's Knuckle", icon:'👊', bossLoot:true, rarity:'rare', cost:0,
    desc:'+2 melee damage. Critical hits deal an extra 3 bonus damage.',
    stats:{dmgMelee:2}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+2; c._critBonusDmg=(c._critBonusDmg||0)+3; } },
+  { id:'bl_giants_stave', slot:'weapon', name:"Giant's Stave", icon:'🌿', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 nature damage. +1 to all rolls.',
+   stats:{dmgNature:3,roll:1}, apply:(c)=>{ c._eqDmgNature=(c._eqDmgNature||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_primal_tusk', slot:'trinket', name:'Primal Tusk', icon:'🦷', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 nature damage. +2 magic damage. Raw power from a felled brute.',
+   stats:{dmgNature:2,dmgMagic:2}, apply:(c)=>{ c._eqDmgNature=(c._eqDmgNature||0)+2; c._eqDmgMagic=(c._eqDmgMagic||0)+2; } },
  ],
  sneedShredder: [
   { id:'bl_shredder_claw', slot:'weapon', name:'Shredder Claw', icon:'⚙️', bossLoot:true, rarity:'rare', cost:0,
@@ -2257,6 +2727,12 @@ const BOSS_LOOT = {
   { id:'bl_grinding_gear', slot:'trinket', name:"Grinding Gear", icon:'⚙️', bossLoot:true, rarity:'rare', cost:0,
    desc:'+2 melee damage. AoE abilities deal +1 extra damage per target.',
    stats:{dmgMelee:2}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+2; c._aoeDmgBonus=(c._aoeDmgBonus||0)+1; } },
+  { id:'bl_cryo_regulator', slot:'offhand', name:'Cryo Regulator', icon:'❄️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 frost damage. +2 arcane damage. +1 to all rolls.',
+   stats:{dmgFrost:3,dmgArcane:2,roll:1}, apply:(c)=>{ c._eqDmgFrost=(c._eqDmgFrost||0)+3; c._eqDmgArcane=(c._eqDmgArcane||0)+2; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_overheat_core', slot:'trinket', name:'Overheat Core', icon:'🔥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 fire damage. Ignite ticks deal +1 extra damage.',
+   stats:{dmgFire:3}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+3; c._igniteBonus=(c._igniteBonus||0)+1; } },
  ],
  gilnid: [
   { id:'bl_smelters_hammer', slot:'weapon', name:"Smelter's Hammer", icon:'🔨', bossLoot:true, rarity:'rare', cost:0,
@@ -2271,6 +2747,12 @@ const BOSS_LOOT = {
   { id:'bl_blast_charge', slot:'trinket', name:'Blast Charge', icon:'💣', bossLoot:true, rarity:'rare', cost:0,
    desc:'+2 fire damage. AoE abilities deal +1 extra damage to each target.',
    stats:{dmgFire:2}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+2; c._aoeDmgBonus=(c._aoeDmgBonus||0)+1; } },
+  { id:'bl_molten_focus', slot:'offhand', name:'Molten Focus', icon:'🌋', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 fire damage. +1 magic damage. Channeled through crystal.',
+   stats:{dmgFire:3,dmgMagic:1}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+3; c._eqDmgMagic=(c._eqDmgMagic||0)+1; } },
+  { id:'bl_forge_robes', slot:'armor', name:"Forge-Touched Robes", icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+6 max HP. +2 fire damage. +1 to all rolls.',
+   stats:{hp:6,dmgFire:2,roll:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+6; c.hp=Math.min(c.hp+6,c.maxHP); c._eqDmgFire=(c._eqDmgFire||0)+2; c._eqRoll=(c._eqRoll||0)+1; } },
  ],
  cookie: [
   { id:'bl_cookie_cleaver', slot:'weapon', name:"Cookie's Cleaver", icon:'🔪', bossLoot:true, rarity:'rare', cost:0,
@@ -2285,6 +2767,15 @@ const BOSS_LOOT = {
   { id:'bl_secret_recipe', slot:'trinket', name:"Cookie's Secret Recipe", icon:'🍳', bossLoot:true, rarity:'rare', cost:0,
    desc:'+10 max HP. Restore 3 HP at the start of each combat.',
    stats:{hp:10}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+10; c.hp=Math.min(c.hp+10,c.maxHP); c.healOnCombatStart=(c.healOnCombatStart||0)+3; } },
+  { id:'bl_frost_cleaver', slot:'weapon', name:'Frostbite Cleaver', icon:'🧊', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 frost damage. +1 magic damage. Chilled to the bone.',
+   stats:{dmgFrost:3,dmgMagic:1}, apply:(c)=>{ c._eqDmgFrost=(c._eqDmgFrost||0)+3; c._eqDmgMagic=(c._eqDmgMagic||0)+1; } },
+  { id:'bl_boiling_pot', slot:'offhand', name:'Boiling Pot', icon:'🍲', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 magic damage. +1 to all rolls. HoTs heal +1 per tick.',
+   stats:{dmgMagic:2,roll:1}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+2; c._eqRoll=(c._eqRoll||0)+1; c._hotBonus=(c._hotBonus||0)+1; } },
+  { id:'bl_chefs_apron', slot:'armor', name:"Cookie's Apron", icon:'🍳', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+6 max HP. +2 to direct healing. +1 to HoT ticks.',
+   stats:{hp:6,healBonus:2,hotBonus:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+6; c.hp=Math.min(c.hp+6,c.maxHP); c._eqHealBonus=(c._eqHealBonus||0)+2; c._hotBonus=(c._hotBonus||0)+1; } },
  ],
  captainGreenskin: [
   { id:'bl_pirate_cutlass', slot:'weapon', name:"Pirate Cutlass", icon:'⚓', bossLoot:true, rarity:'rare', cost:0,
@@ -2299,6 +2790,15 @@ const BOSS_LOOT = {
   { id:'bl_captains_compass', slot:'trinket', name:"Captain's Compass", icon:'🧭', bossLoot:true, rarity:'rare', cost:0,
    desc:'+1 to all combat rolls. Poison effects deal 1 less damage to you.',
    stats:{roll:1}, apply:(c)=>{ c._eqRoll=(c._eqRoll||0)+1; c._poisonResist=(c._poisonResist||0)+1; } },
+  { id:'bl_cursed_pistol', slot:'weapon', name:'Cursed Pistol', icon:'🔫', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 shadow damage. +1 card draw per turn.',
+   stats:{dmgShadow:3,draw:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._eqDraw=(c._eqDraw||0)+1; } },
+  { id:'bl_pirate_talisman', slot:'trinket', name:"Pirate's Talisman", icon:'☠️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 shadow damage. +1 to all rolls. Poison deals 1 less damage to you.',
+   stats:{dmgShadow:2,roll:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._eqRoll=(c._eqRoll||0)+1; c._poisonResist=(c._poisonResist||0)+1; } },
+  { id:'bl_buccaneer_flintlock', slot:'weapon', name:"Buccaneer's Flintlock", icon:'🔫', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 ranged damage. +1 to all rolls.',
+   stats:{dmgRanged:3,roll:1}, apply:(c)=>{ c._eqDmgRanged=(c._eqDmgRanged||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
  ],
  mrSmite: [
   { id:'bl_smites_cutlass', slot:'weapon', name:"Smite's Cutlass", icon:'⚓', bossLoot:true, rarity:'epic', cost:0,
@@ -2313,6 +2813,15 @@ const BOSS_LOOT = {
   { id:'bl_smites_charm', slot:'trinket', name:"Smite's Lucky Charm", icon:'🍀', bossLoot:true, rarity:'epic', cost:0,
    desc:'Crit threshold reduced by 2 (crits on 18+).',
    stats:{}, apply:(c)=>{ c.critThreshold=Math.max(15,(c.critThreshold||20)-2); c._eqCritThresh=(c._eqCritThresh||0)-2; } },
+  { id:'bl_stormcaller', slot:'weapon', name:"Smite's Stormcaller", icon:'🌩️', bossLoot:true, rarity:'epic', cost:0,
+   desc:'+4 nature damage. +1 to all rolls.',
+   stats:{dmgNature:4,roll:1}, apply:(c)=>{ c._eqDmgNature=(c._eqDmgNature||0)+4; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_tempest_medallion', slot:'offhand', name:'Tempest Medallion', icon:'💫', bossLoot:true, rarity:'epic', cost:0,
+   desc:'+3 magic damage. +2 holy damage. +1 card draw per turn.',
+   stats:{dmgMagic:3,dmgHoly:2,draw:1}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+3; c._eqDmgHoly=(c._eqDmgHoly||0)+2; c._eqDraw=(c._eqDraw||0)+1; } },
+  { id:'bl_harpoon_gun', slot:'weapon', name:"Smite's Harpoon Gun", icon:'🏹', bossLoot:true, rarity:'epic', cost:0,
+   desc:'+4 ranged damage. +1 to all rolls.',
+   stats:{dmgRanged:4,roll:1}, apply:(c)=>{ c._eqDmgRanged=(c._eqDmgRanged||0)+4; c._eqRoll=(c._eqRoll||0)+1; } },
  ],
  edwinVanCleef: [
   { id:'bl_vanCleef_blade', slot:'weapon', name:"VanCleef's Blade", icon:'🗡️', bossLoot:true, rarity:'legendary', cost:0,
@@ -2327,6 +2836,216 @@ const BOSS_LOOT = {
   { id:'bl_brotherhood_signet', slot:'trinket', name:"Brotherhood Signet", icon:'💍', bossLoot:true, rarity:'legendary', cost:0,
    desc:'+3 to all damage types. Crit threshold -1. +1 to all rolls. The mark of the Brotherhood.',
    stats:{dmgAll:3,roll:1}, apply:(c)=>{ c._eqDmgAll=(c._eqDmgAll||0)+3; c.critThreshold=Math.max(15,(c.critThreshold||20)-1); c._eqCritThresh=(c._eqCritThresh||0)-1; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_vanCleef_grimoire', slot:'weapon', name:"VanCleef's Grimoire", icon:'📜', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+4 magic damage (all schools). +1 card draw per turn. +1 to all rolls.',
+   stats:{dmgMagic:4,draw:1,roll:1}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+4; c._eqDraw=(c._eqDraw||0)+1; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_scrying_orb', slot:'trinket', name:'Brotherhood Scrying Orb', icon:'🔮', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+3 shadow damage. +3 arcane damage. +1 to all rolls.',
+   stats:{dmgShadow:3,dmgArcane:3,roll:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._eqDmgArcane=(c._eqDmgArcane||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_brotherhood_longbow', slot:'weapon', name:'Brotherhood Longbow', icon:'🏹', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+4 ranged damage. +1 card draw per turn. +1 to all rolls.',
+   stats:{dmgRanged:4,draw:1,roll:1}, apply:(c)=>{ c._eqDmgRanged=(c._eqDmgRanged||0)+4; c._eqDraw=(c._eqDraw||0)+1; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_lifebinder', slot:'trinket', name:"Lifebinder's Sigil", icon:'💗', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+3 to direct healing. +2 to HoT ticks. +1 to all rolls.',
+   stats:{healBonus:3,hotBonus:2,roll:1}, apply:(c)=>{ c._eqHealBonus=(c._eqHealBonus||0)+3; c._hotBonus=(c._hotBonus||0)+2; c._eqRoll=(c._eqRoll||0)+1; } },
+ ],
+ // ── Shadowfang Keep loot ──
+ rethilgore: [
+  { id:'bl_jailers_whip', slot:'weapon', name:"Jailer's Lash", icon:'🪢', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 melee damage. Attacks apply 1 Bleed (Hemorrhage) stack.',
+   stats:{dmgMelee:2}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+2; c._eqBleedOnHit=(c._eqBleedOnHit||0)+1; } },
+  { id:'bl_rusted_manacles', slot:'offhand', name:'Rusted Manacles', icon:'⛓️', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+4 max HP. +1 armor.',
+   stats:{hp:4,armor:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+4; c.hp=Math.min(c.hp+4,c.maxHP); c._eqArmor=(c._eqArmor||0)+1; } },
+  { id:'bl_keepers_cowl', slot:'armor', name:"Keeper's Cowl", icon:'🧥', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+6 max HP. +2 shadow damage.',
+   stats:{hp:6,dmgShadow:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+6; c.hp=Math.min(c.hp+6,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; } },
+  { id:'bl_blood_vial', slot:'trinket', name:'Vial of Blood', icon:'🩸', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 shadow damage. Bleed ticks you deal heal you for 1 each.',
+   stats:{dmgShadow:2}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._bleedLifesteal=(c._bleedLifesteal||0)+1; } },
+ ],
+ razorclaw: [
+  { id:'bl_butcher_cleaver', slot:'weapon', name:"Butcher's Cleaver", icon:'🪓', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+4 melee damage. Crits apply 2 Bleed stacks.',
+   stats:{dmgMelee:4}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+4; c._eqBleedOnCrit=(c._eqBleedOnCrit||0)+2; } },
+  { id:'bl_bloodied_chains', slot:'offhand', name:'Bloodied Chains', icon:'⛓️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 to all rolls. +1 to HoT ticks.',
+   stats:{roll:2,hotBonus:1}, apply:(c)=>{ c._eqRoll=(c._eqRoll||0)+2; c._hotBonus=(c._hotBonus||0)+1; } },
+  { id:'bl_frostwolf_pelt', slot:'armor', name:'Frostwolf Pelt', icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+10 max HP. +2 frost damage.',
+   stats:{hp:10,dmgFrost:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+10; c.hp=Math.min(c.hp+10,c.maxHP); c._eqDmgFrost=(c._eqDmgFrost||0)+2; } },
+  { id:'bl_frenzy_fang', slot:'trinket', name:"Razorclaw's Fang", icon:'🦷', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 melee damage. Below 50% HP, gain +2 additional melee.',
+   stats:{dmgMelee:2}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+2; c._lowHpMeleeBonus=(c._lowHpMeleeBonus||0)+2; } },
+ ],
+ baronSilverlaine: [
+  { id:'bl_baron_cane', slot:'weapon', name:"Baron's Cane", icon:'🦯', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 shadow damage. +1 to all rolls.',
+   stats:{dmgShadow:3,roll:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_cursed_tome', slot:'offhand', name:'Cursed Tome', icon:'📕', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 magic damage. +1 card draw per turn.',
+   stats:{dmgMagic:2,draw:1}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+2; c._eqDraw=(c._eqDraw||0)+1; } },
+  { id:'bl_wolfsbane_robe', slot:'armor', name:'Wolfsbane Robe', icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+8 max HP. +2 shadow damage. +1 to HoT ticks.',
+   stats:{hp:8,dmgShadow:2,hotBonus:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+8; c.hp=Math.min(c.hp+8,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._hotBonus=(c._hotBonus||0)+1; } },
+  { id:'bl_baron_signet', slot:'trinket', name:"Baron's Signet Ring", icon:'💍', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 to all damage. Curses ignore 1 debuff cleanse per combat.',
+   stats:{dmgAll:2}, apply:(c)=>{ c._eqDmgAll=(c._eqDmgAll||0)+2; c._curseShield=(c._curseShield||0)+1; } },
+ ],
+ commanderSpringvale: [
+  { id:'bl_springvale_sword', slot:'weapon', name:"Springvale's Bastard Sword", icon:'⚔️', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+3 melee damage. +1 armor.',
+   stats:{dmgMelee:3,armor:1}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+3; c._eqArmor=(c._eqArmor||0)+1; } },
+  { id:'bl_garrison_crest', slot:'offhand', name:'Garrison Crest', icon:'🛡️', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 armor.',
+   stats:{armor:2}, apply:(c)=>{ c._eqArmor=(c._eqArmor||0)+2; } },
+  { id:'bl_commanders_plate', slot:'armor', name:"Commander's Plate", icon:'🧥', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+10 max HP. +1 armor.',
+   stats:{hp:10,armor:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+10; c.hp=Math.min(c.hp+10,c.maxHP); c._eqArmor=(c._eqArmor||0)+1; } },
+  { id:'bl_rally_banner', slot:'trinket', name:'Rally Banner', icon:'🚩', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+1 to all rolls. Heal 2 HP at start of each combat.',
+   stats:{roll:1}, apply:(c)=>{ c._eqRoll=(c._eqRoll||0)+1; c.healOnCombatStart=(c.healOnCombatStart||0)+2; } },
+ ],
+ odoBlindwatcher: [
+  { id:'bl_silver_longbow', slot:'weapon', name:'Silver-Tipped Longbow', icon:'🏹', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+4 ranged damage. +1 to all rolls.',
+   stats:{dmgRanged:4,roll:1}, apply:(c)=>{ c._eqDmgRanged=(c._eqDmgRanged||0)+4; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_blindwatch_focus', slot:'offhand', name:"Blindwatch Focus", icon:'👁️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 to all rolls. Crit threshold -1.',
+   stats:{roll:2}, apply:(c)=>{ c._eqRoll=(c._eqRoll||0)+2; c.critThreshold=Math.max(15,(c.critThreshold||20)-1); c._eqCritThresh=(c._eqCritThresh||0)-1; } },
+  { id:'bl_watchers_cloak', slot:'armor', name:"Watcher's Cloak", icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+8 max HP. +2 ranged damage. Start combat with Stealth.',
+   stats:{hp:8,dmgRanged:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+8; c.hp=Math.min(c.hp+8,c.maxHP); c._eqDmgRanged=(c._eqDmgRanged||0)+2; c._eqStartStealth=true; } },
+  { id:'bl_deadeye_totem', slot:'trinket', name:'Deadeye Totem', icon:'🎯', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 ranged damage. +1 to all rolls.',
+   stats:{dmgRanged:3,roll:1}, apply:(c)=>{ c._eqDmgRanged=(c._eqDmgRanged||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
+ ],
+ fenrusDevourer: [
+  { id:'bl_fenrus_fang', slot:'weapon', name:"Fenrus's Fang", icon:'🗡️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 melee damage. +2 shadow damage. Crits apply 2 Bleed stacks.',
+   stats:{dmgMelee:3,dmgShadow:2}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+3; c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._eqBleedOnCrit=(c._eqBleedOnCrit||0)+2; } },
+  { id:'bl_devourer_tome', slot:'offhand', name:"Devourer's Grimoire", icon:'📕', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 shadow damage. +1 to HoT ticks.',
+   stats:{dmgShadow:3,hotBonus:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._hotBonus=(c._hotBonus||0)+1; } },
+  { id:'bl_shadow_pelt', slot:'armor', name:'Shadow-Pelt Cloak', icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+10 max HP. +2 shadow damage. +2 to direct healing.',
+   stats:{hp:10,dmgShadow:2,healBonus:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+10; c.hp=Math.min(c.hp+10,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._eqHealBonus=(c._eqHealBonus||0)+2; } },
+  { id:'bl_iron_collar', slot:'trinket', name:"Fenrus's Iron Collar", icon:'⛓️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 shadow damage. Bleed ticks you deal heal you for 1 each.',
+   stats:{dmgShadow:2}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._bleedLifesteal=(c._bleedLifesteal||0)+1; } },
+ ],
+ archmageArugal: [
+  { id:'bl_arugal_staff', slot:'weapon', name:"Arugal's Shadow Staff", icon:'🪄', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+4 shadow damage. +3 frost damage. +1 card draw per turn.',
+   stats:{dmgShadow:4,dmgFrost:3,draw:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+4; c._eqDmgFrost=(c._eqDmgFrost||0)+3; c._eqDraw=(c._eqDraw||0)+1; } },
+  { id:'bl_archmage_focus', slot:'offhand', name:'Archmage Focus', icon:'🔮', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+4 magic damage. +2 to all rolls.',
+   stats:{dmgMagic:4,roll:2}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+4; c._eqRoll=(c._eqRoll||0)+2; } },
+  { id:'bl_arugal_mantle', slot:'armor', name:"Arugal's Mantle", icon:'🧥', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+14 max HP. +2 shadow damage. +2 frost damage. +1 to HoT ticks.',
+   stats:{hp:14,dmgShadow:2,dmgFrost:2,hotBonus:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+14; c.hp=Math.min(c.hp+14,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._eqDmgFrost=(c._eqDmgFrost||0)+2; c._hotBonus=(c._hotBonus||0)+1; } },
+  { id:'bl_moon_pendant', slot:'trinket', name:'Pendant of the Moon', icon:'🌙', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+3 shadow damage. +3 frost damage. +1 to all rolls. +1 card draw.',
+   stats:{dmgShadow:3,dmgFrost:3,roll:1,draw:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._eqDmgFrost=(c._eqDmgFrost||0)+3; c._eqRoll=(c._eqRoll||0)+1; c._eqDraw=(c._eqDraw||0)+1; } },
+ ],
+ // ── Ragefire Chasm loot ──
+ oggleflint: [
+  { id:'bl_trogg_club', slot:'weapon', name:"Trogg Club", icon:'🪵', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+3 melee damage.',
+   stats:{dmgMelee:3}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+3; } },
+  { id:'bl_stoneskin_buckler', slot:'offhand', name:'Stoneskin Buckler', icon:'🛡️', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 armor.',
+   stats:{armor:2}, apply:(c)=>{ c._eqArmor=(c._eqArmor||0)+2; } },
+  { id:'bl_rockhide_vest', slot:'armor', name:'Rockhide Vest', icon:'🧥', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+8 max HP. +1 armor.',
+   stats:{hp:8,armor:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+8; c.hp=Math.min(c.hp+8,c.maxHP); c._eqArmor=(c._eqArmor||0)+1; } },
+  { id:'bl_trogg_totem', slot:'trinket', name:'Trogg Totem', icon:'🪨', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+1 to all rolls. +4 max HP.',
+   stats:{roll:1,hp:4}, apply:(c)=>{ c._eqRoll=(c._eqRoll||0)+1; c.maxHP=(c.maxHP||20)+4; c.hp=Math.min(c.hp+4,c.maxHP); } },
+ ],
+ jergosh: [
+  { id:'bl_invoker_rod', slot:'weapon', name:"Invoker's Rod", icon:'🪄', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 shadow damage. +1 magic damage.',
+   stats:{dmgShadow:3,dmgMagic:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._eqDmgMagic=(c._eqDmgMagic||0)+1; } },
+  { id:'bl_jergosh_tome', slot:'offhand', name:"Jergosh's Tome", icon:'📕', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 shadow damage. +1 card draw per turn. +1 to all rolls.',
+   stats:{dmgShadow:2,draw:1,roll:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._eqDraw=(c._eqDraw||0)+1; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_cult_robes', slot:'armor', name:'Cult Robes', icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+8 max HP. +2 shadow damage.',
+   stats:{hp:8,dmgShadow:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+8; c.hp=Math.min(c.hp+8,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; } },
+  { id:'bl_corrupted_focus', slot:'trinket', name:'Corrupted Focus', icon:'🕳️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 shadow damage. Shadow DoTs deal +1 per tick.',
+   stats:{dmgShadow:2}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._shadowDotBonus=(c._shadowDotBonus||0)+1; } },
+ ],
+ bazzalan: [
+  { id:'bl_bazzalan_dagger', slot:'weapon', name:"Bazzalan's Dagger", icon:'🗡️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+4 melee damage. Hits apply 1 Poison stack.',
+   stats:{dmgMelee:4}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+4; c._eqPoisonOnHit=(c._eqPoisonOnHit||0)+1; } },
+  { id:'bl_venom_flask', slot:'offhand', name:'Venom Flask', icon:'🧪', bossLoot:true, rarity:'rare', cost:0,
+   desc:'Poison ticks you deal +1 damage. +1 card draw per turn.',
+   stats:{draw:1}, apply:(c)=>{ c._eqDraw=(c._eqDraw||0)+1; c._poisonDotBonus=(c._poisonDotBonus||0)+1; } },
+  { id:'bl_shadowsilk_vest', slot:'armor', name:'Shadowsilk Vest', icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+7 max HP. +2 shadow damage. Poison deals 1 less to you.',
+   stats:{hp:7,dmgShadow:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+7; c.hp=Math.min(c.hp+7,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._poisonResist=(c._poisonResist||0)+1; } },
+  { id:'bl_assassin_signet', slot:'trinket', name:"Assassin's Signet", icon:'💍', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 melee damage. +2 shadow damage. Crit threshold -1.',
+   stats:{dmgMelee:2,dmgShadow:2}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+2; c._eqDmgShadow=(c._eqDmgShadow||0)+2; c.critThreshold=Math.max(15,(c.critThreshold||20)-1); c._eqCritThresh=(c._eqCritThresh||0)-1; } },
+ ],
+ maggotEye: [
+  { id:'bl_maggot_staff', slot:'weapon', name:"Maggot Eye's Knotted Staff", icon:'🪄', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+3 nature damage. +1 to all rolls.',
+   stats:{dmgNature:3,roll:1}, apply:(c)=>{ c._eqDmgNature=(c._eqDmgNature||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_jade_idol', slot:'offhand', name:'Jade Eye Idol', icon:'👁️', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+2 magic damage. +1 HoT tick.',
+   stats:{dmgMagic:2,hotBonus:1}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+2; c._hotBonus=(c._hotBonus||0)+1; } },
+  { id:'bl_trogg_shaman_hide', slot:'armor', name:'Trogg Shaman Hide', icon:'🧥', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+8 max HP. Poison deals 1 less to you.',
+   stats:{hp:8}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+8; c.hp=Math.min(c.hp+8,c.maxHP); c._poisonResist=(c._poisonResist||0)+1; } },
+  { id:'bl_all_seeing_eye', slot:'trinket', name:'All-Seeing Eye', icon:'🔮', bossLoot:true, rarity:'uncommon', cost:0,
+   desc:'+1 to all rolls. +1 card draw per turn.',
+   stats:{roll:1,draw:1}, apply:(c)=>{ c._eqRoll=(c._eqRoll||0)+1; c._eqDraw=(c._eqDraw||0)+1; } },
+ ],
+ zelemar: [
+  { id:'bl_zelemar_wand', slot:'weapon', name:"Zelemar's Wrath Wand", icon:'🪄', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+4 shadow damage. Shadow DoTs deal +1 per tick.',
+   stats:{dmgShadow:4}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+4; c._shadowDotBonus=(c._shadowDotBonus||0)+1; } },
+  { id:'bl_wrath_effigy', slot:'offhand', name:'Wrath Effigy', icon:'🕯️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 shadow damage. +1 to all rolls. +1 card draw.',
+   stats:{dmgShadow:2,roll:1,draw:1}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+2; c._eqRoll=(c._eqRoll||0)+1; c._eqDraw=(c._eqDraw||0)+1; } },
+  { id:'bl_wrathful_robes', slot:'armor', name:'Wrathful Robes', icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+10 max HP. +2 shadow damage.',
+   stats:{hp:10,dmgShadow:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+10; c.hp=Math.min(c.hp+10,c.maxHP); c._eqDmgShadow=(c._eqDmgShadow||0)+2; } },
+  { id:'bl_corrupted_sigil', slot:'trinket', name:'Corrupted Sigil', icon:'💀', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+3 shadow damage. Shadow DoTs deal +1 per tick.',
+   stats:{dmgShadow:3}, apply:(c)=>{ c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._shadowDotBonus=(c._shadowDotBonus||0)+1; } },
+ ],
+ forgemaster: [
+  { id:'bl_forgemaster_hammer', slot:'weapon', name:"Forgemaster's Hammer", icon:'🔨', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+4 fire damage. +2 melee damage.',
+   stats:{dmgFire:4,dmgMelee:2}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+4; c._eqDmgMelee=(c._eqDmgMelee||0)+2; } },
+  { id:'bl_molten_shield', slot:'offhand', name:'Molten Shield', icon:'🛡️', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 armor. +2 fire damage.',
+   stats:{armor:2,dmgFire:2}, apply:(c)=>{ c._eqArmor=(c._eqArmor||0)+2; c._eqDmgFire=(c._eqDmgFire||0)+2; } },
+  { id:'bl_forge_harness', slot:'armor', name:'Forge Harness', icon:'🧥', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+10 max HP. +2 fire damage. Fire deals 1 less to you.',
+   stats:{hp:10,dmgFire:2}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+10; c.hp=Math.min(c.hp+10,c.maxHP); c._eqDmgFire=(c._eqDmgFire||0)+2; c._fireResist=(c._fireResist||0)+1; } },
+  { id:'bl_rare_ingot', slot:'trinket', name:'Still-Hot Ingot', icon:'🪙', bossLoot:true, rarity:'rare', cost:0,
+   desc:'+2 fire damage. Ignite ticks deal +1. Earn +10 bonus gold per combat.',
+   stats:{dmgFire:2}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+2; c._igniteBonus=(c._igniteBonus||0)+1; c.goldBonus=(c.goldBonus||0)+10; } },
+ ],
+ taragaman: [
+  { id:'bl_hungerer_maw', slot:'weapon', name:"Hungerer's Maw", icon:'🔥', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+4 fire damage. +3 shadow damage. +1 to all rolls.',
+   stats:{dmgFire:4,dmgShadow:3,roll:1}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+4; c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_cinder_focus', slot:'offhand', name:'Cinder Focus', icon:'🕯️', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+4 magic damage. Ignite ticks deal +1.',
+   stats:{dmgMagic:4}, apply:(c)=>{ c._eqDmgMagic=(c._eqDmgMagic||0)+4; c._igniteBonus=(c._igniteBonus||0)+1; } },
+  { id:'bl_taragaman_hide', slot:'armor', name:"Taragaman's Hide", icon:'🧥', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+14 max HP. +3 fire damage. +1 armor.',
+   stats:{hp:14,dmgFire:3,armor:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+14; c.hp=Math.min(c.hp+14,c.maxHP); c._eqDmgFire=(c._eqDmgFire||0)+3; c._eqArmor=(c._eqArmor||0)+1; } },
+  { id:'bl_hungerer_heart', slot:'trinket', name:"Hungerer's Heart", icon:'❤️‍🔥', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+3 fire damage. +3 shadow damage. +2 to direct healing.',
+   stats:{dmgFire:3,dmgShadow:3,healBonus:2}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+3; c._eqDmgShadow=(c._eqDmgShadow||0)+3; c._eqHealBonus=(c._eqHealBonus||0)+2; } },
  ],
 };
 
@@ -2693,6 +3412,10 @@ const CARD_DAMAGE_TYPES = {
  'Mutilate':'melee','Fan of Knives':'melee','Shiv':'melee','Gouge':'melee',
  'Ambush':'melee','Killing Spree':'melee',"Slice 'n Dice":'melee','Rupture':'melee',
  'Skull Crack':'melee',"Coup de Grâce":'melee','Kick':'melee',
+ // Warlock shadow overrides (Destruction talent maps to fire otherwise)
+ 'Shadow Bolt':'shadow','Death Coil':'shadow','Death Bolt':'shadow','Drain Life':'shadow',
+ 'Siphon Life':'shadow','Soul Siphon':'shadow','Curse of Agony':'shadow','Corruption':'shadow',
+ 'Fear':'shadow','Unstable Affliction':'shadow','Implosion':'shadow','Chaos Bolt':'shadow',
  // Druid melee cards
  'Claw':'melee','Maul':'melee','Swipe':'melee','Ferocious Bite':'melee',
  'Pounce':'melee','Ravage':'melee','Feral Charge':'melee','Rake':'melee',
@@ -2770,7 +3493,7 @@ const RAGE_SPEND_CARDS = {
  'Colossus Smash':   { type:'damage', dmgPerRage:2, label:'+2 dmg per rage' },
  'Anger Management': { type:'utility', label:'+1 armor per rage (3💢 = +1 damage reduction)' },
 };
-const XP_TABLE = [0, 80, 180, 320, 500, 750, 1100, 99999];
+const XP_TABLE = [0, 50, 120, 200, 320, 500, 800, 99999];
 const TIER_UNLOCK = { 1:1, 2:2, 3:2, 4:3, 5:3, 6:4, 7:4 };
 const CLASS_UNLOCK_COSTS = { Rogue:0, Mage:30, Druid:30, Warrior:40, Hunter:40, Priest:40, Warlock:50, Shaman:50, TimeWalker:75 };
 
@@ -2908,6 +3631,24 @@ function modal(title, body, btnLabel='Continue', cb=null) {
  };
 }
 
+function confirmDialog(title, body, yesLabel, noLabel, onYes, onNo){
+ document.getElementById('confirm-overlay')?.remove();
+ const ov=document.createElement('div');
+ ov.id='confirm-overlay';
+ ov.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;pointer-events:all';
+ const box=document.createElement('div');
+ box.style.cssText='background:var(--parch-dark);border:2px solid var(--chrome-gold);border-radius:6px;padding:24px 28px;max-width:420px;width:92%;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center';
+ box.innerHTML=`
+ <div style="font-family:var(--font-pixel);font-size:12px;color:var(--chrome-gold-hi);letter-spacing:0.1em">${title}</div>
+ <div style="font-family:var(--font-body);font-size:14px;color:var(--parch-text-hi);line-height:1.5">${body.replace(/\n/g,'<br>')}</div>
+ <div style="display:flex;gap:10px;margin-top:4px"><button class="btn btn-primary" id="cd-yes">${yesLabel||'Continue'}</button><button class="btn btn-ghost" id="cd-no">${noLabel||'Cancel'}</button></div>
+ `;
+ ov.appendChild(box); document.body.appendChild(ov);
+ const close=()=>ov.remove();
+ box.querySelector('#cd-yes').onclick=()=>{close(); if(onYes) onYes();};
+ box.querySelector('#cd-no').onclick=()=>{close(); if(onNo) onNo();};
+}
+
 function barHTML(cur, max, cls='bar-hp') {
  const pct = Math.max(0, Math.min(100, cur/max*100));
  const col = cls.includes('hp')
@@ -2955,14 +3696,22 @@ function getAvailablePool(className, maxTier) {
 }
 
 function getDraftOptions(className, maxTier, excludeNames=[], count=3) {
- // excludeNames = card names already in deck (prevent offering exact same named card twice in one draft)
- // But allow drafting a card you already have (duplicates are useful in deckbuilding)
- const avail = getAvailablePool(className, maxTier);
- // Shuffle first, then pick 'count' cards ensuring no duplicate names in same offer
- const shuffled = shuffle([...avail]);
+ // Savvy Drafter: chance each option is drawn from one tier above the minimum
+ const boostChance = (G.char?._draftTierBoost||0)/100;
+ const basePool = getAvailablePool(className, maxTier);
+ const boostedPool = getAvailablePool(className, maxTier+1);
+ const higherTierCards = boostedPool.filter(c=>c.tier>maxTier);
  const picked = [];
  const pickedNames = new Set();
+ const shuffled = shuffle([...basePool]);
+ const boostedShuffled = shuffle([...higherTierCards]);
+ let bi=0;
  for(const card of shuffled){
+ // Try boosted-tier replacement
+ if(boostChance>0&&higherTierCards.length>0&&Math.random()<boostChance&&bi<boostedShuffled.length){
+ const b=boostedShuffled[bi++];
+ if(!pickedNames.has(b.name)){ pickedNames.add(b.name); picked.push(b); if(picked.length>=count) break; continue; }
+ }
  if(!pickedNames.has(card.name)){
  pickedNames.add(card.name);
  picked.push(card);
@@ -3185,7 +3934,7 @@ function initTitle() {
  const co=loadCarryover();
  const hasSave=!!loadRun();
  $('btn-continue').style.display=hasSave?'':'none';
- if(hasSave) $('btn-continue').onclick=()=>{G.char=loadRun();G.encounterIdx=G.char.checkpoint||0;window._runStarted=true;runEncounter(G.encounterIdx);};
+ if(hasSave) $('btn-continue').onclick=()=>{G.char=loadRun();G.encounterIdx=G.char.checkpoint||0;G.currentAdventure=G.char.adventure||'deadmines';window._runStarted=true;runEncounter(G.encounterIdx);};
  if($('btn-newgame')) $('btn-newgame').onclick=()=>showAdventureSelect();
  // Rotating flavor text
  const _flavors=[
@@ -3210,15 +3959,38 @@ function initTitle() {
 }
 
 // ── ADVENTURE SELECT ──────────────────────────────────────────────
+function isAdventureUnlocked(adv){
+ if(adv.unlocked) return true; // Deadmines: always free
+ const co=loadCarryover();
+ const unlocks=co.unlockedAdventures||[];
+ if(unlocks.includes(adv.id)) return true;
+ // Grandfather: legacy lg_unlock_* upgrades still work for players who bought them before
+ if(adv.requiresUpgrade && (co.legacyLevels||{})[adv.requiresUpgrade]>=1) return true;
+ return false;
+}
+function buyAdventureUnlock(advId){
+ const co=loadCarryover();
+ const lp=getLegacyPoints(co);
+ const costLP=60;
+ if(lp<costLP){ toast('Not enough Legacy Points','danger'); return; }
+ co.legacyPoints=lp-costLP;
+ co.unlockedAdventures=co.unlockedAdventures||[];
+ if(!co.unlockedAdventures.includes(advId)) co.unlockedAdventures.push(advId);
+ saveCarryover(co);
+ toast(`🗺️ ${ADVENTURES.find(a=>a.id===advId).title} unlocked!`,'success');
+ showLegacyShop(window._lgClass,'adventures','adv_'+advId);
+}
 function showAdventureSelect() {
  show('screen-adventure-select');
  const grid=$('adventure-grid');
  if(!grid)return;
  grid.innerHTML='';
  ADVENTURES.forEach(adv=>{
+ const unlocked=isAdventureUnlocked(adv);
  const card=document.createElement('div');
- card.className='adv-card'+(adv.locked?' locked':'');
+ card.className='adv-card'+(unlocked?'':' locked');
  const tags=adv.tags.map(t=>`<span style="font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:4px 8px">${t}</span>`).join('');
+ const lockedTag=!unlocked?'<div style="margin-left:auto;font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim);border:1px solid rgba(255,255,255,0.1);padding:5px 8px;border-radius:2px">🔒 LOCKED</div>':'';
  card.innerHTML=`
  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px">
  <div style="font-size:44px">${adv.icon}</div>
@@ -3226,11 +3998,11 @@ function showAdventureSelect() {
  <div style="font-family:var(--font-pixel);font-size:14px;color:var(--chrome-gold-hi);margin-bottom:6px">${adv.title}</div>
  <div style="font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim)">📍 ${adv.subtitle}</div>
  </div>
- ${adv.comingSoon?'<div style="margin-left:auto;font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim);border:1px solid rgba(255,255,255,0.1);padding:5px 8px;border-radius:2px">COMING SOON</div>':''}
+ ${lockedTag}
  </div>
  <div style="font-size:16px;color:var(--parch-text-dim);line-height:1.6;margin-bottom:14px">${adv.lore}</div>
- <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:${adv.unlocked?'14px':'0'}">${tags}</div>
- ${adv.unlocked?`<button class="btn btn-primary" style="width:100%;font-size:12px;padding:12px 16px" onclick="selectAdventure('${adv.id}')">⚔️ Enter ${adv.title}</button>`:''}
+ <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:${unlocked?'14px':'6px'}">${tags}</div>
+ ${unlocked?`<button class="btn btn-primary" style="width:100%;font-size:12px;padding:12px 16px" onclick="selectAdventure('${adv.id}')">⚔️ Enter ${adv.title}</button>`:`<div style="font-family:var(--font-pixel);font-size:9px;color:var(--parch-text-dim);text-align:center;padding:8px">🔒 Unlock via Legacy Vault</div>`}
  `;
  grid.appendChild(card);
  });
@@ -3491,7 +4263,9 @@ function startNewRun(name, className) {
  saveCarryover(co);
  toast(`${CLASSES[className]?.icon} ${className} chosen as your starting class!`,'success');
  }
- G.char=createCharacter(name, className);
+  G.char=createCharacter(name, className);
+ // Stamp the chosen adventure onto the character so Continue can restore it
+ G.char.adventure=G.currentAdventure||'deadmines';
  if(G._pendingHeroId){
  const hero=getHero(G._pendingHeroId);
  if(hero){ G.char.heroId=hero.id; G.char.hp=hero.hp; G.char.maxHP=hero.hp; }
@@ -3556,8 +4330,35 @@ function showDraftScreen() {
  el.onclick=()=>pickDraftCard(card);
  container.appendChild(el);
  });
+ // Reroll button — only during normal draft (not initial deck build)
+ const parentEl=$('btn-skip-draft').parentElement;
+ parentEl.querySelector('.draft-reroll-wrap')?.remove();
+ if(!draftIsInitial){
+ const wrap=document.createElement('div');
+ wrap.className='draft-reroll-wrap';
+ wrap.style.cssText='display:inline-flex;gap:8px;margin-left:8px';
+ const rerolls=G.char._draftRerollsLeft!==undefined?G.char._draftRerollsLeft:(G.char._draftRerolls||0);
+ if(G.char._draftRerollsLeft===undefined) G.char._draftRerollsLeft=G.char._draftRerolls||0;
+ if(G.char._draftRerollsLeft>0){
+ const rb=document.createElement('button');
+ rb.className='btn btn-ghost btn-sm';
+ rb.textContent=`♻ Reroll (${G.char._draftRerollsLeft} left)`;
+ rb.onclick=()=>{ G.char._draftRerollsLeft--; saveRun(G.char); showDraftScreen(); };
+ wrap.appendChild(rb);
+ }
+ parentEl.appendChild(wrap);
+ }
  $('btn-skip-draft').style.display=draftIsInitial?'none':'';
- $('btn-skip-draft').onclick=()=>finishDraft(null);
+ $('btn-skip-draft').onclick=()=>{
+ // Hoarder: +15g on skip if the upgrade is owned
+ if((G.char._draftSkipGold||0)>0){
+ G.char.gold=(G.char.gold||0)+G.char._draftSkipGold;
+ G.char.runGold=(G.char.runGold||0)+G.char._draftSkipGold;
+ log(`💰 Skipped the draft — +${G.char._draftSkipGold}g from Hoarder.`,'log-info');
+ toast(`💰 +${G.char._draftSkipGold}g`,'success');
+ }
+ finishDraft(null);
+ };
 }
 
 function pickDraftCard(card) {
@@ -3587,11 +4388,67 @@ function finishDraft(card) {
 
 // ── ENCOUNTERS ────────────────────────────────────────────────────
 function runEncounter(idx) {
- if(idx>=ENCOUNTERS.length){endVictory();return;}
+ const list=getCurrentEncounters();
+ if(idx>=list.length){endVictory();return;}
  G.encounterIdx=idx; G.char.checkpoint=idx; saveRun(G.char);
- const enc=ENCOUNTERS[idx];
+ const enc=list[idx];
  if(enc.type==='encounter') showCombatScreen(enc);
+ else if(enc.type==='cardRemoval') showCardRemovalScreen(enc);
  else showAdventureScreen(enc);
+}
+
+function showCardRemovalScreen(enc){
+ show('screen-adventure');
+ const mainEl=document.querySelector('.adv-main');
+ if(!mainEl)return;
+ renderSidebar();
+ mainEl.innerHTML=`
+ <div class="quest-type-badge" style="background:rgba(120,80,180,0.4);color:var(--chrome-gold-hi)">RITUAL</div>
+ <div class="enc-title"><span>${enc.icon||'⛲'}</span> <span>${enc.title}</span></div>
+ <div class="enc-text">${enc.text||''}</div>
+ <div id="enc-choices"></div>
+ `;
+ const container=document.getElementById('enc-choices');
+ const deck=G.char.deck||[];
+ if(deck.length<=6){
+ const info=document.createElement('div');
+ info.style.cssText='padding:12px;color:var(--parch-text-dim);font-style:italic;text-align:center';
+ info.textContent='Your deck is too small to risk removing a card. You walk past the shrine untouched.';
+ container.appendChild(info);
+ const cont=document.createElement('button');
+ cont.className='btn btn-primary'; cont.textContent='Continue →';
+ cont.onclick=()=>runEncounter(G.encounterIdx+1);
+ container.appendChild(cont);
+ return;
+ }
+ const header=document.createElement('div');
+ header.style.cssText='margin:10px 0;color:var(--chrome-gold-hi);font-family:var(--font-pixel);font-size:10px';
+ header.textContent='Choose a card to remove from your deck — or skip.';
+ container.appendChild(header);
+ // Unique cards
+ const seen=new Set();
+ deck.forEach(id=>{
+ if(seen.has(id))return; seen.add(id);
+ const card=getCardById(id);
+ if(!card)return;
+ const btn=document.createElement('div');
+ btn.className='choice';
+ btn.style.cssText='margin:4px 0';
+ const count=deck.filter(x=>x===id).length;
+ btn.innerHTML=`<div class="choice-bullet">✂</div><span class="choice-text">${card.name} <span style="color:var(--parch-text-dim);font-size:11px">(Tier ${card.tier}${count>1?' · '+count+' copies':''})</span></span>`;
+ btn.onclick=()=>{
+ const i=G.char.deck.indexOf(id); if(i>=0) G.char.deck.splice(i,1);
+ log(`✂ Removed ${card.name} from your deck.`,'log-info');
+ saveRun(G.char);
+ modal('Card Removed', `${card.name} is burned away.`, 'Continue', ()=>runEncounter(G.encounterIdx+1));
+ };
+ container.appendChild(btn);
+ });
+ const skip=document.createElement('button');
+ skip.className='btn btn-ghost'; skip.style.cssText='margin-top:10px';
+ skip.textContent='Skip (keep your deck as-is)';
+ skip.onclick=()=>runEncounter(G.encounterIdx+1);
+ container.appendChild(skip);
 }
 
 function showAdventureScreen(enc) {
@@ -3834,10 +4691,14 @@ function showCardInspect(cardId) {
 // ── COMBAT SCREEN ─────────────────────────────────────────────────
 function showCombatScreen(enc) {
  show('screen-combat');
- // Start battle music (boss music for VanCleef encounter)
+ // Start battle music — boss music plays for any boss fight except the Miner John intro
  if(window._titleMusicUnlocked) {
- const isVanCleef = enc && enc.enemies && enc.enemies.includes('edwinVanCleef');
- playBattleMusic(isVanCleef);
+ const ids = (enc && enc.enemies) || [];
+ const isBossFight = ids.some(id => {
+ if (id === 'minerJohn') return false; // intro boss — keep regular battle music
+ return ENEMIES[id] && ENEMIES[id].type === 'boss';
+ });
+ playBattleMusic(isBossFight);
  }
  // Reset card-granted bonuses each combat — only permanent bonuses persist
  G.char.dmgBonus = G.char._perkDmgBonus || 0;
@@ -4012,8 +4873,11 @@ function renderEnemies() {
  if(d.id==='hemorrhage'&&d.stacks>0) chips+=sc('🩸',d.stacks,`Hemorrhage (${d.stacks})\nDeals ${d.stacks} damage at start of each enemy turn.\\nReduces by 1 stack each turn.`,'debuff')+'</div>';
  if(d.id==='poison'&&d.stacks>0) chips+=sc('☠️',d.stacks,`Poison (${d.stacks})\nTakes ${d.stacks} damage per turn.`,'debuff')+'</div>';
  if(d.id==='corruption'&&d.stacks>0) chips+=sc('💀',d.stacks,`Corruption\nTakes ${d.dmg||3} shadow damage per turn · ${d.stacks} turn${d.stacks!==1?'s':''} left.`,'debuff')+'</div>';
+ if(d.id==='drainLife'&&d.stacks>0) chips+=sc('💉',d.stacks,`Drain Life\nTakes ${d.dmg||3} shadow damage per turn, healing the caster for the damage dealt · ${d.stacks} turn${d.stacks!==1?'s':''} left.`,'debuff')+'</div>';
+ if(d.id==='curseOfAgony'&&d.stacks>0) chips+=sc('😈',d.stacks,`Curse of Agony\nNext tick deals ${d.stacks} shadow damage. Escalates by +1 each turn. Lasts until the target dies.`,'debuff')+'</div>';
  if(d.id==='marked') chips+=sc('🎯','MARK',`Marked for Death\\nTakes +${d.stacks} damage from all attacks this turn.`,'debuff')+'</div>';
  if(d.id==='searingPain'&&d.stacks>0) chips+=sc('🔥','SEAR+',`Searing Pain\nTakes +${d.stacks} damage from all sources this turn.`,'debuff')+'</div>';
+ if(d.id==='feared'&&(d.turnsLeft||0)>0) chips+=sc('😱','FEAR',`Feared\n${d.noStun?'Boss — resists the stun.':'Stunned — loses their turn.'} Takes +${d.stacks} SHADOW damage only. ${d.turnsLeft} turn${d.turnsLeft!==1?'s':''} left.`,'debuff')+'</div>';
  if(d.id==='freeze') chips+=sc('❄️','FRZE','Frozen\nSkips next attack.','debuff')+'</div>';
  });
  if(e._halfAttackNextTurn) chips+=sc('🦴','WEAK','Weakened\nDeals half attack damage next attack.','debuff')+'</div>';
@@ -4133,29 +4997,49 @@ function renderHUD() {
   </div>`;}).join('')}
  </div>`;
 
- // Stat chips
- const dmg=(c.dmgBonus||0)+(c._eqDmg||0)+(c._eqDmgAll||0), roll=(c.rollBonus||0)+(c._eqRoll||0);
- const armorTotal=Math.max(0,(c._eqArmor||0)+(C._angerMgmtArmor||0)-(C._shredderArmorDebuff||0));
- const drTotal=(c.dmgReduction||0);
- const critThresh=c.critThreshold||20;
- const drawPerTurn=3+(c.extraDraw||0)+(c._eqDraw||0);
+ // Stat chips (deck / discard / gold / round — everything else moved to Perks & Gear panel)
  const stats=[
- {v:C.turn||0, l:'RND', sub:'round'},
- {v:C.deck?.length||0, l:'DECK', sub:`${C.discard?.length||0} discard`},
- {v:dmg?'+'+dmg:'—', l:'DMG', hi:!!dmg, sub:dmg?`perks +${c.dmgBonus||0} · all +${(c._eqDmg||0)+(c._eqDmgAll||0)} · typed→pills`:null},
- {v:roll?'+'+roll:'—', l:'ROLL', hi:!!roll, sub:roll?`perks +${c.rollBonus||0} · gear +${c._eqRoll||0}`:null},
- {v:armorTotal||'—', l:'ARMOR', hi:!!armorTotal, sub:armorTotal?`gear ${c._eqArmor||0}${(C._angerMgmtArmor||0)?` · +${C._angerMgmtArmor} anger`:''}${(C._shredderArmorDebuff||0)?` · -${C._shredderArmorDebuff} shredded`:''} (attack dmg only)`:(C._shredderArmorDebuff||0)?`-${C._shredderArmorDebuff} shredded`:'no armor'},
- {v:drTotal||'—', l:'DR', hi:!!drTotal, sub:drTotal?`reduces ALL damage (ability + attack)`:'no reduction'},
- {v:critThresh+'+', l:'CRIT', hi:critThresh<20, sub:critThresh<20?`${20-critThresh} pts reduced`:'roll to crit'},
- {v:drawPerTurn, l:'DRAW', sub:`cards/turn · +${(c.extraDraw||0)+(c._eqDraw||0)} bonus`},
- {v:c.gold||0, l:'GOLD', gold:true, sub:'spend at shop'},
- {v:c.xp||0, l:'XP', sub:`next lv: ${xpToNextLevel(level)||'MAX'}`},
+ {v:C.turn||1, l:'ROUND', sub:'current round'},
+ {v:C.deck?.length||0, l:'DECK', sub:'cards left in deck'},
+ {v:C.discard?.length||0, l:'DISCARD', sub:'cards in discard'},
+ {v:(c.gold||0)+'g', l:'GOLD', gold:true, sub:'spend at shop'},
  ];
  const statsHtml=stats.map(s=>`<div class="hud-stat-chip">
  <span class="hud-stat-v" style="${s.gold?'color:var(--chrome-gold)':s.hi?'color:var(--crit-col)':''}">${s.v}</span>
  <span class="hud-stat-l">${s.l}</span>
  ${s.sub?`<span class="hud-stat-sub">${s.sub}</span>`:''}
  </div>`).join('');
+
+ // Active perks / equipment bonuses breakdown
+ const perkRows=[];
+ const add=(label,val,src)=>{ if(val) perkRows.push({label,val,src}); };
+ add('Damage (all)',       c.dmgBonus,    'perks');
+ add('Damage (all)',       c._eqDmg,      'gear');
+ add('Damage (all)',       c._eqDmgAll,   'gear');
+ add('Melee damage',       c._eqDmgMelee, 'gear');
+ add('Ranged damage',      c._eqDmgRanged,'gear');
+ add('Magic damage',       c._eqDmgMagic, 'gear');
+ add('Fire damage',        c._eqDmgFire,  'gear');
+ add('Frost damage',       c._eqDmgFrost, 'gear');
+ add('Nature damage',      c._eqDmgNature,'gear');
+ add('Shadow damage',      c._eqDmgShadow,'gear');
+ add('Arcane damage',      c._eqDmgArcane,'gear');
+ add('Holy damage',        c._eqDmgHoly,  'gear');
+ add('Roll bonus',         c.rollBonus,   'perks');
+ add('Roll bonus',         c._eqRoll,     'gear');
+ add('Card draw / turn',   c.extraDraw,   'perks');
+ add('Card draw / turn',   c._eqDraw,     'gear');
+ add('Damage reduction',   c.dmgReduction,'perks');
+ add('Armor',              c._eqArmor,    'gear');
+ add('Ignite bonus',       c._igniteBonus,'perks');
+ add('Heal bonus',         c._eqHealBonus,'gear');
+ add('HoT bonus',          c._hotBonus,   'perks');
+ add('Poison resist',      c._poisonResist,'gear');
+ if((c.critThreshold||20)<20) perkRows.push({label:'Crit threshold',val:`${c.critThreshold}+`,src:'perks'});
+ if(c._eqStartStealth) perkRows.push({label:'Start combat stealthed',val:'✓',src:'gear'});
+ const perksHtml=perkRows.length
+ ? `<div class="hud-perks"><div class="hud-perks-title">⚙ PERKS &amp; GEAR</div><div class="hud-perks-grid">${perkRows.map(p=>`<div class="hud-perk-chip" title="${p.label} (${p.src})"><span class="hud-perk-v" style="${p.src==='gear'?'color:var(--chrome-gold-hi)':'color:var(--crit-col)'}">${typeof p.val==='number'?(p.val>0?'+'+p.val:p.val):p.val}</span><span class="hud-perk-l">${p.label}</span><span class="hud-perk-sub">${p.src}</span></div>`).join('')}</div></div>`
+ : '';
 
  // Active combat trackers (shield wall, pet, stance, rage)
  const trackers=[];
@@ -4193,16 +5077,30 @@ function renderHUD() {
  bar.style.cursor=selCard2&&selfTypes.includes(selCard2.type)?'pointer':'default';
  bar.onclick=selCard2&&selfTypes.includes(selCard2.type)?()=>{C.playerTargeted=true;renderCombat();}:null;
 
- // Center HP bar
+ // Center HP bar + XP bar
  const chpEl=$('player-hp-center');
  if(chpEl){
  chpEl.className=`player-hp-center${ptActive?' phc-targeted':''}`;
  chpEl.onclick=selCard2&&selfTypes.includes(selCard2.type)?()=>{C.playerTargeted=true;renderCombat();}:null;
+ const xpNeeded=xpToNextLevel(level);
+ const xpCur=c.xp||0;
+ const xpPct=xpNeeded?Math.max(0,Math.min(100,(xpCur/xpNeeded)*100)):100;
+ const xpLabel=xpNeeded?`${xpCur}/${xpNeeded}`:'MAX';
+ const _played=C.cardsPlayedThisTurn||0, _allowed=2+(C.extraAllowedThisTurn||0), _rem=_allowed-_played;
+ const playsChip=`<span class="phc-plays ${_rem>0?'phc-plays-on':'phc-plays-off'}">▶ ${_rem>0?_rem+' play'+(_rem!==1?'s':'')+' left':'No plays'}</span>`;
  chpEl.innerHTML=`
+ <div class="phc-row">
  <span class="phc-name">${cls.icon} ${c.name} <span class="phc-lv">Lv${level} ${cls.name}</span></span>
  ${ptActive?'<span class="phc-target-label">❖ TARGET</span>':''}
  <div class="phc-track"><div class="phc-fill" style="width:${hpPct}%;background:${hpCol}"></div></div>
  <span class="phc-nums" style="color:${hpCol}">${c.hp}<span class="phc-max">/${c.maxHP}</span></span>
+ </div>
+ <div class="phc-xp-row">
+ <span class="phc-xp-label">XP</span>
+ <div class="phc-xp-track"><div class="phc-xp-fill" style="width:${xpPct}%"></div></div>
+ <span class="phc-xp-nums">${xpLabel}</span>
+ ${playsChip}
+ </div>
  `;
  }
 
@@ -4220,6 +5118,7 @@ function renderHUD() {
  ${gearRowHtml}
  ${bagHtml}
  <div class="hud-stats">${statsHtml}</div>
+ ${perksHtml}
  `;
 }
 
@@ -4305,6 +5204,13 @@ function openCombatGearPanel(focusSlot) {
   body.appendChild(empty);
  } else {
   inv.forEach((item,idx)=>{
+   // Look up canonical slot/stats if missing on the inventory entry (e.g. older saves)
+   const eqRef=EQUIPMENT_SHOP.find(e=>e.id===item.id)||BOSS_LOOT_LIST.find(e=>e.id===item.id);
+   if(eqRef){
+    if(!item.slot) item.slot=eqRef.slot;
+    if(!item.stats) item.stats=eqRef.stats||{};
+    if(!item.rarity&&eqRef.rarity) item.rarity=eqRef.rarity;
+   }
    const isEquip=!!item.slot;
    const rar=item.rarity&&RARITY[item.rarity]?RARITY[item.rarity]:null;
    const row=document.createElement('div');
@@ -4318,7 +5224,7 @@ function openCombatGearPanel(focusSlot) {
     </div>
     ${!isEquip
      ?`<button class="btn btn-primary btn-sm cgp-use-btn" onclick="useInventoryItem('${item.id}');openCombatGearPanel()">Use</button>`
-     :`<span class="cgp-inv-badge">IN BAG</span>`}`;
+     :`<button class="btn btn-primary btn-sm cgp-use-btn" onclick="equipFromInventoryInCombat(${idx})">⚔ Equip</button>`}`;
    body.appendChild(row);
   });
  }
@@ -4363,6 +5269,8 @@ function renderBuffZone() {
  if(C._blackOutActive) pills.push(pill('🌑','BO','Black Out: shadow damage doubled','buff'));
  if(C._lockAndLoadActive) pills.push(pill('🏹','L&L','Lock and Load: damage → roll 15+ for extra play','buff'));
  if(C._eagleEyeActive) pills.push(pill('🦅','EE',`Eagle Eye: persistent — +1 draw and +1 play each turn${C._eagleEyeRollBonus?' · +1 rolls':''}`,'buff'));
+ if((C._meleeDmgBuffThisTurn||0)>0) pills.push(pill('🌲',`+${C._meleeDmgBuffThisTurn}`,`Nature's Wrath: +${C._meleeDmgBuffThisTurn} melee damage this turn`,'buff'));
+ if(C._doubleNextFeral) pills.push(pill('🌲','×2',"Nature's Wrath: next Feral card resolves twice",'buff'));
  if(C._aimedShotActive) pills.push(pill('🎯','AIM','Aimed Shot: next ranged card deals double damage','buff'));
  if(C._aimedShotAutoCrit) pills.push(pill('🎯','AIM★','Aimed Shot (CRIT): next ranged card auto-crits','buff'));
  if(G.char._aspectMonkey) pills.push(pill('🐒','MNK','Aspect of the Monkey: roll 11+ on attacks taken to halve damage','buff'));
@@ -4394,12 +5302,10 @@ function renderBuffZone() {
  if((C._angerMgmtArmor||0)>0) pills.push(pill('🛡','+'+C._angerMgmtArmor,`Anger Management: +${C._angerMgmtArmor} armor (this combat)`,'buff'));
  if((C._shredderArmorDebuff||0)>0) pills.push(pill('⚙️','-'+C._shredderArmorDebuff,`Shredded: -${C._shredderArmorDebuff} armor (Shredder surge)`,'debuff'));
  if(C._provokeDmgReduction) pills.push(pill('🐻','','Provoke: attack damage halved this turn','buff'));
- if((C.extraAllowedThisTurn||0)>0) pills.push(pill('▶',C.extraAllowedThisTurn,`+${C.extraAllowedThisTurn} extra play`,'buff'));
+ // Extra-play count shown on the plays chip next to the XP bar — no duplicate pill here
  if((C.bonusRoll||0)>0) pills.push(pill('🎲','+'+C.bonusRoll,`+${C.bonusRoll} to next roll`,'buff'));
  if(C.doubleDmgNext) pills.push(pill('⚡','×2','Next ability: double damage','buff'));
- if((c._eqDmgAll||0)>0) pills.push(pill('✦','+'+c._eqDmgAll,`+${c._eqDmgAll} to all damage types`,'buff'));
- if((c._eqDmgMagic||0)>0) pills.push(pill('🌀','+'+c._eqDmgMagic,`+${c._eqDmgMagic} to all magic damage`,'buff'));
- [['melee','⚔️','_eqDmgMelee'],['ranged','🏹','_eqDmgRanged'],['fire','🔥','_eqDmgFire'],['frost','❄️','_eqDmgFrost'],['nature','🌿','_eqDmgNature'],['arcane','🔮','_eqDmgArcane'],['shadow','🌑','_eqDmgShadow'],['holy','✨','_eqDmgHoly']].forEach(([t,icon,prop])=>{ if((c[prop]||0)>0) pills.push(pill(icon,'+'+c[prop],`+${c[prop]} ${t} damage`,'buff')); });
+ // Static gear bonuses (_eqDmgAll / _eqDmgMagic / _eqDmgMelee etc.) are shown in the Perks & Gear panel — no need to duplicate here
  if(c.currentForm==='cat'||c.currentForm==='both') pills.push(pill('🐱','','Cat Form: melee +2 dmg','form'));
  if(c.currentForm==='bear'||c.currentForm==='both') pills.push(pill('🐻','','Bear Form: half damage taken','form'));
  (C.activeHoTs||[]).forEach(h=>{
@@ -4419,9 +5325,18 @@ function renderBuffZone() {
  });
  (c.statusEffects||[]).forEach(se=>{
  if(se.id==='seared') pills.push(pill('🔥','SEAR','Seared: 2 fire dmg/turn','debuff'));
- if(se.id==='poison') pills.push(pill('☠',se.stacks||1,`Poison: ${se.stacks||1} dmg/turn`,'debuff'));
+ if(se.id==='poison') pills.push(pill('☠',se.stacks||1,`Poison: ${se.stacks||1} dmg/turn (minus poison resist)`,'debuff'));
  if(se.id==='stealth') pills.push(pill('👤','','Stealth\nPersists until you deal damage.\nNext attack: +1 damage bonus.','form'));
  });
+ // Enemy-applied debuffs on the player
+ if((c._bleedStacks||0)>0) pills.push(pill('🩸',c._bleedStacks,`Bleed: ${c._bleedStacks} damage at end of each round. Reduces by 1 per round.`,'debuff'));
+ if((c._corruptionTurns||0)>0) pills.push(pill('💀',c._corruptionTurns,`Corruption: ${c._corruptionDmg||3} shadow damage at end of each round. ${c._corruptionTurns} turn${c._corruptionTurns!==1?'s':''} left.`,'debuff'));
+ if((c._feared||0)>0) pills.push(pill('😱',c._feared,`Feared: +2 damage taken from all sources. ${c._feared} turn${c._feared!==1?'s':''} left.`,'debuff'));
+ if(C.skipNextPlayerTurn) pills.push(pill('💤','STUN','Stunned: you lose your next turn.','debuff'));
+ if((C._reducedPlaysNextTurn||0)>0) pills.push(pill('❄️',`-${C._reducedPlaysNextTurn}`,`Frozen: -${C._reducedPlaysNextTurn} play${C._reducedPlaysNextTurn!==1?'s':''} next turn.`,'debuff'));
+ if((C.drawPenalty||0)>0&&C.drawPenalty<(3+(c.extraDraw||0)+(c._eqDraw||0))) pills.push(pill('📜','-draw',`Draw penalty: you'll draw only ${C.drawPenalty} card${C.drawPenalty!==1?'s':''} next turn.`,'debuff'));
+ if(C._greenskinCritFail) pills.push(pill('🏴‍☠️','CURSE',"Greenskin's Curse: your next ability critically fails.",'debuff'));
+ if((C.bonusRoll||0)<0) pills.push(pill('🎲',C.bonusRoll,`${C.bonusRoll} to your next roll (enemy curse).`,'debuff'));
  bz.innerHTML=pills.length?`<div class="hud-pills buff-zone-pills">${pills.join('')}</div>`:'';
 }
 
@@ -4564,15 +5479,9 @@ function renderActionBar() {
  if(!_outOfPlays) btn.onclick=playCard;
  bar.appendChild(btn);
  const clr=document.createElement('button');
- clr.className='btn btn-ghost btn-sm'; clr.textContent='Deselect';
+ clr.className='btn btn-ghost'; clr.textContent='Deselect';
  clr.onclick=()=>{C.selectedCardId=null;C.comboPointsToSpend=0;C.rageToSpend=0;renderHand();renderActionBar();};
  bar.appendChild(clr);
- } else {
- const hint=document.createElement('div');
- hint.className='action-label';
- const pl=(2+(C.extraAllowedThisTurn||0))-(C.cardsPlayedThisTurn||0);
- hint.textContent=`${(C.hand||[]).length} cards in hand — ${pl} play${pl!==1?'s':''} remaining`;
- bar.appendChild(hint);
  }
 
  // Hero ability button
@@ -4581,7 +5490,7 @@ function renderActionBar() {
  if(hero){
  const used=C._heroAbilityUsed;
  const hBtn=document.createElement('button');
- hBtn.className=`btn btn-sm${used?' btn-ghost':''}`;
+ hBtn.className=`btn${used?' btn-ghost':''}`;
  hBtn.style.cssText=used?'opacity:0.4':'border-color:var(--chrome-gold);color:var(--chrome-gold-hi)';
  hBtn.innerHTML=`${hero.icon} ${hero.abilityName} (${hero.abilityDC}+)`;
  hBtn.title=hero.abilityDesc;
@@ -4591,15 +5500,8 @@ function renderActionBar() {
  }
  }
 
- // Plays counter
- const played=C.cardsPlayedThisTurn||0, allowed=2+(C.extraAllowedThisTurn||0), rem=allowed-played;
- const pd=document.createElement('div');
- pd.style.cssText=`font-family:var(--font-pixel);font-size:6px;color:${rem>0?'var(--chrome-gold-hi)':'var(--parch-text-dim)'};padding:3px 8px;background:rgba(0,0,0,0.3);border:1px solid var(--chrome-mid);border-radius:3px;text-align:center`;
- pd.textContent=rem>0?`▶ ${rem} play${rem!==1?'s':''} left`:'▶ No plays left';
- bar.appendChild(pd);
-
  const pass=document.createElement('button');
- pass.className='btn btn-ghost btn-sm'; pass.textContent='⏭ Pass Turn';
+ pass.className='btn btn-ghost'; pass.textContent='⏭ Pass Turn';
  pass.title='Skip to enemy turn';
  pass.onclick=()=>{
  log('You pass your turn.','log-system');
@@ -4813,7 +5715,15 @@ function useHeroAbility() {
 
 // ── DRAW ──────────────────────────────────────────────────────────
 function doDraw() {
- C.phase='draw'; C.cardsPlayedThisTurn=0; C.extraAllowedThisTurn=0;
+ C.phase='draw'; C.cardsPlayedThisTurn=0; C.extraAllowedThisTurn=0; C._turnActions=0;
+ // Frostwolf / other "frozen" effect: reduce plays this turn
+ if((C._reducedPlaysNextTurn||0)>0){
+ C.extraAllowedThisTurn=Math.min(0,(C.extraAllowedThisTurn||0)-C._reducedPlaysNextTurn);
+ log(`❄️ Frozen: -${C._reducedPlaysNextTurn} play${C._reducedPlaysNextTurn!==1?'s':''} this turn.`,'log-info');
+ C._reducedPlaysNextTurn=0;
+ }
+ // Reset per-round enemy flags (Greenskin's first-hit debuff, etc.)
+ C.enemies.forEach(e=>{ if(e.id==='captainGreenskin') e._hitThisRound=false; });
  C.thornsActive=null; // Thorns expires at start of new player turn
  C.preventAttackDamageThisTurn=false; // reset after enemy attacks resolved
  C._maulDmgBuff=0; // Maul crit buff falls off at end of round
@@ -4848,9 +5758,11 @@ function doDraw() {
  }
  if(h.channelType==='siphon'){
  const dmg=(h.baseDmg||0)+h.bonusPerStack*h.stack;
+ const prev=C._currentDmgType; C._currentDmgType='shadow';
  let totalDealt=0;
- C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=Math.min(before,dmg);}});
- if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`${h.icon} ${h.name} channels: ${dmg} shadow to all, drained ${G.char.hp-_o} HP (rolled ${tRoll}, tick ${h.stack})`,'log-hit');}
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=(before-e.hp);}});
+ C._currentDmgType=prev;
+ if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`${h.icon} ${h.name} channels (rolled ${tRoll}, tick ${h.stack}): drained ${G.char.hp-_o} HP across all enemies.`,'log-hit');}
  else log(`${h.icon} ${h.name} channels: no targets to drain (rolled ${tRoll})`,'log-info');
  return true;
  }
@@ -4865,13 +5777,14 @@ function doDraw() {
  }
  const _hotOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+(h.healPerTurn+(G.char._hotBonus||0)));
  log(`${h.icon} ${h.name} healed ${G.char.hp-_hotOld} HP → ${G.char.hp}/${G.char.maxHP} (${h.healPerTurn+(G.char._hotBonus||0)} HP · ${h.turnsLeft-1} left)`,'log-hit');
+ if(h.growPerTurn) h.healPerTurn+=h.growPerTurn;
  h.turnsLeft--;
  return h.turnsLeft>0;
  });
  }
  // Tick player DoTs
  if((G.char.statusEffects||[]).find(s=>s.id==='seared')) dealPlayerDamage(2,'Seared',true);
- (G.char.statusEffects||[]).filter(s=>s.id==='poison').forEach(s=>dealPlayerDamage(s.stacks||1,'Poison',true));
+ (G.char.statusEffects||[]).filter(s=>s.id==='poison').forEach(s=>{const raw=s.stacks||1;const amt=Math.max(0,raw-(G.char._poisonResist||0));if(amt>0) dealPlayerDamage(amt,'Poison',true); else log(`💊 Poison resisted (resist ≥ ${raw}).`,'log-info');});
  G.char.statusEffects=(G.char.statusEffects||[]).filter(s=>{
  if(s.id==='poison'){const r=d20();if(r>15){log(`💊 Poison resisted! (${r})`,'log-hit');return false;}}
  return true;
@@ -4995,7 +5908,8 @@ function finalizeCardPlay(card) {
  const raw=d20();
  const _markTgt=C.enemies&&C.enemies[C.targetIdx];
  const _markBonus=(_markTgt&&_markTgt._hunterMarked)?2:0;
- const bonus=(G.char.rollBonus||0)+(C.bonusRoll||0)+(G.char._luckCharges>0?1:0)+(G.char._eqRoll||0)+_markBonus;
+ const _baronCurse=(C.enemies||[]).some(e=>e.id==='baronSilverlaine'&&e.hp>0)?-1:0;
+ const bonus=(G.char.rollBonus||0)+(C.bonusRoll||0)+(G.char._luckCharges>0?1:0)+(G.char._eqRoll||0)+_markBonus+_baronCurse;
  if(G.char._luckCharges>0)G.char._luckCharges--;
  C.bonusRoll=0;
  const critThresh=Math.max(15,(G.char.critThreshold||20)+(G.char._eqCritThresh||0));
@@ -5049,6 +5963,7 @@ function resolveCard(card, outcome, effectiveRoll) {
  C.discard.push(C.selectedCardId);
  C.selectedCardId=null;
  C.cardsPlayedThisTurn=(C.cardsPlayedThisTurn||0)+1;
+ C._turnActions=(C._turnActions||0)+1;
  if(C.enemies.every(e=>e.hp<=0)){C.hand.forEach(id=>C.discard.push(id));C.hand=[];setTimeout(onCombatWin,600);return;}
  if(outcome==='critmiss'){C.hand.forEach(id=>C.discard.push(id));C.hand=[];C.phase='enemy';setTimeout(doEnemyTurn,700);return;}
  if(C._waitingForPicker)return;
@@ -5082,10 +5997,11 @@ function applyCombatEffect(card, outcomeType, target, doubleDmg) {
  let dmg=extractDamage(card.hit||'');
  if(dmg===0&&card.type==='damage')dmg=2;
  let bonusDmg=(G.char.dmgBonus||0)+(G.char._eqDmg||0)+(G.char._eqDmgAll||0)+(C._maulDmgBuff||0);
-const _cdt=getCardDmgType(card);if(_cdt&&DMG_TYPE_PROP[_cdt])bonusDmg+=(G.char[DMG_TYPE_PROP[_cdt]]||0);
+const _cdt=getCardDmgType(card);C._currentDmgType=_cdt;C._currentIsCrit=(outcomeType==='critical');if(_cdt&&DMG_TYPE_PROP[_cdt])bonusDmg+=(G.char[DMG_TYPE_PROP[_cdt]]||0);
 if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonusDmg+=(G.char._eqDmgMagic||0);
  const isMelee=CARD_DAMAGE_TYPES[card.name]==='melee'||(card.hit||'').includes(' melee ');
  if(isMelee&&(G.char.currentForm==='cat'||G.char.currentForm==='both'))bonusDmg+=2+(G.char._catFormBonus||0);
+ if(isMelee&&(C._meleeDmgBuffThisTurn||0)>0)bonusDmg+=C._meleeDmgBuffThisTurn;
  if((C._petPlayerDmgBuff||0)>0)bonusDmg+=C._petPlayerDmgBuff;
  if((C._felHunterShadowBuff||0)>0&&getCardDmgType(card)==='shadow')bonusDmg+=C._felHunterShadowBuff;
  if((G.char._moltenArmorFireBonus||0)>0&&CARD_TALENTS[card.name]==='Fire')bonusDmg+=G.char._moltenArmorFireBonus;
@@ -5104,6 +6020,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  if(target&&(target._predatorMark||0)>0)bonusDmg+=(target._predatorMark||0);
  // Hunter's Mark: +1 damage of any type vs marked target
  if(target&&target._hunterMarked)bonusDmg+=1;
+ // (Feared shadow amp applied inside dealEnemyDamage via C._currentDmgType — no double-count here)
  // Killer Instinct: +3 dmg to targets below 50% HP
  if(C._killerInstinctActive&&target&&target.hp<=Math.ceil(target.maxHP/2))bonusDmg+=3;
  // Ice Fury: next N ice sources deal double
@@ -5792,14 +6709,16 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Greater Heal'&&(outcomeType==='hit'||outcomeType==='crit')){
- const ghBase=Math.ceil(G.char.maxHP*0.6);const ghAmt=C._divineSpiritActive?ghBase*2:ghBase;if(C._divineSpiritActive)C._divineSpiritActive=false;
+ const ghBase=Math.ceil(G.char.maxHP*0.6);let ghAmt=C._divineSpiritActive?ghBase*2:ghBase;if(C._divineSpiritActive)C._divineSpiritActive=false;
+ ghAmt+=(G.char._eqHealBonus||0);
  const ghOld=G.char.hp; G.char.hp=isCrit?G.char.maxHP:Math.min(G.char.maxHP,G.char.hp+ghAmt);
  C.bonusDrawNextTurn=(C.bonusDrawNextTurn||0)+1;
  log(`✨ Greater Heal: healed ${G.char.hp-ghOld} HP → ${G.char.hp}/${G.char.maxHP}! Draw +1 next turn!`,isCrit?'log-crit':'log-hit');
  renderHUD(); C._shredOverrideFired=true;
  }
  if(card.name==='Flash Heal'&&(outcomeType==='hit'||outcomeType==='crit')){
- let fhAmt=isCrit?8:4;if(C._divineSpiritActive){fhAmt*=2;C._divineSpiritActive=false;} const _fhOld=G.char.hp;
+ let fhAmt=isCrit?8:4;if(C._divineSpiritActive){fhAmt*=2;C._divineSpiritActive=false;} fhAmt+=(G.char._eqHealBonus||0);
+ const _fhOld=G.char.hp;
  G.char.hp=Math.min(G.char.maxHP,G.char.hp+fhAmt);
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
  log(`✨ Flash Heal: healed ${G.char.hp-_fhOld} HP → ${G.char.hp}/${G.char.maxHP}! Extra play!`,isCrit?'log-crit':'log-hit');
@@ -5990,8 +6909,27 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Fear'&&(outcomeType==='hit'||outcomeType==='crit')){
- if(target&&target.hp>0){target._stunnedTurns=(target._stunnedTurns||0)+(isCrit?2:1);target.debuffs=target.debuffs||[];const mk=target.debuffs.find(d=>d.id==='marked');if(mk)mk.stacks+=3;else target.debuffs.push({id:'marked',stacks:3});}
- log(`💀 Fear: ${target?.name||'target'} feared for ${isCrit?2:1} turn(s), takes +3 Shadow damage!`,'log-hit');
+ const stunTurns=isCrit?2:1;
+ const ampTurns=3;
+ const applyFear=e=>{
+ const isBoss=e.type==='boss';
+ if(!isBoss) e._stunnedTurns=(e._stunnedTurns||0)+stunTurns;
+ e.debuffs=e.debuffs||[];
+ const fx=e.debuffs.find(d=>d.id==='feared');
+ if(fx){fx.stacks=Math.max(fx.stacks,3);fx.turnsLeft=Math.max(fx.turnsLeft||0,ampTurns);fx.noStun=!!isBoss||fx.noStun;}
+ else e.debuffs.push({id:'feared',stacks:3,turnsLeft:ampTurns,noStun:!!isBoss});
+ return isBoss;
+ };
+ if(isCrit){
+ let anyBoss=false;
+ C.enemies.forEach(e=>{if(e.hp>0&&applyFear(e))anyBoss=true;});
+ log(`💀 Fear CRIT: ALL enemies feared — +3 shadow dmg for ${ampTurns} turns${anyBoss?', non-bosses stunned for '+stunTurns+' turns':', stunned for '+stunTurns+' turns'}!`,'log-crit');
+ } else {
+ if(target&&target.hp>0){
+ const bossed=applyFear(target);
+ log(`💀 Fear: ${target.name} feared — +3 shadow dmg for ${ampTurns} turns${bossed?' (boss resists the stun)':`, stunned for ${stunTurns} turn`}.`,'log-hit');
+ }
+ }
  C._shredOverrideFired=true;
  }
  if((card.name==='Life Tap'||card.name==='Life tap')&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -6004,16 +6942,25 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Drain Life'&&(outcomeType==='hit'||outcomeType==='crit')){
- const dlDmg=(3+bonusDmg)*(isCrit?2:1);
- if(target&&target.hp>0)dealEnemyDamage(target,dlDmg,C.targetIdx);
- const _dlOld=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+Math.ceil(dlDmg/2));
- log(`💀 Drain Life: ${dlDmg} Shadow damage, healed ${G.char.hp-_dlOld} HP!`,isCrit?'log-crit':'log-hit');
- renderHUD(); C._shredOverrideFired=true;
+ const dur=isCrit?5:3;
+ if(target&&target.hp>0){
+ target.debuffs=target.debuffs||[];
+ const dl=target.debuffs.find(d=>d.id==='drainLife');
+ if(dl) dl.stacks=dur; else target.debuffs.push({id:'drainLife',stacks:dur,dmg:3});
+ }
+ log(`💀 Drain Life attached to ${target?.name||'target'}: 3 shadow/turn + heal you each tick for ${dur} turn${dur!==1?'s':''}${isCrit?' (crit duration)':' (refreshes on recast)'}.`,isCrit?'log-crit':'log-hit');
+ C._shredOverrideFired=true;
  }
  if(card.name==='Curse of Agony'&&(outcomeType==='hit'||outcomeType==='crit')){
- const coaStacks=isCrit?4:2;
- if(target&&target.hp>0){target.debuffs=target.debuffs||[];const px=target.debuffs.find(d=>d.id==='poison');if(px)px.stacks+=coaStacks;else target.debuffs.push({id:'poison',stacks:coaStacks});}
- log(`💀 Curse of Agony: ${coaStacks} escalating Shadow DoT (takes more each turn)!`,isCrit?'log-crit':'log-hit');
+ const add=isCrit?2:1;
+ if(target&&target.hp>0){
+ target.debuffs=target.debuffs||[];
+ const coa=target.debuffs.find(d=>d.id==='curseOfAgony');
+ if(coa) coa.stacks=(coa.stacks||0)+add;
+ else target.debuffs.push({id:'curseOfAgony',stacks:add});
+ }
+ const cur=target?.debuffs?.find(d=>d.id==='curseOfAgony')?.stacks||add;
+ log(`💀 Curse of Agony applied to ${target?.name||'target'} (${cur} stack${cur!==1?'s':''} — next tick ${cur} shadow, +1 per turn).`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Death Coil'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -6114,9 +7061,9 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  // Initial drain is unconditional (card's own DC already succeeded)
  const dmg=(1+bonusDmg)*(isCrit?2:1);
  let totalDealt=0;
- C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=Math.min(before,dmg);}});
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=(before-e.hp);}});
  const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);
- log(`💀 Siphon Life: ${dmg} shadow to all, drained ${G.char.hp-_o} HP. Channel begins!`,isCrit?'log-crit':'log-hit');
+ log(`💀 Siphon Life: drained ${G.char.hp-_o} HP across all enemies. Channel begins!`,isCrit?'log-crit':'log-hit');
  // Channel persists — each subsequent end-of-round rolls DC 8 before draining
  C.activeHoTs=C.activeHoTs||[];
  C.activeHoTs=C.activeHoTs.filter(h=>h.name!=='Siphon Life');
@@ -6179,7 +7126,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Healing Wave'&&(outcomeType==='hit'||outcomeType==='crit')){
- const hwAmt=isCrit?12:6; const _hwOld=G.char.hp;
+ const hwAmt=(isCrit?12:6)+(G.char._eqHealBonus||0); const _hwOld=G.char.hp;
  G.char.hp=Math.min(G.char.maxHP,G.char.hp+hwAmt);
  log(`⚡ Healing Wave: healed ${G.char.hp-_hwOld} HP → ${G.char.hp}/${G.char.maxHP}!`,isCrit?'log-crit':'log-hit');
  renderHUD(); C._shredOverrideFired=true;
@@ -6240,7 +7187,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Healing Surge'&&(outcomeType==='hit'||outcomeType==='crit')){
- const hsgAmt=isCrit?4:2; const _hsgOld=G.char.hp;
+ const hsgAmt=(isCrit?4:2)+(G.char._eqHealBonus||0); const _hsgOld=G.char.hp;
  G.char.hp=Math.min(G.char.maxHP,G.char.hp+hsgAmt);
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
  log(`⚡ Healing Surge: healed ${G.char.hp-_hsgOld} HP! Extra play!`,isCrit?'log-crit':'log-hit');
@@ -6272,9 +7219,10 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Chain Heal'&&(outcomeType==='hit'||outcomeType==='crit')){
- let chHeal=isCrit?6:4; const _chOld=G.char.hp;
+ const hb=G.char._eqHealBonus||0;
+ let chHeal=(isCrit?6:4)+hb; const _chOld=G.char.hp;
  G.char.hp=Math.min(G.char.maxHP,G.char.hp+chHeal);
- chHeal=Math.ceil(chHeal*0.7);
+ chHeal=Math.ceil((isCrit?6:4)*0.7)+hb;
  G.char.hp=Math.min(G.char.maxHP,G.char.hp+chHeal); // second bounce
  log(`⚡ Chain Heal: healed ${G.char.hp-_chOld} HP total (2 bounces) → ${G.char.hp}/${G.char.maxHP}!`,isCrit?'log-crit':'log-hit');
  renderHUD(); C._shredOverrideFired=true;
@@ -7062,6 +8010,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  for(let r=0;r<6;r++){
  const mfBase=(1+bonusDmg)*(isCrit&&r===0?2:1);
  if(target&&target.hp>0){ dealEnemyDamage(target,mfBase,C.targetIdx); totalDmg+=mfBase; }
+ if(r>0) C._turnActions=(C._turnActions||0)+1;
  dc+=2;
  const roll=d20();
  if(roll<dc){
@@ -7080,6 +8029,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  for(let r=0;r<4;r++){
  const rvDmg=(3+bonusDmg)*(isCrit?2:1);
  if(target&&target.hp>0){ dealEnemyDamage(target,rvDmg,C.targetIdx); totalDmg+=rvDmg; }
+ if(r>0) C._turnActions=(C._turnActions||0)+1;
  if(r===0&&isCrit) continue; // crit: no DC on first extra hit
  dc+=4;
  const roll=d20();
@@ -7213,10 +8163,10 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  // Nourish: Heal 2 + X where X = sum of all active HoT heal amounts
  if(card.name==='Nourish'&&(outcomeType==='hit'||outcomeType==='crit')){
  const hotTotal=(C.activeHoTs||[]).reduce((sum,h)=>sum+(h.healPerTurn||0)+(G.char._hotBonus||0),0);
- const nourishAmt=(2+hotTotal)*(isCrit?2:1);
+ const nourishAmt=(2+hotTotal)*(isCrit?2:1)+(G.char._eqHealBonus||0);
  const _nOld=G.char.hp;
  G.char.hp=Math.min(G.char.maxHP,(G.char.hp||0)+nourishAmt);
- log(`🌿 Nourish: healed ${G.char.hp-_nOld} HP → ${G.char.hp}/${G.char.maxHP} (base 2 + ${hotTotal} from HoTs)`,isCrit?'log-crit':'log-hit');
+ log(`🌿 Nourish: healed ${G.char.hp-_nOld} HP → ${G.char.hp}/${G.char.maxHP} (base 2 + ${hotTotal} from HoTs${G.char._eqHealBonus?' + '+G.char._eqHealBonus+' gear':''})`,isCrit?'log-crit':'log-hit');
  if(isCrit){
  // Resolve again
  const _nOld2=G.char.hp;
@@ -7323,7 +8273,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
 
  // Tranquility: initial heal + channeled HoT that keeps healing until DC roll fails
  if(card.name==='Tranquility'&&(outcomeType==='hit'||outcomeType==='crit')){
- const tranqAmt=4*(isCrit?2:1);
+ const tranqAmt=4*(isCrit?2:1)+(G.char._eqHealBonus||0);
  const _tqOld=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+tranqAmt);
  log(`🌿 Tranquility: healed ${G.char.hp-_tqOld} HP → ${G.char.hp}/${G.char.maxHP}. Channel begins!`,isCrit?'log-crit':'log-hit');
  C.activeHoTs=C.activeHoTs||[];
@@ -7375,11 +8325,13 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
 
- // Ferocious Bite: 6 melee damage; crit = double + +2 damage next round
+ // Ferocious Bite: 4 + 2 per previous action (card play or repeat) this turn
  if(card.name==='Ferocious Bite'&&(outcomeType==='hit'||outcomeType==='crit')){
- const fbDmg=(6+bonusDmg)*(isCrit?2:1);
+ const prevActions=C._turnActions||0;
+ const fbBase=4+prevActions*2;
+ const fbDmg=(fbBase+bonusDmg)*(isCrit?2:1);
  if(target&&target.hp>0) dealEnemyDamage(target,fbDmg,C.targetIdx);
- log(`🐱 Ferocious Bite: ${fbDmg} melee damage!`,isCrit?'log-crit':'log-hit');
+ log(`🐱 Ferocious Bite: ${fbDmg} melee damage! (base 4 + ${prevActions*2} from ${prevActions} prior action${prevActions!==1?'s':''}${bonusDmg?` +${bonusDmg} bonuses`:''}${isCrit?' ×2 crit':''})`,isCrit?'log-crit':'log-hit');
  if(isCrit){
  G.char.dmgBonus=(G.char.dmgBonus||0)+2;
  log('🐱 Ferocious Bite CRIT: +2 damage next round!','log-crit');
@@ -7772,7 +8724,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  if(isCrit)C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
  log(`🐻 Iron Hide: persistent! Each attack roll >8 — take -1 damage (bear form: auto-success)!${isCrit?' Extra play!':''}`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;}
- // Swipe: 3 melee damage to ALL enemies + extra play
+ // Swipe: 3 melee damage to ALL enemies
  if(card.name==='Swipe'&&(outcomeType==='hit'||outcomeType==='crit')){
  C.enemies.forEach((e,ei)=>{
  if(e.hp>0){
@@ -7780,8 +8732,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  dealEnemyDamage(e,sw,ei);
  }
  });
- C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log(`🐾 Swipe: ${(3+bonusDmg)*(isCrit?2:1)} melee damage to all enemies! Extra play!`,isCrit?'log-crit':'log-hit');
+ log(`🐾 Swipe: ${(3+bonusDmg)*(isCrit?2:1)} melee damage to all enemies!`,isCrit?'log-crit':'log-hit');
  }
  // Starfire: 6 arcane magic damage to target
  if(card.name==='Starfire'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -7826,12 +8777,17 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  if(target){ target.debuffs=target.debuffs||[]; const mk=target.debuffs.find(d=>d.id==='marked'); if(mk) mk.stacks+=2; else target.debuffs.push({id:'marked',stacks:2}); }
  log(`🐱 Maim: ${maimDmg} damage, target takes +2 melee damage this turn!`,isCrit?'log-crit':'log-hit');
  }
- // Nature's Might: target ally deals +3 melee damage + extra play
+ // Nature's Might: you deal +3 melee damage this turn + extra play
  if(card.name==="Nature's Might"&&(outcomeType==='hit'||outcomeType==='crit')){
- G.char.dmgBonus=(G.char.dmgBonus||0)+3;
+ const amt=isCrit?5:3;
+ C._meleeDmgBuffThisTurn=(C._meleeDmgBuffThisTurn||0)+amt;
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log("🌿 Nature's Might: +3 melee damage this turn! Extra play!",'log-info');
- if(isCrit){ G.char.dmgBonus=(G.char.dmgBonus||0)+2; log("🌿 CRIT: +5 total!",'log-crit'); }
+ if(isCrit) C.bonusRoll=(C.bonusRoll||0)+2;
+ log(`🌿 Nature's Might: +${amt} melee damage this turn! Extra play!${isCrit?' +2 to your next roll.':''}`,isCrit?'log-crit':'log-hit');
+ }
+ if(card.name==="Nature's Might"&&outcomeType==='critmiss'){
+ dealPlayerDamage(2,"Nature's Might (critmiss)",true,null,true);
+ log("🌿 Nature's Might backfires: 2 damage to you!",'log-critmiss');
  }
  // Overrun: +3 to next roll, +2 damage this turn
  if(card.name==='Overrun'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -7886,7 +8842,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
 
  if(card.name==='Claw'&&(outcomeType==='hit'||outcomeType==='crit')){
  const clawMult = isCrit ? 3 : 1;
- const clawDmg = (4 + bonusDmg) * clawMult;
+ const clawDmg = (2 + bonusDmg) * clawMult;
  if(target && target.hp > 0) dealEnemyDamage(target, clawDmg, C.targetIdx);
  C.extraAllowedThisTurn = (C.extraAllowedThisTurn||0) + 1;
  log(`🐾 Claw: ${clawDmg} melee damage${isCrit?' (TRIPLE!)':''} + play another card!`, isCrit?'log-crit':'log-hit');
@@ -7917,14 +8873,14 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  log(`🌿 Wild Growth: healed ${G.char.hp-_wgOld} HP → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
  C.activeHoTs=C.activeHoTs||[];
  const wgEx=C.activeHoTs.findIndex(h=>h.name==='Wild Growth');if(wgEx>=0)C.activeHoTs.splice(wgEx,1);
- C.activeHoTs.push({name:'Wild Growth',icon:'🌿',healPerTurn:isCrit?3:2,turnsLeft:4});
- log(`🌿 Wild Growth HoT: +${isCrit?3:2}/turn for 4 turns.`,'log-info');
+ C.activeHoTs.push({name:'Wild Growth',icon:'🌿',healPerTurn:isCrit?3:2,growPerTurn:1,turnsLeft:4});
+ log(`🌿 Wild Growth HoT: +${isCrit?3:2}/turn for 4 turns, growing by +1 each tick.`,'log-info');
  C._shredOverrideFired=true;
  }
  if(card.name==='Lifebloom'&&(outcomeType==='hit'||outcomeType==='crit')){
  let s=1;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);
- if(isCrit){for(let r=0;r<3;r++){s++;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);}log(`🌸 Lifebloom crit! ${s}×`,'log-crit');}
- else{let dc=card.risk+4;for(let r=0;r<3;r++){const roll=d20()+(G.char.rollBonus||0);if(roll>=dc){s++;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);log(`🌸 Lifebloom repeats (${roll}≥${dc}) — ${s}×`,'log-hit');dc+=4;}else{log(`🌸 Lifebloom stops at ${s}×. (${roll}<${dc})`,'log-miss');break;}}}
+ if(isCrit){for(let r=0;r<3;r++){s++;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);C._turnActions=(C._turnActions||0)+1;}log(`🌸 Lifebloom crit! ${s}×`,'log-crit');}
+ else{let dc=card.risk+4;for(let r=0;r<3;r++){const roll=d20()+(G.char.rollBonus||0);if(roll>=dc){s++;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);C._turnActions=(C._turnActions||0)+1;log(`🌸 Lifebloom repeats (${roll}≥${dc}) — ${s}×`,'log-hit');dc+=4;}else{log(`🌸 Lifebloom stops at ${s}×. (${roll}<${dc})`,'log-miss');break;}}}
  const lbHot=s,lbBloom=s*3+(G.char._lifeboomBonus||0);
  C.activeHoTs=C.activeHoTs||[];
  const ex=C.activeHoTs.find(h=>h.name==='Lifebloom');
@@ -7943,9 +8899,18 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  if(cardTalent==='Restoration'||cardTalent==='Balance'){
  C._doubleNextRestoBalance=false;
  log(`🌿 Gaia's Blessing: ${card.name} resolves TWICE!`,'log-crit');
- // Replay at same outcome, doesn't cost an extra play
  applyCombatEffect(card, outcomeType, target, doubleDmg);
- return; // return after recursion to avoid double-resetting
+ return;
+ }
+ }
+ // Nature's Wrath (Elsworn): replay Feral card without extra play cost
+ if(C._doubleNextFeral){
+ const cardTalent = CARD_TALENTS[card.name];
+ if(cardTalent==='Feral'){
+ C._doubleNextFeral=false;
+ log(`🌲 Nature's Wrath: ${card.name} resolves TWICE!`,'log-crit');
+ applyCombatEffect(card, outcomeType, target, doubleDmg);
+ return;
  }
  }
  // Omen of Clarity proc: on any hit/crit while buff is active, 50% chance to grant auto-hit + draw 1
@@ -8374,12 +9339,51 @@ function dealEnemyDamage(enemy, amount, idx) {
  // Searing Pain: +stacks bonus damage from all sources this turn
  const sp=(enemy.debuffs||[]).find(d=>d.id==='searingPain');
  if(sp&&sp.stacks>0) amount+=sp.stacks;
+ // Feared amp — shadow damage only, gated by the current damage type
+ if(C._currentDmgType==='shadow'){
+ const fx=(enemy.debuffs||[]).find(d=>d.id==='feared');
+ if(fx&&fx.stacks>0&&(fx.turnsLeft||0)>0) amount+=fx.stacks;
+ }
  // Siku pet: bonus damage this turn to marked enemy
  if((enemy._petBonusDmgThisTurn||0)>0) amount+=enemy._petBonusDmgThisTurn;
  // Sneed's damage reduction: -2 from player abilities (DoTs bypass this via direct hp manipulation)
  if(enemy.id==='sneed') amount=Math.max(1,amount-2);
  // Sneed's Shredder ongoing: takes -1 damage (DoTs bypass via direct hp manipulation)
  if(enemy.id==='sneedShredder') amount=Math.max(1,amount-1);
+ // Strip Miner ongoing: -1 damage from magic sources (min 1)
+ if(enemy.id==='stripMiner'){
+ const t=C._currentDmgType;
+ if(t&&['fire','frost','nature','arcane','shadow','holy'].includes(t)) amount=Math.max(1,amount-1);
+ }
+ // Ragefire Trogg ongoing: -1 damage from magic sources (min 1)
+ if(enemy.id==='ragefireTrogg'){
+ const t=C._currentDmgType;
+ if(t&&['fire','frost','nature','arcane','shadow','holy'].includes(t)) amount=Math.max(1,amount-1);
+ }
+ // Razorclaw Frenzy: +1 damage TAKEN for every 10% below 50% player HP (makes him bigger below 50%)
+ // (handled in player damage path)
+ // Arugal Ice Barrier: -2 damage until broken by a crit
+ if(enemy.id==='archmageArugal'&&enemy.arugalBarrier&&!enemy._barrierBroken) amount=Math.max(1,amount-2);
+ // Taragaman Shadow Cloak: -3 damage from all sources while active
+ if(enemy.id==='taragaman'&&enemy._cloakActive) amount=Math.max(1,amount-3);
+ // Commander Springvale armor: -1 damage from all sources
+ if(enemy.id==='commanderSpringvale'&&enemy.armoredNegOne) amount=Math.max(1,amount-1);
+ // Forgemaster fire immunity
+ if(enemy.fireImmune&&C._currentDmgType==='fire'){ log(`⚒️ ${enemy.name} is fire-immune — no damage!`,'log-miss'); spawnEnemyFloat('IMMUNE',idx,'miss'); return; }
+ // Maggot Eye — takes +1 damage from crits
+ if(enemy.id==='maggotEye'&&C._currentIsCrit) amount+=1;
+ // Defias Rogue ongoing: on taking damage, roll d20 — if < 5, prevent all damage
+ if(enemy.id==='defiastRogue'&&amount>0){
+ const dr=d20();
+ if(dr<5){ log(`🗡️ Defias Rogue dodges! (rolled ${dr} < 5) — 0 damage to ${enemy.name}.`,'log-miss'); spawnEnemyFloat('DODGE',idx,'miss'); return; }
+ }
+ // Captain Greenskin ongoing: first hit each round applies -5 next roll, -1 card draw next turn
+ if(enemy.id==='captainGreenskin'&&amount>0&&!enemy._hitThisRound){
+ enemy._hitThisRound=true;
+ C.bonusRoll=(C.bonusRoll||0)-5;
+ C.drawPenalty=Math.max(1,(3+(G.char.extraDraw||0)+(G.char._eqDraw||0))-1);
+ log(`🏴‍☠️ Greenskin's curse: -5 to your next roll, draw 1 less card next turn.`,'log-system');
+ }
  const dmg=Math.max(1,amount);
  enemy.hp=Math.max(0,enemy.hp-dmg);
  G.char.runDmgDealt=(G.char.runDmgDealt||0)+dmg;
@@ -8396,6 +9400,25 @@ function dealEnemyDamage(enemy, amount, idx) {
  if(enemy.id==='rhahkZor'&&enemy.hp<=30&&!enemy.statusEffects?.includes('enrage')){
  enemy.statusEffects=enemy.statusEffects||[];enemy.statusEffects.push('enrage');
  log("😡 Rhahk'Zor ENRAGES! Double damage!",'log-surge');
+ }
+ // Oggleflint enrage
+ if(enemy.id==='oggleflint'&&enemy.hp<=enemy.enrageThreshold&&!enemy.statusEffects?.includes('enrage')){
+ enemy.statusEffects=enemy.statusEffects||[];enemy.statusEffects.push('enrage');
+ enemy.atk=(enemy.atk||5)+3;
+ log('😡 Oggleflint ENRAGES! +3 attack.','log-surge');
+ }
+ // Arugal Ice Barrier: -2 damage until broken by a crit
+ if(enemy.id==='archmageArugal'&&enemy.arugalBarrier&&!enemy._barrierBroken){
+ if(C._currentIsCrit){ enemy._barrierBroken=true; log('❄️ Arugal\'s Ice Barrier SHATTERS on your crit!','log-crit'); }
+ }
+ // Taragaman Shadow Cloak: at 50% HP, gain -3 damage taken until crit
+ if(enemy.id==='taragaman'&&enemy.hp<=enemy.shadowCloakAt&&!enemy._cloakActive&&!enemy._cloakBroken){
+ enemy._cloakActive=true;
+ log('🌑 Taragaman shrouds himself in Shadow Cloak — takes -3 from all sources until broken by a crit.','log-surge');
+ }
+ if(enemy.id==='taragaman'&&enemy._cloakActive&&C._currentIsCrit){
+ enemy._cloakActive=false; enemy._cloakBroken=true;
+ log('🌑 Your crit SHATTERS Taragaman\'s Shadow Cloak!','log-crit');
  }
  // VanCleef phases
  if(enemy.id==='edwinVanCleef'&&enemy.hp>0){
@@ -8414,6 +9437,11 @@ function dealEnemyDamage(enemy, amount, idx) {
  if(enemy.hp<=0){
  G.char.runKills=(G.char.runKills||0)+1;
  log(`☠️ ${enemy.name} defeated!`,'log-crit');
+ // Lava Imp on death: explodes for 3 fire to you
+ if(enemy.id==='lavaImp'){
+ dealPlayerDamage(3,`${enemy.name} death explosion`,true,null,true);
+ log('🔥 Lava Imp explodes on death — 3 fire damage!','log-dmg');
+ }
  // Soul Harvest: gain a charge per kill
  if(C._soulHarvestActive){C._soulHarvestCharges=(C._soulHarvestCharges||0)+1;G.char.dmgBonus=(G.char.dmgBonus||0)+1;log(`💀 Soul Harvest: ${enemy.name} dies — +1 charge! (${C._soulHarvestCharges} total, +${C._soulHarvestCharges} dmg)`,'log-info');}
  // Award XP and LP per kill
@@ -8444,6 +9472,8 @@ function dealEnemyDamage(enemy, amount, idx) {
 
 function dealPlayerDamage(amount, source, isAbilityDmg=false, sourceEnemy=null, bypassMitigation=false) {
  if(amount<=0)return;
+ // Feared on player (Baron Silverlaine): +2 damage taken while fear persists
+ if(!bypassMitigation&&(G.char._feared||0)>0) amount+=2;
  // Pet: enemies deal half damage this turn (Kuma NAT 20)
  if(!bypassMitigation&&!isAbilityDmg&&C._petEnemiesHalfDmg) amount=Math.ceil(amount/2);
  // Stone Skin Totem: -1 damage to you (min 1) while alive
@@ -8602,6 +9632,7 @@ function doEnemyTurn() {
  if(!hasLivingPet()){G.char._petActive=null;G.char._petBonus=null;}
  // Pet per-turn buffs fall off at end of player turn
  C._petPlayerDmgBuff=0;
+ C._meleeDmgBuffThisTurn=0;
  C._petEnemiesHalfDmg=false;
  C._petShellActive=false;
  C._petReflectActive=false;
@@ -8640,13 +9671,15 @@ function doEnemyTurn() {
  log(`⚡ ${enemy.name} SURGES! ${enemy.surge}`,'log-surge');
  if(enemy.id==='edwinVanCleef'){
  G.char.statusEffects=G.char.statusEffects||[];
- G.char.statusEffects.push({id:'poison',stacks:2},{id:'poison',stacks:1});
- log(`⚔️ VanCleef applies 2 Poison counters!`,'log-surge');
+ const p=G.char.statusEffects.find(s=>s.id==='poison');
+ if(p) p.stacks=(p.stacks||0)+3;
+ else G.char.statusEffects.push({id:'poison',stacks:3});
+ log(`⚔️ VanCleef applies 3 Poison counters (total ${G.char.statusEffects.find(s=>s.id==='poison').stacks})!`,'log-surge');
  dealPlayerDamage(Math.ceil(enemy.atk*1.5),`VanCleef surge`,false,enemy);
  } else if(enemy.id==='captainGreenskin'){
  C._greenskinCritFail=true;
- spawnEnemy('defiastRogue'); spawnEnemy('defiastRogue');
- log(`🏴‍☠️ Greenskin: your next ability critically fails! 2 crewmates board!`,'log-surge');
+ spawnEnemy('defiastWizard'); spawnEnemy('shadowGuard');
+ log(`🏴‍☠️ Greenskin: your next ability critically fails! A Defias Wizard and a Shadow Guard board!`,'log-surge');
  } else if(enemy.id==='mechanoguard'&&enemy.hp>0){
  const selfDestructDmg=Math.ceil(enemy.hp/2);
  dealPlayerDamage(selfDestructDmg,`${enemy.name} SELF-DESTRUCT`,false,enemy);
@@ -8663,6 +9696,10 @@ function doEnemyTurn() {
  } else if(enemy.id==='sneed'){
  C.skipNextPlayerTurn=true;
  log(`🔧 Sneed grabs you and slams you into the machinery — you lose your next turn!`,'log-surge');
+ // Sneed still attacks during the grab
+ const satk=enemy.atk+(enemy.statusEffects?.includes('enrage')?enemy.atk:0);
+ dealPlayerDamage(satk,`${enemy.name} (grab attack)`,false,enemy);
+ log(`🔧 Sneed pummels you for ${satk} damage while holding you!`,'log-dmg');
  } else if(enemy.id==='sneedShredder'){
  dealPlayerDamage(5,`${enemy.name} surge`,false,enemy);
  C._shredderArmorDebuff=(C._shredderArmorDebuff||0)+2;
@@ -8675,12 +9712,85 @@ function doEnemyTurn() {
  dealPlayerDamage(rhkAtk,enemy.name,false,enemy);
  log(`👹 Rhahk'Zor also attacks for ${rhkAtk}!`,'log-dmg');
  return;
+ } else if(enemy.id==='oggleflint'){
+ const oatk=enemy.atk+(enemy.statusEffects?.includes('enrage')?enemy.atk:0);
+ dealPlayerDamage(oatk,`${enemy.name} (Berserk Hit 1)`,false,enemy);
+ dealPlayerDamage(oatk,`${enemy.name} (Berserk Hit 2)`,false,enemy);
+ log(`🪨 Oggleflint BERSERKS — double-strike for ${oatk} + ${oatk}!`,'log-surge');
+ return;
+ } else if(enemy.id==='frostwolfHunter'){
+ dealPlayerDamage(4,`${enemy.name} surge`,true,enemy);
+ C._reducedPlaysNextTurn=(C._reducedPlaysNextTurn||0)+1;
+ log(`🐺 Frostwolf Hunter freezes you — 4 ice damage and -1 play next turn.`,'log-surge');
+ } else if(enemy.id==='wailingSpirit'){
+ dealPlayerDamage(4,`${enemy.name} surge`,true,enemy);
+ C.drawPenalty=Math.max(1,(3+(G.char.extraDraw||0)+(G.char._eqDraw||0))-1);
+ log(`👻 Wailing Spirit screams — 4 shadow magic + draw 1 less card next turn.`,'log-surge');
+ } else if(enemy.id==='rethilgore'){
+ dealPlayerDamage(6,`${enemy.name} surge`,false,enemy);
+ G.char._bleedStacks=(G.char._bleedStacks||0)+3;
+ log(`🦇 Rethilgore rips and tears — 6 damage + 3 Bleed stacks.`,'log-surge');
+ } else if(enemy.id==='razorclaw'){
+ dealPlayerDamage(5,`${enemy.name} Cleave`,false,enemy);
+ G.char._bleedStacks=(G.char._bleedStacks||0)+3;
+ log(`🪓 Razorclaw Cleaves — 5 damage + 3 Bleed stacks.`,'log-surge');
+ } else if(enemy.id==='baronSilverlaine'){
+ C.skipNextPlayerTurn=true;
+ dealPlayerDamage(3,`${enemy.name} Fear`,true,enemy);
+ G.char._feared=3;
+ log(`🧛 Baron Silverlaine strikes Fear — 3 shadow damage, stunned 1 turn, +2 damage taken for 3 turns.`,'log-surge');
+ } else if(enemy.id==='jergosh'){
+ dealPlayerDamage(5,`${enemy.name} Word of Pain`,true,enemy);
+ G.char._corruptionTurns=Math.max(G.char._corruptionTurns||0,3); G.char._corruptionDmg=3;
+ log(`📕 Jergosh — Word of Pain: 5 shadow + 3 Corruption stacks (3 shadow/turn for 3 turns).`,'log-surge');
+ } else if(enemy.id==='bazzalan'){
+ dealPlayerDamage(6,`${enemy.name} Shadow Strike`,false,enemy);
+ G.char.statusEffects=G.char.statusEffects||[];
+ const p=G.char.statusEffects.find(s=>s.id==='poison');
+ if(p) p.stacks+=2; else G.char.statusEffects.push({id:'poison',stacks:2});
+ log(`🗡️ Bazzalan Shadow Strikes — 6 damage + 2 Poison stacks.`,'log-surge');
+ } else if(enemy.id==='archmageArugal'){
+ dealPlayerDamage(10,`${enemy.name} Void Bolt barrage`,true,enemy);
+ log(`🧙 Arugal unleashes a Void Bolt barrage — 10 combined shadow + ice damage.`,'log-surge');
+ } else if(enemy.id==='taragaman'){
+ dealPlayerDamage(8,`${enemy.name} Consume`,true,enemy);
+ const healAmt=4;
+ enemy.hp=Math.min(enemy.maxHP,enemy.hp+healAmt);
+ log(`👹 Taragaman Consumes — 8 damage to you, heals himself for ${healAmt}!`,'log-surge');
  } else {
  const sm=enemy.surge.match(/Deal (\d+)/i);
  dealPlayerDamage(sm?parseInt(sm[1])*1.5|0:Math.ceil(enemy.atk*1.5),`${enemy.name} surge`,false,enemy);
  }
  } else {
  let atk=enemy.atk+(enemy.statusEffects?.includes('enrage')?enemy.atk:0);
+ // Murloc Pirate aura: +1 damage per living Murloc in play (affects every enemy)
+ const murlocCount=C.enemies.filter(e=>e.id==='murloc'&&e.hp>0).length;
+ if(murlocCount>0) atk+=murlocCount;
+ // Razorclaw Frenzy: +1 damage for every 10% below 50% player HP
+ if(enemy.id==='razorclaw'&&enemy.frenzyFromLowHp){
+ const pctHp=(G.char.hp/G.char.maxHP)*100;
+ if(pctHp<50){ const bonus=Math.ceil((50-pctHp)/10); atk+=bonus; if(bonus>0) log(`🪓 Razorclaw frenzies: +${bonus} damage (you are below 50% HP).`,'log-info'); }
+ }
+ // Zelemar Wrath: +1 attack per stack (capped at 5)
+ if(enemy.id==='zelemar'&&(enemy._wrathStacks||0)>0){ atk+=enemy._wrathStacks; }
+ // Bazzalan: attacks ignore X armor (applied by temporarily reducing player's _eqArmor during the attack)
+ let _bazzalanRestore=0;
+ if(enemy.id==='bazzalan'&&enemy.ignoreArmor&&(G.char._eqArmor||0)>0){
+ _bazzalanRestore=Math.min(enemy.ignoreArmor,G.char._eqArmor||0);
+ G.char._eqArmor=(G.char._eqArmor||0)-_bazzalanRestore;
+ }
+ // Odo — ranged-ignore-armor: fully bypass armor for this attack
+ let _odoRestore=0;
+ if(enemy.id==='odoBlindwatcher'&&enemy.rangedIgnoreArmor&&(G.char._eqArmor||0)>0){
+ _odoRestore=G.char._eqArmor||0;
+ G.char._eqArmor=0;
+ }
+ // Odo Deadeye — first attack of the combat is an auto-crit (1.5× damage)
+ if(enemy.id==='odoBlindwatcher'&&enemy.deadeyeAuto&&!enemy._deadeyeFired){
+ enemy._deadeyeFired=true;
+ atk=Math.ceil(atk*1.5);
+ log(`🏹 Odo's Deadeye — first shot lands true, dealing ${atk} damage!`,'log-crit');
+ }
  if(enemy.id==='sneedShredder') atk+=1; // Sneed's Shredder ongoing: +1 damage
  if(C._growlDebuff&&C._growlDebuff.turns>0) atk=Math.max(1,atk-C._growlDebuff.amount);
  if(enemy.id==='mrSmite'){
@@ -8723,8 +9833,10 @@ function doEnemyTurn() {
  enemy.statusEffects=enemy.statusEffects||[];
  if(!enemy.statusEffects.includes('shield')) enemy.statusEffects.push('shield');
  G.char.statusEffects=G.char.statusEffects||[];
- G.char.statusEffects.push({id:'poison',stacks:1});
- log(`👤 Shadow Guard applies 1 Poison counter!`,'log-info');
+ const spg=G.char.statusEffects.find(s=>s.id==='poison');
+ if(spg) spg.stacks=(spg.stacks||0)+1;
+ else G.char.statusEffects.push({id:'poison',stacks:1});
+ log(`👤 Shadow Guard applies 1 Poison counter (total ${G.char.statusEffects.find(s=>s.id==='poison').stacks})!`,'log-info');
  }
  if(enemy.id==='defiastWizard'&&enemy.hp>0){
  dealPlayerDamage(2,'Defias Wizard (fire)',true,enemy);
@@ -8763,7 +9875,24 @@ function doEnemyTurn() {
  if(enemy.poisonOnHit){
  G.char.statusEffects=G.char.statusEffects||[];
  const px=G.char.statusEffects.find(s=>s.id==='poison');
- if(px)px.stacks=Math.min(10,px.stacks+1);else G.char.statusEffects.push({id:'poison',stacks:1});
+ if(px)px.stacks+=1;else G.char.statusEffects.push({id:'poison',stacks:1});
+ }
+  // Restore Bazzalan's / Odo's temporary armor bypass after their attack
+ if(_bazzalanRestore>0) G.char._eqArmor=(G.char._eqArmor||0)+_bazzalanRestore;
+ if(_odoRestore>0) G.char._eqArmor=(G.char._eqArmor||0)+_odoRestore;
+ // Bleed on hit — Feral Worgen (value true = 1 stack) or Rethilgore-type boss (numeric stacks)
+ if(enemy.bleedOnHit){
+ const stacks=typeof enemy.bleedOnHit==='number'?enemy.bleedOnHit:1;
+ G.char._bleedStacks=(G.char._bleedStacks||0)+stacks;
+ log(`🩸 ${enemy.name}'s strike draws blood — +${stacks} Bleed (total ${G.char._bleedStacks}).`,'log-dmg');
+ }
+ }
+ // Searing Blade Cultist chant — end of turn, roll DC 10 to apply Seared
+ if(enemy.id==='searingCultist'&&enemy.hp>0){
+ const sr=d20();
+ if(sr>=10&&!(G.char.statusEffects||[]).find(s=>s.id==='seared')){
+ (G.char.statusEffects=G.char.statusEffects||[]).push({id:'seared',stacks:1});
+ log(`🔪 ${enemy.name} chants — SEARED applied! (rolled ${sr})`,'log-dmg');
  }
  }
  }
@@ -8786,9 +9915,11 @@ function doEnemyTurn() {
  }
  if(h.channelType==='siphon'){
  const dmg=(h.baseDmg||0)+h.bonusPerStack*h.stack;
+ const prev=C._currentDmgType; C._currentDmgType='shadow';
  let totalDealt=0;
- C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=Math.min(before,dmg);}});
- if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`${h.icon} ${h.name} channels: ${dmg} shadow to all, drained ${G.char.hp-_o} HP (rolled ${tRoll}, tick ${h.stack})`,'log-hit');}
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=(before-e.hp);}});
+ C._currentDmgType=prev;
+ if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`${h.icon} ${h.name} channels (rolled ${tRoll}, tick ${h.stack}): drained ${G.char.hp-_o} HP across all enemies.`,'log-hit');}
  else log(`${h.icon} ${h.name} channels: no targets to drain (rolled ${tRoll})`,'log-info');
  return true;
  }
@@ -8803,6 +9934,7 @@ function doEnemyTurn() {
  }
  const _hotOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+(h.healPerTurn+(G.char._hotBonus||0)));
  log(`${h.icon} ${h.name} healed ${G.char.hp-_hotOld} HP → ${G.char.hp}/${G.char.maxHP} (${h.healPerTurn+(G.char._hotBonus||0)} HP · ${h.turnsLeft-1} left)`,'log-hit');
+ if(h.growPerTurn) h.healPerTurn+=h.growPerTurn;
  h.turnsLeft--;
  return h.turnsLeft>0;
  });
@@ -8861,7 +9993,8 @@ function _runEndOfRoundTriggers(){
  const sp=(e.debuffs||[]).find(d=>d.id==='searingPain');
  const bonus=igniteOnly+(mk?.stacks||0)+(sp?.stacks||0);
  const base=ig.stacks+(c._igniteBonus||0);
- const dmg=base+bonus;
+ const stripReduce=(e.id==='stripMiner')?1:0;
+ const dmg=Math.max(1,base+bonus-stripReduce);
  e.hp=Math.max(0,e.hp-dmg);
  log(`🔥 Ignite burns ${e.name} for ${dmg}${bonus?` (base ${base} +${bonus} bonuses)`:''}!`,'log-hit');
  ig.stacks=Math.max(0,ig.stacks-1);
@@ -8970,6 +10103,13 @@ function _runEndOfRoundTriggers(){
  const mk=(e.debuffs||[]).find(d=>d.id==='marked');
  const sp=(e.debuffs||[]).find(d=>d.id==='searingPain');
  bonus+=(mk?.stacks||0)+(sp?.stacks||0);
+ // Fear amp is shadow-only
+ if(type==='shadow'){
+ const fx=(e.debuffs||[]).find(d=>d.id==='feared');
+ if(fx&&fx.stacks>0&&(fx.turnsLeft||0)>0) bonus+=fx.stacks;
+ }
+ // Strip Miner: -1 from magic sources (shadow/fire/frost/nature/arcane/holy)
+ if(e.id==='stripMiner'&&['fire','frost','ice','nature','arcane','shadow','holy'].includes(type)) bonus-=1;
  return bonus;
  };
  // Corruption ticks (Warlock — fixed dmg, decays per turn)
@@ -8977,12 +10117,40 @@ function _runEndOfRoundTriggers(){
  if(e.hp<=0)return;
  const cor=(e.debuffs||[]).find(d=>d.id==='corruption');
  if(cor&&cor.stacks>0){
- const base=cor.dmg||3, bonus=dotBonus(e,'shadow'), dmg=base+bonus;
+ const base=cor.dmg||3, bonus=dotBonus(e,'shadow'), dmg=Math.max(1,base+bonus);
  e.hp=Math.max(0,e.hp-dmg);
  log(`💀 Corruption deals ${dmg} shadow to ${e.name}${bonus?` (base ${base} +${bonus} debuff)`:''}! (${e.hp}/${e.maxHP} HP · ${cor.stacks-1} turn${cor.stacks-1!==1?'s':''} left)`,'log-hit');
  cor.stacks=Math.max(0,cor.stacks-1);
  if(cor.stacks===0){ e.debuffs=e.debuffs.filter(d=>d.id!=='corruption'); log(`💀 Corruption fades on ${e.name}.`,'log-system'); }
  if(e.hp<=0){ G.char.runKills=(G.char.runKills||0)+1; log(`💀 ${e.name} dies from Corruption!`,'log-crit'); }
+ }
+ });
+ // Curse of Agony ticks (Warlock — escalates each turn, never expires until death)
+ C.enemies.forEach(e=>{
+ if(e.hp<=0)return;
+ const coa=(e.debuffs||[]).find(d=>d.id==='curseOfAgony');
+ if(coa&&coa.stacks>0){
+ const base=coa.stacks, bonus=dotBonus(e,'shadow'), dmg=Math.max(1,base+bonus);
+ e.hp=Math.max(0,e.hp-dmg);
+ log(`💀 Curse of Agony deals ${dmg} shadow to ${e.name}${bonus?` (base ${base} +${bonus} bonuses)`:''}! Next tick: ${coa.stacks+1}.`,'log-hit');
+ coa.stacks+=1; // escalate for next turn
+ if(e.hp<=0){ G.char.runKills=(G.char.runKills||0)+1; log(`💀 ${e.name} dies from Curse of Agony!`,'log-crit'); }
+ }
+ });
+ // Drain Life ticks (Warlock — damage + heal player for damage dealt)
+ C.enemies.forEach(e=>{
+ if(e.hp<=0)return;
+ const dl=(e.debuffs||[]).find(d=>d.id==='drainLife');
+ if(dl&&dl.stacks>0){
+ const base=dl.dmg||3, bonus=dotBonus(e,'shadow'), dmg=Math.max(1,base+bonus);
+ const before=e.hp;
+ e.hp=Math.max(0,e.hp-dmg);
+ const dealt=before-e.hp;
+ const _o=G.char.hp; G.char.hp=Math.min(G.char.maxHP,G.char.hp+dealt);
+ log(`💉 Drain Life deals ${dmg} shadow to ${e.name}${bonus?` (base ${base} +${bonus} bonuses)`:''} and heals you ${G.char.hp-_o} HP. (${dl.stacks-1} turn${dl.stacks-1!==1?'s':''} left)`,'log-hit');
+ dl.stacks=Math.max(0,dl.stacks-1);
+ if(dl.stacks===0){ e.debuffs=e.debuffs.filter(d=>d.id!=='drainLife'); log(`💉 Drain Life fades on ${e.name}.`,'log-system'); }
+ if(e.hp<=0){ G.char.runKills=(G.char.runKills||0)+1; log(`💉 ${e.name} dies from Drain Life!`,'log-crit'); }
  }
  });
  // Poison ticks (Deadly Poison applied to enemies)
@@ -9033,14 +10201,104 @@ function _runEndOfRoundTriggers(){
  });
  // Clear one-turn damage-amp debuffs (Marked / Searing Pain) — DoTs above benefited from them
  C.enemies.forEach(e=>{ e.debuffs=(e.debuffs||[]).filter(d=>d.id!=='marked'&&d.id!=='searingPain'); });
- // Status damage on player (Seared, Poison)
+ // Tick down Fear duration; expire when 0
+ C.enemies.forEach(e=>{
+ const fx=(e.debuffs||[]).find(d=>d.id==='feared');
+ if(fx&&fx.turnsLeft>0){
+ fx.turnsLeft--;
+ if(fx.turnsLeft<=0){ e.debuffs=e.debuffs.filter(d=>d.id!=='feared'); log(`😱 Fear fades on ${e.name}.`,'log-system'); }
+ }
+ });
+ // Boss end-of-round auras (Taragaman fire, Arugal shadow nova on even rounds, Rethilgore/Baron drains, Jergosh corruption)
+ const bossAlive = id => C.enemies.find(e=>e.id===id&&e.hp>0);
+ if(bossAlive('taragaman')){
+ dealPlayerDamage(1,'Taragaman Fire Aura',true);
+ }
+ if(bossAlive('archmageArugal')&&(C.turn%2===0)){
+ dealPlayerDamage(3,'Arugal Shadow Nova',true);
+ }
+ const _reth=bossAlive('rethilgore');
+ if(_reth){
+ const r=d20();
+ if(r>=10){
+ const stacks=G.char._bleedStacks||0;
+ if(stacks>0){
+ const drain=2*stacks;
+ const oldHp=G.char.hp;
+ dealPlayerDamage(drain,'Rethilgore lifedrain',true,_reth);
+ const actualDrain=Math.max(0,oldHp-G.char.hp);
+ _reth.hp=Math.min(_reth.maxHP,_reth.hp+actualDrain);
+ log(`🦇 Rethilgore drains ${actualDrain} HP through your Bleed! (rolled ${r}).`,'log-dmg');
+ }
+ }
+ }
+ const _baron=bossAlive('baronSilverlaine');
+ if(_baron){
+ const r=d20();
+ if(r<10){ dealPlayerDamage(2,'Baron Silverlaine curse',true); log(`🧛 Baron's curse drains 2 HP (rolled ${r} < 10).`,'log-dmg'); }
+ }
+ if(bossAlive('jergosh')){
+ const r=d20();
+ if(r>=12){
+ G.char._corruptionTurns=3; G.char._corruptionDmg=3;
+ log(`📕 Jergosh chants — you are Corrupted (3 turns, 3 shadow/turn).`,'log-dmg');
+ }
+ }
+ // Fenrus — shadow howl DC 10 applies Feared (2 turns, +2 dmg taken), heals 2 HP per player Bleed stack
+ const _fenrus=bossAlive('fenrusDevourer');
+ if(_fenrus){
+ const bleed=G.char._bleedStacks||0;
+ if(bleed>0){ const feed=Math.min(2*bleed,_fenrus.maxHP-_fenrus.hp); if(feed>0){ _fenrus.hp+=feed; log(`🐺 Fenrus feeds on your Bleed — heals ${feed} HP.`,'log-info'); } }
+ const r=d20();
+ if(r>=10){ G.char._feared=Math.max(G.char._feared||0,2); log(`🐺 Fenrus's Shadow Howl lands (rolled ${r}) — you are Feared for 2 turns.`,'log-dmg'); }
+ }
+ // Maggot Eye — DC 10 applies 2 Poison stacks
+ if(bossAlive('maggotEye')){
+ const r=d20();
+ if(r>=10){
+ G.char.statusEffects=G.char.statusEffects||[];
+ const px=G.char.statusEffects.find(s=>s.id==='poison');
+ if(px) px.stacks+=2; else G.char.statusEffects.push({id:'poison',stacks:2});
+ log(`👁️ Maggot Eye gazes through you — +2 Poison stacks (rolled ${r}).`,'log-dmg');
+ }
+ }
+ // Zelemar — gains 1 Wrath stack per round (+1 attack per stack, max 5)
+ const _zelemar=bossAlive('zelemar');
+ if(_zelemar){
+ _zelemar._wrathStacks=Math.min(5,(_zelemar._wrathStacks||0)+1);
+ log(`🧛 Zelemar gains +1 Wrath (now ${_zelemar._wrathStacks}/5).`,'log-info');
+ }
+ // Forgemaster — superheated aura: 2 fire magic to you AND 2 fire magic to every other enemy
+ const _forge=bossAlive('forgemaster');
+ if(_forge){
+ dealPlayerDamage(2,'Forgemaster Superheated',true);
+ C.enemies.forEach((e,ei)=>{ if(e.hp>0&&e.id!=='forgemaster'&&!e.fireImmune) dealEnemyDamage(e,2,ei); });
+ log(`⚒️ The Forgemaster's aura scorches everyone — 2 fire to you and each other enemy.`,'log-info');
+ }
+ // Corruption on player (Jergosh)
+ if((G.char._corruptionTurns||0)>0){
+ dealPlayerDamage(G.char._corruptionDmg||3,'Corruption',true);
+ G.char._corruptionTurns--;
+ if(G.char._corruptionTurns<=0){ log('📕 Corruption fades.','log-system'); }
+ }
+ // Fear on player (Baron Silverlaine): tick down
+ if((G.char._feared||0)>0){
+ G.char._feared--;
+ if(G.char._feared<=0) log('😱 Fear subsides.','log-system');
+ }
+ // Status damage on player (Seared, Poison, Bleed)
  if(!C._skipTurnEffectsApplied){
  (G.char.statusEffects||[]).find(s=>s.id==='seared')&&dealPlayerDamage(2,'Seared',true);
- (G.char.statusEffects||[]).filter(s=>s.id==='poison').forEach(s=>dealPlayerDamage(s.stacks||1,'Poison',true));
+ (G.char.statusEffects||[]).filter(s=>s.id==='poison').forEach(s=>{const raw=s.stacks||1;const amt=Math.max(0,raw-(G.char._poisonResist||0));if(amt>0) dealPlayerDamage(amt,'Poison',true); else log(`💊 Poison resisted (resist ≥ ${raw}).`,'log-info');});
  G.char.statusEffects=(G.char.statusEffects||[]).filter(s=>{
  if(s.id==='poison'){const r=d20();if(r>15){log(`💊 Poison resisted! (${r})`,'log-hit');return false;}}
  return true;
  });
+ if((G.char._bleedStacks||0)>0){
+ dealPlayerDamage(G.char._bleedStacks,'Bleed',true);
+ log(`🩸 Bleed deals ${G.char._bleedStacks} damage. Reduced by 1.`,'log-dmg');
+ G.char._bleedStacks=Math.max(0,G.char._bleedStacks-1);
+ }
  }
  renderCombat();
 }
@@ -9167,6 +10425,24 @@ const DUNGEONS = [
   { key:'captainGreenskin',name:'Captain Greenskin',  icon:'🏴‍☠️' },
   { key:'mrSmite',        name:'Mr. Smite',            icon:'⚓' },
   { key:'edwinVanCleef',  name:'Edwin VanCleef',      icon:'🗡️' },
+ ]},
+ { id:'shadowfang', name:'Shadowfang Keep', icon:'🏰', bosses:[
+  { key:'commanderSpringvale',name:'Commander Springvale', icon:'🗡️' },
+  { key:'rethilgore',         name:'Rethilgore',            icon:'🦇' },
+  { key:'odoBlindwatcher',    name:'Odo the Blindwatcher',  icon:'🏹' },
+  { key:'razorclaw',          name:'Razorclaw',             icon:'🪓' },
+  { key:'fenrusDevourer',     name:'Fenrus the Devourer',   icon:'🐺' },
+  { key:'baronSilverlaine',   name:'Baron Silverlaine',     icon:'🧛' },
+  { key:'archmageArugal',     name:'Archmage Arugal',       icon:'🧙' },
+ ]},
+ { id:'ragefire', name:'Ragefire Chasm', icon:'🔥', bosses:[
+  { key:'maggotEye',         name:'Maggot Eye',            icon:'👁️' },
+  { key:'oggleflint',        name:'Oggleflint',            icon:'🪨' },
+  { key:'forgemaster',       name:'The Forgemaster',       icon:'⚒️' },
+  { key:'bazzalan',          name:'Bazzalan',              icon:'🗡️' },
+  { key:'zelemar',           name:'Zelemar the Wrathful',  icon:'🧛' },
+  { key:'jergosh',           name:'Jergosh the Invoker',   icon:'📕' },
+  { key:'taragaman',         name:'Taragaman the Hungerer',icon:'👹' },
  ]},
 ];
 
@@ -9555,6 +10831,55 @@ function equipFromInventory(invIndex) {
  showShop();
 }
 
+function equipFromInventoryInCombat(invIndex){
+ const invItem=(G.char.inventory||[])[invIndex];
+ if(!invItem||!invItem.slot){toast('Cannot equip this item','danger');return;}
+ confirmDialog(
+ `Equip ${invItem.name}?`,
+ `Swapping gear in combat will END YOUR TURN. Your current plays and hand will be forfeited.`,
+ '⚔ Equip & End Turn',
+ 'Cancel',
+ ()=>_doEquipFromInventoryInCombat(invIndex),
+ null
+ );
+}
+function _doEquipFromInventoryInCombat(invIndex){
+ const invItem=(G.char.inventory||[])[invIndex];
+ if(!invItem||!invItem.slot){toast('Cannot equip this item','danger');return;}
+ const eq=EQUIPMENT_SHOP.find(e=>e.id===invItem.id)||BOSS_LOOT_LIST.find(e=>e.id===invItem.id);
+ if(!eq){toast('Item data not found','danger');return;}
+ const current=G.char.equipment?.[eq.slot];
+ if(current){
+ const old=EQUIPMENT_SHOP.find(e=>e.id===current.id)||BOSS_LOOT_LIST.find(e=>e.id===current.id);
+ if(old&&old.stats){
+ if(old.stats.dmg) G.char._eqDmg=(G.char._eqDmg||0)-old.stats.dmg;
+ if(old.stats.dmgAll) G.char._eqDmgAll=(G.char._eqDmgAll||0)-old.stats.dmgAll;
+ if(old.stats.dmgMagic) G.char._eqDmgMagic=(G.char._eqDmgMagic||0)-old.stats.dmgMagic;
+ Object.keys(DMG_TYPE_PROP).forEach(t=>{const sk='dmg'+t[0].toUpperCase()+t.slice(1);if(old.stats[sk])G.char[DMG_TYPE_PROP[t]]=(G.char[DMG_TYPE_PROP[t]]||0)-old.stats[sk];});
+ if(old.stats.roll) G.char._eqRoll=(G.char._eqRoll||0)-old.stats.roll;
+ if(old.stats.armor) G.char._eqArmor=(G.char._eqArmor||0)-old.stats.armor;
+ if(old.stats.draw) G.char._eqDraw=(G.char._eqDraw||0)-old.stats.draw;
+ if(old.stats.hp){ G.char.maxHP=Math.max(1,G.char.maxHP-old.stats.hp); G.char.hp=Math.min(G.char.hp,G.char.maxHP); }
+ if(old.stats.critStunChance) G.char._critStunChance=Math.max(0,(G.char._critStunChance||0)-old.stats.critStunChance);
+ }
+ G.char.inventory[invIndex]={id:current.id,name:current.name,icon:current.icon,desc:current.desc,slot:current.slot,stats:current.stats||{},rarity:current.rarity||null};
+ } else {
+ G.char.inventory.splice(invIndex,1);
+ }
+ eq.apply(G.char);
+ G.char.equipment=G.char.equipment||{weapon:null,offhand:null,armor:null,trinket:null};
+ G.char.equipment[eq.slot]={id:eq.id,name:eq.name,icon:eq.icon,desc:eq.desc,stats:eq.stats||{},rarity:eq.rarity||null};
+ log(`⚔ Equipped ${eq.name} mid-combat — turn ends.`,'log-system');
+ toast(`${eq.icon} ${eq.name} equipped! Turn ended.`,'success');
+ saveRun(G.char);
+ document.getElementById('combat-gear-panel')?.remove();
+ // End the turn — player forfeits remaining plays
+ C.hand.forEach(id=>C.discard.push(id));
+ C.hand=[]; C.selectedCardId=null; C.phase='enemy';
+ renderCombat();
+ setTimeout(doEnemyTurn,400);
+}
+
 function useInventoryItem(itemId){
  const item=SHOP.find(i=>i.id===itemId);
  if(!item){toast('Unknown item','danger');return;}
@@ -9566,8 +10891,7 @@ function useInventoryItem(itemId){
  log(`${item.icon} Used ${item.name}: ${msg}`,'log-hit');
  toast(`${item.icon} ${msg}`,'success');
  saveRun(G.char);
- renderHUD();
- renderEnemies();
+ renderCombat();
  // Refresh gear panel if open
  if(document.getElementById('combat-gear-panel')) openCombatGearPanel();
 }
@@ -9656,7 +10980,7 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  // Tab bar
  const tabBar=document.createElement('div');
  tabBar.className='lv-tabs';
- const tabs=[{id:'upgrades',label:'📦 Upgrades'},{id:'equipment',label:'⚔️ Equipment'},{id:'heroes',label:`${CLASSES[selClass]?.icon} Heroes`}];
+ const tabs=[{id:'upgrades',label:'📦 Upgrades'},{id:'equipment',label:'⚔️ Equipment'},{id:'heroes',label:`${CLASSES[selClass]?.icon} Heroes`},{id:'adventures',label:'🗺️ Adventures'}];
  tabs.forEach(t=>{
  const btn=document.createElement('button');
  btn.className='lv-tab'+(window._lgTab===t.id?' active':'');
@@ -9732,10 +11056,28 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  if(arsenalUpgs.length)renderGroup(arsenalUpgs,'ARSENAL — DRAFT TIER UNLOCKS');
 
  } else if(window._lgTab==='equipment'){
+ // Collapsible section helper — clickable header toggles its body
+ window._lgSectionsOpen=window._lgSectionsOpen||{starting:true};
+ const makeSection=(key,labelHtml,builder)=>{
+ const wrap=document.createElement('div');
+ wrap.className='lv-collapsible';
+ const isOpen=!!window._lgSectionsOpen[key];
+ const hdr=document.createElement('div');
+ hdr.className='lv-category-hdr lv-collapsible-hdr';
+ hdr.innerHTML=`<span class="lv-chev">${isOpen?'▼':'▶'}</span>${labelHtml}`;
+ hdr.style.cursor='pointer';
+ hdr.onclick=()=>{ window._lgSectionsOpen[key]=!window._lgSectionsOpen[key]; showLegacyShop(selClass,window._lgTab,window._lgSelected); };
+ wrap.appendChild(hdr);
+ const body=document.createElement('div');
+ body.className='lv-collapsible-body';
+ body.style.display=isOpen?'block':'none';
+ if(isOpen) builder(body);
+ wrap.appendChild(body);
+ itemsPane.appendChild(wrap);
+ };
+
  // ── STARTING EQUIPMENT ───────────────────────────────────────
- const startHdr=document.createElement('div');startHdr.className='lv-category-hdr';
- startHdr.textContent='🏪 STARTING EQUIPMENT';
- itemsPane.appendChild(startHdr);
+ makeSection('starting','🏪 STARTING EQUIPMENT',(body)=>{
  const slotSubLabels={weapon:'── WEAPONS ──',offhand:'── OFF-HAND ──',armor:'── ARMOR ──',trinket:'── TRINKETS ──'};
  ['weapon','offhand','armor','trinket'].forEach(slot=>{
   const baseItems=EQUIPMENT_SHOP.filter(e=>e.slot===slot&&!e.bossLoot);
@@ -9743,7 +11085,7 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
   const subHdr=document.createElement('div');
   subHdr.style.cssText='font-family:var(--font-pixel);font-size:5px;color:var(--parch-text-dim);letter-spacing:0.1em;margin:8px 0 4px;padding-left:4px';
   subHdr.textContent=slotSubLabels[slot];
-  itemsPane.appendChild(subHdr);
+  body.appendChild(subHdr);
   const grid=document.createElement('div');grid.className='lv-item-grid';
   baseItems.forEach(eq=>{
    const isUnlocked=unlockedEquip.includes(eq.id);
@@ -9755,32 +11097,36 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
    el.onclick=()=>{window._lgSelected=eq.id; document.querySelectorAll('.lv-item').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); renderLvDetail(eq.id);};
    grid.appendChild(el);
   });
-  itemsPane.appendChild(grid);
+  body.appendChild(grid);
+ });
  });
  // ── DUNGEON DROPS ─────────────────────────────────────────────
  DUNGEONS.forEach(dg=>{
-  const dgHdr=document.createElement('div');dgHdr.className='lv-category-hdr';
-  dgHdr.textContent=`${dg.icon} ${dg.name.toUpperCase()}`;
-  itemsPane.appendChild(dgHdr);
-  dg.bosses.forEach(boss=>{
-   const bossItems=BOSS_LOOT[boss.key];
-   if(!bossItems||!bossItems.length) return;
-   const bossHdr=document.createElement('div');
-   bossHdr.style.cssText='font-family:var(--font-pixel);font-size:5px;color:var(--chrome-gold);letter-spacing:0.1em;margin:8px 0 4px;padding-left:4px';
-   bossHdr.textContent=`── ${boss.icon} ${boss.name.toUpperCase()} ──`;
-   itemsPane.appendChild(bossHdr);
-   const grid=document.createElement('div');grid.className='lv-item-grid';
-   bossItems.forEach(item=>{
-    const isUnlocked=unlockedEquip.includes(item.id);
-    const rar=RARITY[item.rarity]||null;
-    const sub=isUnlocked?'✔ Found':'🔒 Not yet found';
-    const badge=rar?rar.label:'';
-    const el=makeItem(item.id,item.icon,item.name,sub,badge,!isUnlocked,window._lgSelected===item.id,false);
-    if(rar&&isUnlocked) el.style.setProperty('--lv-item-accent',rar.color);
-    el.onclick=()=>{window._lgSelected=item.id; document.querySelectorAll('.lv-item').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); renderLvDetail(item.id);};
-    grid.appendChild(el);
+  const totalBosses=dg.bosses.length;
+  const foundCount=dg.bosses.reduce((s,boss)=>s+((BOSS_LOOT[boss.key]||[]).filter(it=>unlockedEquip.includes(it.id)).length),0);
+  const totalItems=dg.bosses.reduce((s,boss)=>s+(BOSS_LOOT[boss.key]||[]).length,0);
+  const labelHtml=`${dg.icon} ${dg.name.toUpperCase()} <span style="margin-left:auto;font-family:var(--font-pixel);font-size:5px;color:var(--parch-text-dim);letter-spacing:0.1em">${foundCount}/${totalItems} found · ${totalBosses} bosses</span>`;
+  makeSection('dungeon_'+dg.id,labelHtml,(body)=>{
+   dg.bosses.forEach(boss=>{
+    const bossItems=BOSS_LOOT[boss.key];
+    if(!bossItems||!bossItems.length) return;
+    const bossHdr=document.createElement('div');
+    bossHdr.style.cssText='font-family:var(--font-pixel);font-size:5px;color:var(--chrome-gold);letter-spacing:0.1em;margin:8px 0 4px;padding-left:4px';
+    bossHdr.textContent=`── ${boss.icon} ${boss.name.toUpperCase()} ──`;
+    body.appendChild(bossHdr);
+    const grid=document.createElement('div');grid.className='lv-item-grid';
+    bossItems.forEach(item=>{
+     const isUnlocked=unlockedEquip.includes(item.id);
+     const rar=RARITY[item.rarity]||null;
+     const sub=isUnlocked?'✔ Found':'🔒 Not yet found';
+     const badge=rar?rar.label:'';
+     const el=makeItem(item.id,item.icon,item.name,sub,badge,!isUnlocked,window._lgSelected===item.id,false);
+     if(rar&&isUnlocked) el.style.setProperty('--lv-item-accent',rar.color);
+     el.onclick=()=>{window._lgSelected=item.id; document.querySelectorAll('.lv-item').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); renderLvDetail(item.id);};
+     grid.appendChild(el);
+    });
+    body.appendChild(grid);
    });
-   itemsPane.appendChild(grid);
   });
  });
 
@@ -9796,6 +11142,23 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  const sub=heroUnlocked?'✔ Unlocked':`⚡${hero.unlockCost} LP`;
  const el=makeItem(hero.id,hero.icon,hero.name,sub,'',false,window._lgSelected===hero.id,heroUnlocked);
  el.onclick=()=>{window._lgSelected=hero.id; document.querySelectorAll('.lv-item').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); renderLvDetail(hero.id);};
+ grid.appendChild(el);
+ });
+ itemsPane.appendChild(grid);
+ } else if(window._lgTab==='adventures'){
+ const hdr=document.createElement('div');hdr.className='lv-category-hdr';
+ hdr.textContent='🗺️ ADVENTURES';
+ itemsPane.appendChild(hdr);
+ const intro=document.createElement('div');
+ intro.style.cssText='font-family:var(--font-body);font-size:13px;color:var(--parch-text-dim);margin:0 0 12px;line-height:1.5;padding:0 4px';
+ intro.innerHTML='<span style="color:var(--chrome-gold-hi)">The Deadmines</span> is your free starting dungeon. Additional dungeons must be purchased with Legacy Points.';
+ itemsPane.appendChild(intro);
+ const grid=document.createElement('div');grid.className='lv-item-grid';
+ ADVENTURES.forEach(adv=>{
+ const unlocked=isAdventureUnlocked(adv);
+ const sub=unlocked?(adv.unlocked?'★ Starting Dungeon':'✔ Unlocked'):'⚡ 60 LP to unlock';
+ const el=makeItem('adv_'+adv.id,adv.icon,adv.title,sub,'',false,window._lgSelected==='adv_'+adv.id,unlocked);
+ el.onclick=()=>{window._lgSelected='adv_'+adv.id; document.querySelectorAll('.lv-item').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); renderLvDetail('adv_'+adv.id);};
  grid.appendChild(el);
  });
  itemsPane.appendChild(grid);
@@ -9894,6 +11257,27 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  ?`<div style="font-family:var(--font-pixel);font-size:6px;color:#5d5;text-align:center">FREE STARTER</div>`
  :`<button class="btn btn-primary${canAfford?'':' btn-ghost'}" style="width:100%" ${canAfford?'':'disabled'} onclick="buyHeroUnlock('${hero.id}','${selClass}')">⚡${hero.unlockCost} LP — Unlock</button>`
  }
+ </div>`;
+ }
+ } else if(window._lgTab==='adventures'&&sel&&sel.startsWith('adv_')){
+ const advId=sel.slice(4);
+ const adv=ADVENTURES.find(a=>a.id===advId);
+ if(adv){
+ const unlocked=isAdventureUnlocked(adv);
+ const costLP=60;
+ const canAfford=lp>=costLP;
+ const statusLabel=unlocked?(adv.unlocked?'★ Starting Dungeon':'✔ Unlocked'):`⚡ ${costLP} LP to unlock`;
+ detail.innerHTML=`
+ <div class="lv-detail-icon">${adv.icon}</div>
+ <div class="lv-detail-name">${adv.title}</div>
+ <div style="font-family:var(--font-pixel);font-size:6px;color:var(--parch-text-dim);margin-bottom:10px">📍 ${adv.subtitle}</div>
+ <div class="lv-detail-desc" style="margin-bottom:10px">${adv.lore}</div>
+ <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:12px">${adv.tags.map(t=>`<span style="font-family:var(--font-pixel);font-size:5px;color:var(--parch-text-dim);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:3px 6px">${t}</span>`).join('')}</div>
+ <div class="lv-detail-cost">${statusLabel}</div>
+ <div class="lv-detail-btn">
+ ${unlocked
+ ?`<div style="font-family:var(--font-pixel);font-size:6px;color:var(--chrome-gold-rim);text-align:center">AVAILABLE TO PLAY</div>`
+ :`<button class="btn btn-primary${canAfford?'':' btn-ghost'}" style="width:100%" ${canAfford?'':'disabled'} onclick="buyAdventureUnlock('${adv.id}')">⚡${costLP} LP — Unlock</button>`}
  </div>`;
  }
  }

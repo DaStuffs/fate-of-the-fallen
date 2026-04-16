@@ -509,26 +509,30 @@ body {
   overflow: hidden;
   flex-direction: row !important;
 }
-.combat-main {
+.combat-middle {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column;
   overflow: hidden;
 }
-.combat-top {
-  display: flex; flex-direction: row; gap: 0;
-  flex: 1; min-height: 0; overflow: hidden;
+.combat-main {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
 }
 
-/* Player HUD box (left panel) */
+/* Player HUD box (left sidebar — full height) */
 .player-hud {
-  width: 210px; flex-shrink: 0;
+  width: 230px; flex-shrink: 0;
   background: #0d0d0d;
   border-right: 1px solid rgba(80,200,80,0.2);
   padding: 10px 10px 8px;
   display: flex; flex-direction: column; gap: 6px;
-  overflow: hidden; align-self: stretch;
+  overflow-y: auto; scrollbar-width: thin;
+  align-self: stretch;
   transition: border-color 0.15s;
 }
+.player-hud::-webkit-scrollbar { width: 4px; }
+.player-hud::-webkit-scrollbar-thumb { background: rgba(200,160,40,0.25); border-radius: 2px; }
 .pb-header {
   display: flex; align-items: center; gap: 8px;
 }
@@ -539,39 +543,48 @@ body {
   padding: 2px 4px; background: rgba(80,200,80,0.08);
 }
 
-/* Center HP bar */
+/* Center HP + XP bar */
 .player-hp-center {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; flex-direction: column; gap: 3px;
   padding: 5px 16px; flex-shrink: 0;
   background: rgba(0,0,0,0.3);
   border-bottom: 1px solid rgba(80,200,80,0.1);
   transition: border-color 0.15s;
 }
+.phc-row { display: flex; align-items: center; gap: 10px; }
+.phc-xp-row { display: flex; align-items: center; gap: 10px; }
+.phc-xp-label { font-family: var(--font-pixel); font-size: 9px; color: var(--chrome-gold-rim); letter-spacing: 0.12em; min-width: 30px; font-weight: bold; }
+.phc-xp-track { flex: 1; height: 10px; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+.phc-xp-fill { height: 100%; background: linear-gradient(90deg, var(--chrome-gold-rim), var(--chrome-gold-hi)); border-radius: 2px; transition: width 0.3s; }
+.phc-xp-nums { font-family: var(--font-pixel); font-size: 11px; color: var(--chrome-gold-hi); min-width: 68px; text-align: right; font-weight: bold; }
+.phc-plays { font-family: var(--font-pixel); font-size: 9px; padding: 3px 8px; border-radius: 3px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+.phc-plays-on  { color: var(--chrome-gold-hi); border-color: var(--chrome-gold); background: rgba(200,160,40,0.1); }
+.phc-plays-off { color: var(--parch-text-dim); border-color: var(--chrome-mid); background: rgba(0,0,0,0.25); }
 .player-hp-center.phc-targeted {
   border-color: rgba(80,200,80,0.4);
   cursor: pointer;
   background: rgba(80,200,80,0.04);
 }
 .phc-name {
-  font-family: var(--font-pixel); font-size: 7px;
+  font-family: var(--font-pixel); font-size: 10px;
   color: var(--parch-text-hi); white-space: nowrap; flex-shrink: 0;
 }
-.phc-lv { font-size: 5px; color: var(--parch-text-dim); }
+.phc-lv { font-size: 7px; color: var(--parch-text-dim); }
 .phc-target-label {
-  font-family: var(--font-pixel); font-size: 5px; color: var(--heal-col);
+  font-family: var(--font-pixel); font-size: 7px; color: var(--heal-col);
   border: 1px solid var(--heal-col); border-radius: 2px;
-  padding: 1px 3px; background: rgba(80,200,80,0.08); flex-shrink: 0;
+  padding: 2px 5px; background: rgba(80,200,80,0.08); flex-shrink: 0;
 }
 .phc-track {
-  flex: 1; height: 9px; background: rgba(0,0,0,0.55);
-  border-radius: 2px; overflow: hidden;
+  flex: 1; height: 16px; background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;
 }
 .phc-fill { height: 100%; border-radius: 2px; transition: width 0.25s, background 0.25s; }
 .phc-nums {
-  font-family: var(--font-pixel); font-size: 9px; font-weight: bold;
-  white-space: nowrap; min-width: 52px; text-align: right; flex-shrink: 0;
+  font-family: var(--font-pixel); font-size: 12px; font-weight: bold;
+  white-space: nowrap; min-width: 68px; text-align: right; flex-shrink: 0;
 }
-.phc-max { font-size: 7px; color: var(--parch-text-dim); }
+.phc-max { font-size: 9px; color: var(--parch-text-dim); }
 
 /* Enemy row */
 .enemy-row {
@@ -880,6 +893,15 @@ body {
 .hud-stat-chip { cursor: default; min-width: 48px; }
 .hud-stat-sub  { font-family: var(--font-body); font-size: 11px; color: var(--parch-text-dim); text-align: center; line-height: 1.3; }
 
+/* Perks & gear bonuses breakdown */
+.hud-perks { margin-top: 8px; padding: 8px 9px; background: rgba(0,0,0,0.35); border: 1px solid rgba(200,160,40,0.25); border-radius: 3px; }
+.hud-perks-title { font-family: var(--font-pixel); font-size: 9px; color: var(--chrome-gold-rim); letter-spacing: 0.14em; text-align: center; margin-bottom: 6px; font-weight: bold; }
+.hud-perks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.hud-perk-chip { display: flex; flex-direction: column; align-items: center; padding: 6px 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; }
+.hud-perk-v { font-family: var(--font-pixel); font-size: 14px; line-height: 1; font-weight: bold; }
+.hud-perk-l { font-family: var(--font-body); font-size: 13px; color: var(--parch-text-hi); text-align: center; line-height: 1.25; margin-top: 4px; }
+.hud-perk-sub { font-family: var(--font-pixel); font-size: 8px; color: var(--parch-text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 3px; }
+
 /* Active combat trackers */
 .hud-trackers { display: flex; flex-direction: column; gap: 3px; }
 .hud-tracker {
@@ -939,6 +961,11 @@ body {
   padding: 6px 10px; flex-shrink: 0; flex-wrap: wrap;
   border-top: 1px solid var(--chrome-dark);
   background: rgba(0,0,0,0.2);
+}
+/* Normalize button sizes inside the action bar so Play / Hero / Pass Turn / Deselect match */
+.action-bar > .btn {
+  min-width: 170px; padding: 10px 14px; font-size: 9px;
+  justify-content: center;
 }
 .action-label {
   font-family: var(--font-pixel); font-size: 6px;
@@ -1183,6 +1210,11 @@ body {
   color: var(--parch-text-dim); padding: 4px 0 8px;
   border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px;
 }
+.lv-collapsible { margin-bottom: 10px; }
+.lv-collapsible-hdr { display: flex; align-items: center; gap: 6px; user-select: none; transition: color 0.15s; }
+.lv-collapsible-hdr:hover { color: var(--chrome-gold-hi); }
+.lv-chev { display: inline-block; width: 12px; color: var(--chrome-gold-rim); font-size: 8px; }
+.lv-collapsible-body { padding-top: 4px; }
 .lv-item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px,1fr)); gap: 6px; margin-bottom: 18px; }
 .lv-item {
   display: flex; align-items: center; gap: 10px;
@@ -1275,12 +1307,15 @@ body {
 /* Combat log */
 .combat-log { font-size: 13px; }
 
-/* Center HP bar */
-.phc-name { font-size: 12px; }
-.phc-lv   { font-size: 10px; }
-.phc-nums { font-size: 14px; }
-.phc-max  { font-size: 12px; }
-.phc-track { height: 13px; }
+/* Center HP + XP bar (desktop) */
+.phc-name { font-size: 15px; }
+.phc-lv   { font-size: 11px; }
+.phc-nums { font-size: 17px; }
+.phc-max  { font-size: 13px; }
+.phc-track { height: 20px; }
+.phc-xp-label { font-size: 12px; }
+.phc-xp-track { height: 13px; }
+.phc-xp-nums { font-size: 14px; }
 
 /* Player HUD */
 .hud-name       { font-size: 13px; }
