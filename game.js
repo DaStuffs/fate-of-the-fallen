@@ -693,11 +693,11 @@ const CARDS = {
  { id:'pr03', name:'Divine Word: Fortitude', tier:1, type:'target', risk:6,
  hit:'Gain +5 max HP for the rest of combat.',
  crit:'Gain +10 max HP.', miss:null, critmiss:'Take 3 damage.' },
- { id:'pr04', name:'Resurrect', tier:1, type:'target', risk:6,
- hit:'Cheat death — survive your next fatal hit and return to half HP.',
- crit:null, miss:null, critmiss:'Lose half your current HP.' },
+ { id:'pr04', name:'Divine Word: Miracle', tier:1, type:'target', risk:6,
+ hit:'Cheat death — survive your next fatal hit and return to 1 HP.',
+ crit:'Survive the fatal hit at FULL HP instead.', miss:null, critmiss:'Lose half your current HP.' },
  { id:'pr05', name:'Shadow word: Pain', tier:1, type:'damage', risk:8,
- hit:'Deal 3 Shadow damage. Apply 2 Poison stacks (repeating Shadow DoT).',
+ hit:'Deal 3 Shadow damage. Apply Shadow Word: Pain (2 shadow/turn for 4 turns). Reapplying refreshes duration.',
  crit:'Apply to a second target also.', miss:null, critmiss:'Take 3 damage.' },
  { id:'pr06', name:'Mind Control', tier:1, type:'damage', risk:7,
  hit:'The next attack against you is redirected as Shadow damage to an enemy instead.',
@@ -2467,7 +2467,7 @@ const CLASSES = {
  desc:'A divine healer and shadow caster. Holy abilities heal and shield allies while Shadow abilities deal ongoing damage and corrupt enemies. Dual-path class that can output heavy healing or surprising damage.',
  baseHP:22, mechanic:'Holy & Shadow',
  mechanicDesc:'Holy cards heal, shield, and buff. Shadow cards apply Devouring Plague and Shadow Word: Pain for DoT damage. Switching between paths mid-combat gives powerful situational answers.',
- playstyle:'Support / DoT', strengths:'Healing, shielding, Shadow DoTs, Resurrect', weaknesses:'Lowest HP among support classes',
+ playstyle:'Support / DoT', strengths:'Healing, shielding, Shadow DoTs, Divine Word: Miracle', weaknesses:'Lowest HP among support classes',
  },
  Warlock: {
  name:'Warlock', icon:'💀', color:'var(--warlock-col, )', borderRGB:'106,58,139',
@@ -2508,8 +2508,8 @@ const CLASSES = {
  name:'Priest', icon:'✨', color:'var(--priest-col, )', borderRGB:'220,200,248',
  desc:'A divine healer and shadow caster. Holy abilities heal and shield while Shadow abilities deal ongoing damage. Dual-path class that can output heavy healing or surprising shadow damage.',
  baseHP:22, mechanic:'Holy & Shadow',
- mechanicDesc:'Holy cards heal, shield, and buff. Shadow cards apply Devouring Plague and Shadow Word: Pain for DoT damage. Penance and Mind Flay deal sustained damage. Resurrect can revive after a death.',
- playstyle:'Support / DoT', strengths:'Healing, shielding, Shadow DoTs, Resurrect', weaknesses:'Low HP — avoid taking direct hits',
+ mechanicDesc:'Holy cards heal, shield, and buff. Shadow cards apply Devouring Plague and Shadow Word: Pain for DoT damage. Penance and Mind Flay deal sustained damage. Divine Word: Miracle can revive after a death.',
+ playstyle:'Support / DoT', strengths:'Healing, shielding, Shadow DoTs, Divine Word: Miracle', weaknesses:'Low HP — avoid taking direct hits',
  },
  Warlock: {
  name:'Warlock', icon:'💀', color:'var(--warlock-col, )', borderRGB:'106,58,139',
@@ -3335,7 +3335,7 @@ const CARD_TALENTS = {
   'Smite':'Holy',
   'Divine Word: Shield':'Discipline',
   'Divine Word: Fortitude':'Discipline',
-  'Resurrect':'Holy',
+  'Divine Word: Miracle':'Discipline',
   'Ressurect':'Holy',
   'Shadow Word: Pain':'Shadow',
   'Shadow word: Pain':'Shadow',
@@ -5035,6 +5035,7 @@ function renderEnemies() {
  if(d.id==='hemorrhage'&&d.stacks>0) chips+=sc('🩸',d.stacks,`Hemorrhage (${d.stacks})\nDeals ${d.stacks} damage at start of each enemy turn.\\nReduces by 1 stack each turn.`,'debuff')+'</div>';
  if(d.id==='poison'&&d.stacks>0) chips+=sc('☠️',d.stacks,`Poison (${d.stacks})\nTakes ${d.stacks} damage per turn.`,'debuff')+'</div>';
  if(d.id==='corruption'&&d.stacks>0) chips+=sc('💀',d.stacks,`Corruption\nTakes ${d.dmg||3} shadow damage per turn · ${d.stacks} turn${d.stacks!==1?'s':''} left.`,'debuff')+'</div>';
+ if(d.id==='shadowWordPain'&&d.stacks>0) chips+=sc('🌑',d.stacks,`Shadow Word: Pain\nTakes ${d.dmg||2} shadow damage per turn · ${d.stacks} turn${d.stacks!==1?'s':''} left.`,'debuff')+'</div>';
  if(d.id==='drainLife'&&d.stacks>0) chips+=sc('💉',d.stacks,`Drain Life\nTakes ${d.dmg||3} shadow damage per turn, healing the caster for the damage dealt · ${d.stacks} turn${d.stacks!==1?'s':''} left.`,'debuff')+'</div>';
  if(d.id==='curseOfAgony'&&d.stacks>0) chips+=sc('😈',d.stacks,`Curse of Agony\nNext tick deals ${d.stacks} shadow damage. Escalates by +1 each turn. Lasts until the target dies.`,'debuff')+'</div>';
  if(d.id==='marked') chips+=sc('🎯','MARK',`Marked for Death\\nTakes +${d.stacks} damage from all attacks this turn.`,'debuff')+'</div>';
@@ -5419,6 +5420,7 @@ function renderBuffZone() {
  if(c._moltenArmorActive) pills.push(pill('🌋',c._moltenArmorCharges||0,'Molten Armor: retaliate on hits','buff'));
  if(C.thornsActive) pills.push(pill('🌿','','Thorns: reflect attack damage','buff'));
  if(C._rebirthActive) pills.push(pill('🌿','','Rebirth: cheat death active — survive next fatal hit!','buff'));
+ if(C._resurrectActive) pills.push(pill('✨','',`Divine Word: Miracle: cheat death active — survive next fatal hit at ${C._resurrectFullHeal?'FULL':'1'} HP!`,'buff'));
  if(C._soulStoneActive) pills.push(pill('💀','SS','Soul Stone: cheat death — return to half HP if fatal','buff'));
  if((C._bladeStormTurns||0)>0) pills.push(pill('⚔️',C._bladeStormTurns,`Blade Storm: ${C._bladeStormTurns} AoE turn(s) left`,'buff'));
  if((C._shieldWallBuffTurns||0)>0) pills.push(pill('🛡️',C._shieldWallBuffTurns,`Shield Wall: +1 shield charge at start of each turn for ${C._shieldWallBuffTurns} more turn(s)`,'buff'));
@@ -6786,27 +6788,32 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  log(`✨ Divine Word: Fortitude: +${hpGain} max HP for the rest of combat!`,'log-info');
  renderHUD(); C._shredOverrideFired=true;
  }
- if(card.name==='Resurrect'&&(outcomeType==='hit'||outcomeType==='crit')){
- // In single player: trigger cheat death if not already active
- if(!C._rebirthActive){
- C._rebirthActive=true; C._rebirthFullHeal=isCrit;
- log(`✨ Resurrect: cheat death activated — survive next fatal hit${isCrit?' at FULL HP':''}!`,isCrit?'log-crit':'log-hit');
+ if(card.name==='Divine Word: Miracle'&&(outcomeType==='hit'||outcomeType==='crit')){
+ if(!C._resurrectActive){
+ C._resurrectActive=true; C._resurrectFullHeal=isCrit;
+ log(`✨ Divine Word: Miracle: cheat death activated — survive next fatal hit${isCrit?' at FULL HP':' at 1 HP'}!`,isCrit?'log-crit':'log-hit');
  } else {
  const healAmt=Math.ceil(G.char.maxHP/2); const _rOld=G.char.hp;
  G.char.hp=Math.min(G.char.maxHP,G.char.hp+healAmt);
- log(`✨ Resurrect: already active — healed ${G.char.hp-_rOld} HP instead!`,'log-hit');
+ log(`✨ Divine Word: Miracle: already active — healed ${G.char.hp-_rOld} HP instead!`,'log-hit');
  }
  renderHUD(); C._shredOverrideFired=true;
  }
  if((card.name==='Shadow word: Pain'||card.name==='Shadow Word: Pain')&&(outcomeType==='hit'||outcomeType==='crit')){
  const swpDmg=(3+bonusDmg)*(isCrit?2:1);
- if(target&&target.hp>0){
- dealEnemyDamage(target,swpDmg,C.targetIdx);
- target.debuffs=target.debuffs||[];
- const px=target.debuffs.find(d=>d.id==='poison');
- if(px)px.stacks+=isCrit?3:2;else target.debuffs.push({id:'poison',stacks:isCrit?3:2});
+ const applySWP=(t)=>{
+ if(!t||t.hp<=0) return;
+ dealEnemyDamage(t,swpDmg,C.enemies.indexOf(t));
+ t.debuffs=t.debuffs||[];
+ const swp=t.debuffs.find(d=>d.id==='shadowWordPain');
+ if(swp){ swp.stacks=4; } else { t.debuffs.push({id:'shadowWordPain',stacks:4,dmg:2}); }
+ };
+ applySWP(target);
+ if(isCrit||C._damnationActive){
+ const other=C.enemies.find(e=>e.hp>0&&e!==target);
+ if(other) applySWP(other);
  }
- log(`🌑 Shadow Word: Pain: ${swpDmg} Shadow damage + repeating DoT!`,isCrit?'log-crit':'log-hit');
+ log(`🌑 Shadow Word: Pain: ${swpDmg} Shadow damage + Shadow Word: Pain DoT (2/turn · 4 turns)${isCrit?' — hits second target!':C._damnationActive?' — Damnation spreads it!':''}`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Mind Control'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -9741,6 +9748,15 @@ function dealPlayerDamage(amount, source, isAbilityDmg=false, sourceEnemy=null, 
  log(`🌿 REBIRTH! Fatal blow survived — returned to ${rebornHp}/${G.char.maxHP} HP!`,'log-crit');
  renderHUD();
  }
+ // Resurrect: cheat death — survive fatal hit at 1 HP (or full on crit)
+ if(G.char.hp<=0 && C._resurrectActive){
+ C._resurrectActive=false;
+ const rebornHp = C._resurrectFullHeal ? G.char.maxHP : 1;
+ C._resurrectFullHeal=false;
+ G.char.hp=rebornHp;
+ log(`✨ DIVINE MIRACLE! Fatal blow survived — returned to ${rebornHp}/${G.char.maxHP} HP!`,'log-crit');
+ renderHUD();
+ }
  // Soul Stone: cheat death (Warlock)
  if(G.char.hp<=0 && C._soulStoneActive){
  C._soulStoneActive=false;
@@ -10327,6 +10343,19 @@ function _runEndOfRoundTriggers(){
  cor.stacks=Math.max(0,cor.stacks-1);
  if(cor.stacks===0){ e.debuffs=e.debuffs.filter(d=>d.id!=='corruption'); log(`💀 Corruption fades on ${e.name}.`,'log-system'); }
  if(e.hp<=0){ G.char.runKills=(G.char.runKills||0)+1; log(`💀 ${e.name} dies from Corruption!`,'log-crit'); }
+ }
+ });
+ // Shadow Word: Pain ticks (Priest — fixed dmg, decays per turn)
+ C.enemies.forEach(e=>{
+ if(e.hp<=0)return;
+ const swp=(e.debuffs||[]).find(d=>d.id==='shadowWordPain');
+ if(swp&&swp.stacks>0){
+ const base=swp.dmg||2, bonus=dotBonus(e,'shadow'), dmg=Math.max(1,base+bonus);
+ e.hp=Math.max(0,e.hp-dmg);
+ log(`🌑 Shadow Word: Pain deals ${dmg} shadow to ${e.name}${bonus?` (base ${base} +${bonus} bonuses)`:''}! (${e.hp}/${e.maxHP} HP · ${swp.stacks-1} turn${swp.stacks-1!==1?'s':''} left)`,'log-hit');
+ swp.stacks=Math.max(0,swp.stacks-1);
+ if(swp.stacks===0){ e.debuffs=e.debuffs.filter(d=>d.id!=='shadowWordPain'); log(`🌑 Shadow Word: Pain fades on ${e.name}.`,'log-system'); }
+ if(e.hp<=0){ G.char.runKills=(G.char.runKills||0)+1; log(`🌑 ${e.name} dies from Shadow Word: Pain!`,'log-crit'); }
  }
  });
  // Curse of Agony ticks (Warlock — escalates each turn, never expires until death)
