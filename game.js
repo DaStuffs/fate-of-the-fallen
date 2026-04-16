@@ -1272,10 +1272,10 @@ const ENEMIES = {
  xp:120, gold:40 },
  baronSilverlaine: { id:'baronSilverlaine', name:'Baron Silverlaine', portrait:'🧛',
  tier:3, maxHP:220, atk:8, type:'boss',
- ongoing:'Mark of the Wolf on start: -1 to all rolls while he lives. Each end of round rolls DC 10 — fail drains 2 HP.',
- surge:'Fear — applies Feared (+3 shadow dmg taken) and stuns you 1 turn.',
+ ongoing:'All his attacks are shadow. Mark of the Wolf: -5 to all rolls while he lives. Each end of round rolls DC 10 — on fail drains 5 HP as shadow damage and heals himself that amount.',
+ surge:'Fear — applies Feared (+3 dmg taken from all sources) and stuns you 1 turn.',
  xp:140, gold:40,
- baronCurse:true,
+ baronCurse:true, shadowAttacks:true,
  phase2HP:80, phase2Spawns:'wailingSpirit' },
  archmageArugal: { id:'archmageArugal', name:'Archmage Arugal', portrait:'🧙',
  tier:5, maxHP:320, atk:12, type:'boss',
@@ -1299,7 +1299,7 @@ const ENEMIES = {
  rangedIgnoreArmor:true, deadeyeAuto:true },
  fenrusDevourer: { id:'fenrusDevourer', name:'Fenrus the Devourer', portrait:'🐺',
  tier:3, maxHP:200, atk:10, type:'boss',
- ongoing:'Each hit applies 2 Bleed stacks. Shadow Howl: at end of round, roll DC 10. On success applies Feared (+2 dmg taken 2 turns). Heals 2 HP per Bleed stack on you each round.',
+ ongoing:'Each hit applies 2 Bleed stacks. Shadow Howl: at end of round, roll DC 10. On success applies Feared (+3 dmg taken from all sources, 2 turns). Heals 2 HP per Bleed stack on you each round.',
  surge:'Devour — applies 3 Bleed stacks, then for each Bleed stack on you deals 3 shadow damage and heals Fenrus for 6.',
  xp:130, gold:40,
  bleedOnHit:2, fenrusHowl:true, bleedFeed:true },
@@ -1374,12 +1374,12 @@ const ENEMIES = {
  surge:'Fire Breath — 5 fire magic damage to you.',
  shadowAttacks:false, xp:60 },
  dragonspawnWarrior: { id:'dragonspawnWarrior', name:'Dragonspawn Warrior', portrait:'🛡️',
- tier:3, maxHP:26, atk:4, type:'minion',
+ tier:3, maxHP:52, atk:8, type:'minion',
  ongoing:'Takes -1 damage from all sources (armored).',
  surge:'Cleave — 5 damage to you.',
  armoredNegOne:true, xp:75 },
  dragonspawnSorceress: { id:'dragonspawnSorceress', name:'Dragonspawn Sorceress', portrait:'🔮',
- tier:3, maxHP:22, atk:3, type:'minion',
+ tier:3, maxHP:44, atk:6, type:'minion',
  ongoing:'All her attacks are shadow magic. Each end of round, rolls DC 12 to Corrupt you (2 shadow/turn for 2 turns).',
  surge:'Shadow Flame — 5 shadow magic damage.',
  shadowAttacks:true, xp:85, sorceressCorrupt:true },
@@ -4048,7 +4048,7 @@ function initTitle() {
  const co=loadCarryover();
  const hasSave=!!loadRun();
  $('btn-continue').style.display=hasSave?'':'none';
- if(hasSave) $('btn-continue').onclick=()=>{G.char=loadRun();G.encounterIdx=G.char.checkpoint||0;G.currentAdventure=G.char.adventure||'deadmines';window._runStarted=true;runEncounter(G.encounterIdx);};
+ if(hasSave) $('btn-continue').onclick=()=>{G.char=loadRun();G.encounterIdx=G.char.checkpoint||0;G.currentAdventure=G.char.adventure||'deadmines';window._runStarted=true;stopAllMusic();runEncounter(G.encounterIdx);};
  if($('btn-newgame')) $('btn-newgame').onclick=()=>showAdventureSelect();
  // Rotating flavor text
  const _flavors=[
@@ -4407,7 +4407,7 @@ function showDraftScreen() {
  show('screen-draft');
  const cls=G.char.className;
  const maxTier=getLevelTier(G.char.level);
- $('draft-title-txt').textContent=draftIsInitial?`STARTING DECK — CARD ${draftInitialCount+1} OF 6`:'DRAFT A NEW CARD';
+ $('draft-title-txt').textContent=draftIsInitial?`STARTING DECK — CARD ${draftInitialCount+1} OF ${6+(G.char._extraStartCards||0)}`:'DRAFT A NEW CARD';
  $('draft-sub-txt').textContent=draftIsInitial?'Build your starting deck one card at a time.':'Choose one card to add to your deck.';
  const options=getDraftOptions(cls, maxTier, draftIsInitial?[]:G.char.deck.map(id=>{const c=getCardById(id);return c?c.name:'';}).filter(Boolean), G.char._draftChoices||3);
  const container=$('draft-cards-row');
@@ -4464,6 +4464,24 @@ function showDraftScreen() {
  parentEl.appendChild(wrap);
  }
  $('btn-skip-draft').style.display=draftIsInitial?'none':'';
+ // Current deck panel — show what's already in the deck
+ const cdEl=$('draft-current-deck');
+ if(cdEl){
+ const deck=G.char.deck||[];
+ if(deck.length===0){ cdEl.innerHTML=''; }
+ else {
+ const counts={};
+ deck.forEach(id=>{const c=getCardById(id); if(c) counts[c.name]=(counts[c.name]||0)+1;});
+ const seen={};
+ const rows=[];
+ deck.forEach(id=>{
+ const c=getCardById(id); if(!c||seen[c.name]) return; seen[c.name]=true;
+ const n=counts[c.name];
+ rows.push(`<div class="dcd-row"><span class="dcd-count">${n>1?'×'+n:''}</span><span class="dcd-name">${c.name}</span><span class="dcd-tier">T${TIER_ROMAN[c.tier]||c.tier}</span></div>`);
+ });
+ cdEl.innerHTML=`<div class="dcd-hdr">YOUR DECK — ${deck.length} card${deck.length!==1?'s':''}</div><div class="dcd-list">${rows.join('')}</div>`;
+ }
+ }
  $('btn-skip-draft').onclick=()=>{
  // Hoarder: +15g on skip if the upgrade is owned
  if((G.char._draftSkipGold||0)>0){
@@ -4481,7 +4499,8 @@ function pickDraftCard(card) {
  toast(`Added: ${card.name}`,'success');
  if(draftIsInitial){
  draftInitialCount++;
- if(draftInitialCount<6){showDraftScreen();return;}
+ const targetSize=6+(G.char._extraStartCards||0);
+ if(draftInitialCount<targetSize){showDraftScreen();return;}
  G.char.deck=shuffle(G.char.deck);
  saveRun(G.char);
  // Stop title music — adventure begins
@@ -5458,6 +5477,7 @@ function renderBuffZone() {
  if((C._hellsAdvocateCharges||0)>0) pills.push(pill('👿',C._hellsAdvocateCharges,`Hell's Advocate: ${C._hellsAdvocateCharges} double-shadow charge(s)`,'buff'));
  if(C._ironHideActive) pills.push(pill('🐻','IRON','Iron Hide: roll >8 → -1 physical damage','buff'));
  if(C._tigersRuryActive) pills.push(pill('🐯',`+${C._tigersFuryStacks||0}`,`Tiger's Fury: +${C._tigersFuryStacks||0} melee damage (persistent, stacks each cast)`,'buff'));
+ if((G.char._starfallCounters||0)>0) pills.push(pill('⭐',G.char._starfallCounters,`Starfall: 4 arcane damage to all enemies at start of each turn. ${G.char._starfallCounters} tick${G.char._starfallCounters!==1?'s':''} left.`,'buff'));
  if(C._maelstromActive) pills.push(pill('⚡',C._maelstromCharges||0,`Maelstrom Weapon: ${C._maelstromCharges||0}/5 charges`,'buff'));
  if((C._gravityBeamCounters||0)>0) pills.push(pill('⏳',C._gravityBeamCounters,`Gravity Beam: ${C._gravityBeamCounters} counter(s)`,'buff'));
  if(C._killerInstinctActive) pills.push(pill('🎯','KI','Killer Instinct: +3 dmg vs <50% HP','buff'));
@@ -5495,7 +5515,7 @@ function renderBuffZone() {
  // Enemy-applied debuffs on the player
  if((c._bleedStacks||0)>0) pills.push(pill('🩸',c._bleedStacks,`Bleed: ${c._bleedStacks} damage at end of each round. Reduces by 1 per round.`,'debuff'));
  if((c._corruptionTurns||0)>0) pills.push(pill('💀',c._corruptionTurns,`Corruption: ${c._corruptionDmg||3} shadow damage at end of each round. ${c._corruptionTurns} turn${c._corruptionTurns!==1?'s':''} left.`,'debuff'));
- if((c._feared||0)>0) pills.push(pill('😱',c._feared,`Feared: +2 damage taken from all sources. ${c._feared} turn${c._feared!==1?'s':''} left.`,'debuff'));
+ if((c._feared||0)>0) pills.push(pill('😱',c._feared,`Feared: +3 damage taken from all sources. ${c._feared} turn${c._feared!==1?'s':''} left.`,'debuff'));
  if(C.skipNextPlayerTurn) pills.push(pill('💤','STUN','Stunned: you lose your next turn.','debuff'));
  if((C._reducedPlaysNextTurn||0)>0) pills.push(pill('❄️',`-${C._reducedPlaysNextTurn}`,`Frozen: -${C._reducedPlaysNextTurn} play${C._reducedPlaysNextTurn!==1?'s':''} next turn.`,'debuff'));
  if((C.drawPenalty||0)>0&&C.drawPenalty<(3+(c.extraDraw||0)+(c._eqDraw||0))) pills.push(pill('📜','-draw',`Draw penalty: you'll draw only ${C.drawPenalty} card${C.drawPenalty!==1?'s':''} next turn.`,'debuff'));
@@ -6072,7 +6092,7 @@ function finalizeCardPlay(card) {
  const raw=d20();
  const _markTgt=C.enemies&&C.enemies[C.targetIdx];
  const _markBonus=(_markTgt&&_markTgt._hunterMarked)?2:0;
- const _baronCurse=(C.enemies||[]).some(e=>e.id==='baronSilverlaine'&&e.hp>0)?-1:0;
+ const _baronCurse=(C.enemies||[]).some(e=>e.id==='baronSilverlaine'&&e.hp>0)?-5:0;
  const bonus=(G.char.rollBonus||0)+(C.bonusRoll||0)+(G.char._luckCharges>0?1:0)+(G.char._eqRoll||0)+_markBonus+_baronCurse;
  if(G.char._luckCharges>0)G.char._luckCharges--;
  C.bonusRoll=0;
@@ -9652,8 +9672,8 @@ function dealEnemyDamage(enemy, amount, idx) {
 
 function dealPlayerDamage(amount, source, isAbilityDmg=false, sourceEnemy=null, bypassMitigation=false) {
  if(amount<=0)return;
- // Feared on player (Baron Silverlaine): +2 damage taken while fear persists
- if(!bypassMitigation&&(G.char._feared||0)>0) amount+=2;
+ // Feared on player: +3 damage taken from all sources while fear persists
+ if(!bypassMitigation&&(G.char._feared||0)>0) amount+=3;
  // Pet: enemies deal half damage this turn (Kuma NAT 20)
  if(!bypassMitigation&&!isAbilityDmg&&C._petEnemiesHalfDmg) amount=Math.ceil(amount/2);
  // Stone Skin Totem: -1 damage to you (min 1) while alive
@@ -10078,13 +10098,16 @@ function doEnemyTurn() {
  const half=enemy._halfAttackNextTurn;
  if(half){enemy._halfAttackNextTurn=false;atk=Math.ceil(atk/2);}
  const razorDouble=enemy.id==='razorclaw'&&(G.char.hp/G.char.maxHP)<0.5;
+ const _prevDT=C._currentDmgType;
+ if(enemy.shadowAttacks) C._currentDmgType='shadow';
  if(razorDouble){
- dealPlayerDamage(atk,`${enemy.name} (Hit 1)`,false,enemy);
- if(enemy.hp>0) dealPlayerDamage(atk,`${enemy.name} (Hit 2)`,false,enemy);
+ dealPlayerDamage(atk,`${enemy.name} (Hit 1)`,enemy.shadowAttacks||false,enemy);
+ if(enemy.hp>0) dealPlayerDamage(atk,`${enemy.name} (Hit 2)`,enemy.shadowAttacks||false,enemy);
  log(`🪓 Razorclaw smells blood — attacks twice!`,'log-dmg');
  } else {
- dealPlayerDamage(atk,enemy.name,false,enemy);
+ dealPlayerDamage(atk,enemy.name,enemy.shadowAttacks||false,enemy);
  }
+ C._currentDmgType=_prevDT;
  if(enemy.id==='cookie'){
  const sr=d20();
  if(sr<8&&!(G.char.statusEffects||[]).find(s=>s.id==='seared')){
@@ -10468,7 +10491,15 @@ function _runEndOfRoundTriggers(){
  const _baron=bossAlive('baronSilverlaine');
  if(_baron){
  const r=d20();
- if(r<10){ dealPlayerDamage(2,'Baron Silverlaine curse',true); log(`🧛 Baron's curse drains 2 HP (rolled ${r} < 10).`,'log-dmg'); }
+ if(r<10){
+ const before=G.char.hp;
+ const prev=C._currentDmgType; C._currentDmgType='shadow';
+ dealPlayerDamage(5,'Baron Silverlaine curse',true,_baron);
+ C._currentDmgType=prev;
+ const dealt=before-G.char.hp;
+ if(dealt>0){ _baron.hp=Math.min(_baron.maxHP,_baron.hp+dealt); log(`🧛 Baron's curse drains ${dealt} shadow HP — heals himself for ${dealt} (rolled ${r} < 10).`,'log-dmg'); }
+ else log(`🧛 Baron's curse fizzles — no damage dealt (rolled ${r} < 10).`,'log-system');
+ }
  }
  if(bossAlive('jergosh')){
  const r=d20();
@@ -11627,6 +11658,27 @@ function renderLvDetail(sel) {
  }
  </div>`;
  }
+
+ } else if(tab==='adventures'){
+ if(!sel||!sel.startsWith('adv_')){detailEl.innerHTML='<div class="lv-empty">Hover or click an adventure<br>to see details</div>';return;}
+ const adv=ADVENTURES.find(a=>a.id===sel.slice(4));
+ if(!adv){detailEl.innerHTML='<div class="lv-empty">Unknown adventure</div>';return;}
+ const unlocked=isAdventureUnlocked(adv);
+ const costLP=adv.unlockCostLP||60;
+ const canAfford=lp>=costLP;
+ const statusLabel=unlocked?(adv.unlocked?'★ Starting Dungeon':'✔ Unlocked'):`⚡ ${costLP} LP to unlock`;
+ detailEl.innerHTML=`
+ <div class="lv-detail-icon">${adv.icon}</div>
+ <div class="lv-detail-name">${adv.title}</div>
+ <div style="font-family:var(--font-pixel);font-size:6px;color:var(--parch-text-dim);margin-bottom:10px">📍 ${adv.subtitle}</div>
+ <div class="lv-detail-desc" style="margin-bottom:10px">${adv.lore}</div>
+ <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:12px">${(adv.tags||[]).map(t=>`<span style="font-family:var(--font-pixel);font-size:5px;color:var(--parch-text-dim);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:3px 6px">${t}</span>`).join('')}</div>
+ <div class="lv-detail-cost">${statusLabel}</div>
+ <div class="lv-detail-btn">
+ ${unlocked
+ ?`<div style="font-family:var(--font-pixel);font-size:6px;color:var(--chrome-gold-rim);text-align:center">AVAILABLE TO PLAY</div>`
+ :`<button class="btn btn-primary${canAfford?'':' btn-ghost'}" style="width:100%" ${canAfford?'':'disabled'} onclick="buyAdventureUnlock('${adv.id}')">⚡${costLP} LP — Unlock</button>`}
+ </div>`;
 
  } else if(tab==='heroes'){
  const classHeroes=HEROES[selClass]||[];
