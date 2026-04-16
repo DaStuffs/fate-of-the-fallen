@@ -816,8 +816,8 @@ const CARDS = {
  hit:'Target takes +3 Shadow damage for 3 turns.',
  crit:'Affects all enemies.', miss:null, critmiss:'You take +1 damage from the next 3 hits.' },
  { id:'wl08', name:'Siphon Life', tier:1, type:'damage', risk:6,
- hit:'Deal 1 shadow damage to all enemies and heal yourself for the total dealt. Channel begins: at the start of each turn roll DC 8 — on success repeat the effect. Channel breaks on failed roll.',
- crit:'Initial damage is doubled.', miss:null, critmiss:null },
+ hit:'Roll DC 8 — on success deal 1 shadow to all enemies and heal yourself for the total dealt; channel begins. Each subsequent turn rolls DC 8 again before draining. Channel breaks on any failed roll.',
+ crit:'Damage is doubled on the initial drain.', miss:null, critmiss:null },
  { id:'wl09', name:'Searing Pain', tier:1, type:'damage', risk:6,
  hit:'Deal 2 fire damage. Apply Searing Pain: target takes +2 damage from all sources this turn.',
  crit:'Damage and Searing Pain debuff applied to all enemies.', miss:null, critmiss:'Take +2 damage this turn.' },
@@ -6101,14 +6101,22 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Siphon Life'&&(outcomeType==='hit'||outcomeType==='crit')){
- const slDmg=(1+bonusDmg)*(isCrit?2:1);
+ // Roll DC 8 NOW — every drain (initial included) is gated by its own check
+ const slBaseDmg=1+bonusDmg;
+ const slRoll=d20()+(G.char.rollBonus||0);
+ if(slRoll>=8){
+ const dmg=slBaseDmg*(isCrit?2:1);
  let totalDealt=0;
- C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,slDmg,ei);totalDealt+=Math.min(before,slDmg);}});
- if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`💀 Siphon Life: ${slDmg} shadow to all (drained ${G.char.hp-_o} HP). Channel begins!`,isCrit?'log-crit':'log-hit');}
- else log(`💀 Siphon Life: no targets to drain. Channel begins.`,'log-info');
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=Math.min(before,dmg);}});
+ const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);
+ log(`💀 Siphon Life (rolled ${slRoll}, DC 8): ${dmg} shadow to all, drained ${G.char.hp-_o} HP. Channel begins!`,isCrit?'log-crit':'log-hit');
+ // Channel persists — each end-of-round it rolls DC 8 again before damaging
  C.activeHoTs=C.activeHoTs||[];
  C.activeHoTs=C.activeHoTs.filter(h=>h.name!=='Siphon Life');
  C.activeHoTs.push({name:'Siphon Life',icon:'💀',channel:true,channelType:'siphon',dc:8,stack:0,baseDmg:1,bonusPerStack:0,turnsLeft:99});
+ } else {
+ log(`💀 Siphon Life fizzles (rolled ${slRoll}, need 8+). No drain, no channel.`,'log-miss');
+ }
  C._siphonLifeActive=false; // legacy flag no longer used
  C._shredOverrideFired=true;}
  if(card.name==='Searing Pain'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -8844,13 +8852,15 @@ function _runEndOfRoundTriggers(){
  livingForIgnite.forEach(e=>{
  const ig=(e.debuffs||[]).find(d=>d.id==='ignite');
  if(ig&&ig.stacks>0){
+ const c=G.char;
+ const igniteOnly=(c._eqDmgFire||0)+(c._eqDmgMagic||0)+(c.dmgBonus||0)+(c._eqDmg||0)+(c._eqDmgAll||0);
  const mk=(e.debuffs||[]).find(d=>d.id==='marked');
  const sp=(e.debuffs||[]).find(d=>d.id==='searingPain');
- const bonus=(mk?.stacks||0)+(sp?.stacks||0);
- const base=ig.stacks+(G.char._igniteBonus||0);
+ const bonus=igniteOnly+(mk?.stacks||0)+(sp?.stacks||0);
+ const base=ig.stacks+(c._igniteBonus||0);
  const dmg=base+bonus;
  e.hp=Math.max(0,e.hp-dmg);
- log(`🔥 Ignite burns ${e.name} for ${dmg}${bonus?` (base ${base} +${bonus} debuff)`:''}!`,'log-hit');
+ log(`🔥 Ignite burns ${e.name} for ${dmg}${bonus?` (base ${base} +${bonus} bonuses)`:''}!`,'log-hit');
  ig.stacks=Math.max(0,ig.stacks-1);
  }
  });
@@ -8941,18 +8951,29 @@ function _runEndOfRoundTriggers(){
  G.char._starfallCounters--;
  if(G.char._starfallCounters===0) log('⭐ Starfall fades.','log-system');
  }
- // Helper: apply per-enemy damage-amp debuffs (Marked / Searing Pain) to DoT ticks
- const dotBonus=(e)=>{
+ // Helper: per-DoT damage bonus = perks + equipment + on-target debuff amps
+ const dotBonus=(e,type)=>{
+ const c=G.char;
+ let bonus=(c.dmgBonus||0)+(c._eqDmg||0)+(c._eqDmgAll||0);
+ if(type==='shadow')bonus+=(c._eqDmgShadow||0)+(c._eqDmgMagic||0);
+ else if(type==='fire')bonus+=(c._eqDmgFire||0)+(c._eqDmgMagic||0);
+ else if(type==='nature')bonus+=(c._eqDmgNature||0)+(c._eqDmgMagic||0);
+ else if(type==='ice'||type==='frost')bonus+=(c._eqDmgFrost||0)+(c._eqDmgMagic||0);
+ else if(type==='arcane')bonus+=(c._eqDmgArcane||0)+(c._eqDmgMagic||0);
+ else if(type==='holy')bonus+=(c._eqDmgHoly||0)+(c._eqDmgMagic||0);
+ else if(type==='melee')bonus+=(c._eqDmgMelee||0);
+ else if(type==='ranged')bonus+=(c._eqDmgRanged||0);
  const mk=(e.debuffs||[]).find(d=>d.id==='marked');
  const sp=(e.debuffs||[]).find(d=>d.id==='searingPain');
- return (mk?.stacks||0)+(sp?.stacks||0);
+ bonus+=(mk?.stacks||0)+(sp?.stacks||0);
+ return bonus;
  };
  // Corruption ticks (Warlock — fixed dmg, decays per turn)
  C.enemies.forEach(e=>{
  if(e.hp<=0)return;
  const cor=(e.debuffs||[]).find(d=>d.id==='corruption');
  if(cor&&cor.stacks>0){
- const base=cor.dmg||3, bonus=dotBonus(e), dmg=base+bonus;
+ const base=cor.dmg||3, bonus=dotBonus(e,'shadow'), dmg=base+bonus;
  e.hp=Math.max(0,e.hp-dmg);
  log(`💀 Corruption deals ${dmg} shadow to ${e.name}${bonus?` (base ${base} +${bonus} debuff)`:''}! (${e.hp}/${e.maxHP} HP · ${cor.stacks-1} turn${cor.stacks-1!==1?'s':''} left)`,'log-hit');
  cor.stacks=Math.max(0,cor.stacks-1);
@@ -8965,7 +8986,7 @@ function _runEndOfRoundTriggers(){
  if(e.hp<=0)return;
  const pois=(e.debuffs||[]).find(d=>d.id==='poison');
  if(pois&&pois.stacks>0){
- const base=pois.stacks, bonus=dotBonus(e), dmg=base+bonus;
+ const base=pois.stacks, bonus=dotBonus(e,'poison'), dmg=base+bonus;
  e.hp=Math.max(0,e.hp-dmg);
  log(`☠️ Poison deals ${dmg} damage to ${e.name}${bonus?` (base ${base} +${bonus} debuff)`:''}! (${e.hp}/${e.maxHP} HP)`,'log-hit');
  pois.stacks=Math.max(0,pois.stacks-1);
@@ -8988,7 +9009,7 @@ function _runEndOfRoundTriggers(){
  if(e.hp<=0)return;
  const hem=(e.debuffs||[]).find(d=>d.id==='hemorrhage');
  if(hem&&hem.stacks>0){
- const base=hem.stacks, bonus=dotBonus(e), dmg=base+bonus;
+ const base=hem.stacks, bonus=dotBonus(e,'melee'), dmg=base+bonus;
  e.hp=Math.max(0,e.hp-dmg);
  log(`🩸 Hemorrhage deals ${dmg} damage to ${e.name}${bonus?` (base ${base} +${bonus} debuff)`:''}! (${e.hp}/${e.maxHP} HP)`,'log-hit');
  hem.stacks=Math.max(0,hem.stacks-1);
