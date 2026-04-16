@@ -1367,6 +1367,31 @@ const ENEMIES = {
  surge:'Molten Smash — 7 fire damage and applies 2 Ignite stacks to you.',
  xp:130, gold:40,
  fireImmune:true, forgeAura:true },
+
+ // ── ONYXIA'S LAIR (RAID) ──
+ onyxianWhelpling: { id:'onyxianWhelpling', name:'Onyxian Whelpling', portrait:'🐲',
+ tier:2, maxHP:14, atk:3, type:'minion',
+ ongoing:'Each attack is fire magic damage.',
+ surge:'Fire Breath — 5 fire magic damage to you.',
+ shadowAttacks:false, xp:60 },
+ dragonspawnWarrior: { id:'dragonspawnWarrior', name:'Dragonspawn Warrior', portrait:'🛡️',
+ tier:3, maxHP:26, atk:4, type:'minion',
+ ongoing:'Takes -1 damage from all sources (armored).',
+ surge:'Cleave — 5 damage to you.',
+ armoredNegOne:true, xp:75 },
+ dragonspawnSorceress: { id:'dragonspawnSorceress', name:'Dragonspawn Sorceress', portrait:'🔮',
+ tier:3, maxHP:22, atk:3, type:'minion',
+ ongoing:'All her attacks are shadow magic. Each end of round, rolls DC 12 to Corrupt you (2 shadow/turn for 2 turns).',
+ surge:'Shadow Flame — 5 shadow magic damage.',
+ shadowAttacks:true, xp:85, sorceressCorrupt:true },
+ onyxia: { id:'onyxia', name:'Onyxia, Broodmother', portrait:'🐉',
+ tier:6, maxHP:400, atk:7, type:'boss', isFinalBoss:true,
+ ongoing:'PHASE 1 (400–300 HP): melee + Fire Breath. PHASE 2 (300–175 HP): takes flight — -2 damage taken, summons Whelplings each round, Deep Breath surge hits for massive fire. PHASE 3 (175–0 HP): LANDS IN FURY — +3 attack, Bellowing Roar applies Fear + stun each end of round (DC 10), no longer takes reduced damage.',
+ surge:'Phase-dependent.',
+ xp:600, gold:200,
+ onyxiaBoss:true,
+ phase2At:300, phase3At:175,
+ spawnsMinion:null },
 };
 const STATUS = {
  seared: {
@@ -1438,6 +1463,19 @@ const ADVENTURES = [
  tags: ['Fire', 'Shadow', 'Cultists'],
  unlocked: false,
  requiresUpgrade: 'lg_unlock_ragefire',
+ },
+ {
+ id: 'onyxia',
+ title: "Onyxia's Lair",
+ subtitle: 'Dustwallow Marsh — RAID',
+ icon: '🐉',
+ difficulty: 'Raid',
+ difficultyColor: ' ',
+ lore: 'Onyxia, Daughter of Deathwing, slumbers in a cavern beneath the marsh. Her whelps and broodlings patrol the approach — and she herself is the trial. A test of everything you\'ve earned.',
+ tags: ['RAID', '3-Phase Boss', 'Hard'],
+ unlocked: false,
+ isRaid: true,
+ unlockCostLP: 300,
  },
 ];
 const ENCOUNTERS = [
@@ -1872,10 +1910,44 @@ const ENCOUNTERS_RAGEFIRE = [
    onWin:`Taragaman is vanquished. The Searing Blade's ritual unravels, and the chasm begins to collapse above you. You have only moments to climb out.`, xpBonus:60, isFinalBoss:true },
 ];
 
+// ── ONYXIA'S LAIR (RAID) ENCOUNTERS ────────────────────────────────
+const ENCOUNTERS_ONYXIA = [
+ { id:'ony_approach', type:'story', title:'The Broodmother\'s Lair', icon:'🐉',
+   text:`The marsh opens onto a cavern mouth sealed with bones. You can smell the sulphur and feel the heat from inside.\n\nThis is a raid. The Broodmother is more than any single adventurer should face — but you are not without resources. You have worn down lesser threats. Now you stand at the last door.`,
+   choices:[
+   { text:'Push onward',                                  skill:null, dc:0 },
+   { text:'Examine the bones — any clues?',               skill:'Perception', dc:10 },
+   { text:'Whisper a prayer for luck',                    skill:null, dc:0 },
+   ],
+   outcomes:[
+   { result:`You step inside. Heat rolls over you like a physical thing.` },
+   { success:`Among the bones: a scorched shield-chip marked with the crest of a slain Stormwind Guard. A small vial of dragon's-blood rests beside it. +25g and +2 to your first roll.`,
+     fail:`The bones are old and tell no tales. But a loose stone shifts — take 2 damage from a falling bone-spur.`,
+     successEffect:{ gold:25, nextCombatRollBonus:2 }, failEffect:{ hp:-2 } },
+   { result:`You mutter an old prayer from another life. A small comfort. +1 lucky roll.`,
+     effect:{ luckCharges:1 } },
+   ] },
+ { id:'ony_whelp_cavern', type:'encounter', title:'Whelp Cavern', icon:'🐲',
+   text:`A nest of Onyxian whelplings swarms from cracks in the wall, chittering and spitting fire.`,
+   enemies:['onyxianWhelpling','onyxianWhelpling','onyxianWhelpling'],
+   onWin:`The whelplings lie in smoking heaps. The tunnel ahead widens.`, xpBonus:30 },
+ { id:'ony_dragonspawn', type:'encounter', title:'Dragonspawn Guardians', icon:'🛡️',
+   text:`Two armored Dragonspawn warriors move to flank you while a sorceress raises a staff crackling with shadow-fire.`,
+   enemies:['dragonspawnWarrior','dragonspawnWarrior','dragonspawnSorceress'],
+   onWin:`The guardians crumple. The final chamber yawns ahead — you can feel her breathing from here.`, xpBonus:40 },
+ { id:'ony_preparation', type:'preparation', title:"Dragon's Rest", icon:'⛩️',
+   text:`The tunnel widens into a chamber lit only by a shaft of moonlight from a break in the ceiling. A dead merchant's cart rests against the wall — his goods scattered but intact. A stone shrine sits in the corner, runes pulsing softly.\n\nThis is your last chance to prepare. Shop. Trim your deck. Steel yourself.` },
+ { id:'ony_onyxia', type:'encounter', title:'Onyxia, Daughter of Deathwing', icon:'🐉',
+   text:`A voice like tearing iron fills the chamber.\n\n"So. Another fool bleeds into my hoard. Come, little thing — let us see how fast you can scream."\n\nA monstrous black dragon rears from the dark.`,
+   enemies:['onyxia'],
+   onWin:`Onyxia collapses with a final shuddering breath. The cavern shakes. You have the Broodmother's head — and, more importantly, her hoard.`, xpBonus:200, isFinalBoss:true },
+];
+
 const ADVENTURE_ENCOUNTERS = {
  deadmines: ENCOUNTERS,
  shadowfang: ENCOUNTERS_SHADOWFANG,
  ragefire: ENCOUNTERS_RAGEFIRE,
+ onyxia: ENCOUNTERS_ONYXIA,
 };
 function getCurrentEncounters(){ return ADVENTURE_ENCOUNTERS[G.currentAdventure] || ENCOUNTERS; }
 
@@ -3033,6 +3105,20 @@ const BOSS_LOOT = {
    desc:'+2 fire damage. Ignite ticks deal +1. Earn +10 bonus gold per combat.',
    stats:{dmgFire:2}, apply:(c)=>{ c._eqDmgFire=(c._eqDmgFire||0)+2; c._igniteBonus=(c._igniteBonus||0)+1; c.goldBonus=(c.goldBonus||0)+10; } },
  ],
+ onyxia: [
+  { id:'bl_onyxia_fang', slot:'weapon', name:"Onyxia's Fang", icon:'🗡️', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+5 melee damage. +3 fire damage. +1 to all rolls.',
+   stats:{dmgMelee:5,dmgFire:3,roll:1}, apply:(c)=>{ c._eqDmgMelee=(c._eqDmgMelee||0)+5; c._eqDmgFire=(c._eqDmgFire||0)+3; c._eqRoll=(c._eqRoll||0)+1; } },
+  { id:'bl_black_scale_shield', slot:'offhand', name:'Black Scale Shield', icon:'🛡️', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+3 armor. +10 max HP. +1 card draw per turn.',
+   stats:{armor:3,hp:10,draw:1}, apply:(c)=>{ c._eqArmor=(c._eqArmor||0)+3; c.maxHP=(c.maxHP||20)+10; c.hp=Math.min(c.hp+10,c.maxHP); c._eqDraw=(c._eqDraw||0)+1; } },
+  { id:'bl_broodmother_mantle', slot:'armor', name:"Broodmother's Mantle", icon:'🧥', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+20 max HP. +2 fire damage. +1 to all rolls. +1 HoT tick.',
+   stats:{hp:20,dmgFire:2,roll:1,hotBonus:1}, apply:(c)=>{ c.maxHP=(c.maxHP||20)+20; c.hp=Math.min(c.hp+20,c.maxHP); c._eqDmgFire=(c._eqDmgFire||0)+2; c._eqRoll=(c._eqRoll||0)+1; c._hotBonus=(c._hotBonus||0)+1; } },
+  { id:'bl_heart_of_onyxia', slot:'trinket', name:'Heart of Onyxia', icon:'❤️‍🔥', bossLoot:true, rarity:'legendary', cost:0,
+   desc:'+4 to all damage types. +2 to all rolls. Crit threshold -1.',
+   stats:{dmgAll:4,roll:2}, apply:(c)=>{ c._eqDmgAll=(c._eqDmgAll||0)+4; c._eqRoll=(c._eqRoll||0)+2; c.critThreshold=Math.max(15,(c.critThreshold||20)-1); c._eqCritThresh=(c._eqCritThresh||0)-1; } },
+ ],
  taragaman: [
   { id:'bl_hungerer_maw', slot:'weapon', name:"Hungerer's Maw", icon:'🔥', bossLoot:true, rarity:'legendary', cost:0,
    desc:'+4 fire damage. +3 shadow damage. +1 to all rolls.',
@@ -3971,13 +4057,14 @@ function isAdventureUnlocked(adv){
 function buyAdventureUnlock(advId){
  const co=loadCarryover();
  const lp=getLegacyPoints(co);
- const costLP=60;
+ const adv=ADVENTURES.find(a=>a.id===advId);
+ const costLP=adv?.unlockCostLP||60;
  if(lp<costLP){ toast('Not enough Legacy Points','danger'); return; }
  co.legacyPoints=lp-costLP;
  co.unlockedAdventures=co.unlockedAdventures||[];
  if(!co.unlockedAdventures.includes(advId)) co.unlockedAdventures.push(advId);
  saveCarryover(co);
- toast(`🗺️ ${ADVENTURES.find(a=>a.id===advId).title} unlocked!`,'success');
+ toast(`🗺️ ${adv.title} unlocked!`,'success');
  showLegacyShop(window._lgClass,'adventures','adv_'+advId);
 }
 function showAdventureSelect() {
@@ -4394,7 +4481,42 @@ function runEncounter(idx) {
  const enc=list[idx];
  if(enc.type==='encounter') showCombatScreen(enc);
  else if(enc.type==='cardRemoval') showCardRemovalScreen(enc);
+ else if(enc.type==='preparation') showPreparationScreen(enc);
  else showAdventureScreen(enc);
+}
+
+function showPreparationScreen(enc){
+ show('screen-adventure');
+ const mainEl=document.querySelector('.adv-main');
+ if(!mainEl)return;
+ renderSidebar();
+ mainEl.innerHTML=`
+ <div class="quest-type-badge" style="background:rgba(200,160,40,0.4);color:var(--chrome-gold-hi)">PREPARATION</div>
+ <div class="enc-title"><span>${enc.icon||'⛩️'}</span> <span>${enc.title}</span></div>
+ <div class="enc-text">${enc.text||''}</div>
+ <div id="enc-choices"></div>
+ `;
+ const container=document.getElementById('enc-choices');
+ const makeBtn=(label,color,onclick)=>{
+ const b=document.createElement('button');
+ b.className='btn btn-primary';
+ b.style.cssText=`width:100%;margin:6px 0;padding:12px;${color?'border-color:'+color+';color:'+color:''}`;
+ b.textContent=label;
+ b.onclick=onclick;
+ return b;
+ };
+ container.appendChild(makeBtn('🏪 Visit the Shop','var(--chrome-gold-hi)',()=>{
+ // Pipe through showShop, and on leave advance encounter
+ G.char._prepShopLeaveTarget=G.encounterIdx+1;
+ showShop();
+ }));
+ container.appendChild(makeBtn('✂ Remove a card from your deck','#a070d0',()=>{
+ enc.title=enc.title+' (Removing card...)';
+ showCardRemovalScreen(enc);
+ }));
+ container.appendChild(makeBtn('⚔ Skip preparation — face the boss','var(--dmg-col)',()=>{
+ runEncounter(G.encounterIdx+1);
+ }));
 }
 
 function showCardRemovalScreen(enc){
@@ -9366,6 +9488,8 @@ function dealEnemyDamage(enemy, amount, idx) {
  if(enemy.id==='archmageArugal'&&enemy.arugalBarrier&&!enemy._barrierBroken) amount=Math.max(1,amount-2);
  // Taragaman Shadow Cloak: -3 damage from all sources while active
  if(enemy.id==='taragaman'&&enemy._cloakActive) amount=Math.max(1,amount-3);
+ // Onyxia Phase 2: -2 damage taken while airborne
+ if(enemy.id==='onyxia'&&(enemy._onyxiaMitigation||0)>0) amount=Math.max(1,amount-enemy._onyxiaMitigation);
  // Commander Springvale armor: -1 damage from all sources
  if(enemy.id==='commanderSpringvale'&&enemy.armoredNegOne) amount=Math.max(1,amount-1);
  // Forgemaster fire immunity
@@ -9427,6 +9551,21 @@ function dealEnemyDamage(enemy, amount, idx) {
  spawnEnemy('shadowGuard');spawnEnemy('shadowGuard');
  log(`⚡ VanCleef summons Shadow Guards! (${enemy.hp} HP)`,'log-surge');
  }});
+ }
+ // Onyxia 3-phase transitions
+ if(enemy.id==='onyxia'&&enemy.onyxiaBoss&&enemy.hp>0){
+ if(enemy.hp<=enemy.phase2At&&enemy._onyxiaPhase!==2&&enemy._onyxiaPhase!==3){
+ enemy._onyxiaPhase=2;
+ enemy._onyxiaMitigation=2; // -2 damage taken while airborne
+ log('🐉 PHASE 2: Onyxia takes flight! She is harder to hit (-2 damage taken) and will call her whelps each round. Beware Deep Breath!','log-surge');
+ spawnEnemy('onyxianWhelpling'); spawnEnemy('onyxianWhelpling');
+ }
+ if(enemy.hp<=enemy.phase3At&&enemy._onyxiaPhase!==3){
+ enemy._onyxiaPhase=3;
+ enemy._onyxiaMitigation=0;
+ enemy.atk=(enemy.atk||7)+3;
+ log('🐉 PHASE 3: Onyxia LANDS IN FURY! +3 attack, no longer reduced damage. She will Fear you at end of each round.','log-surge');
+ }
  }
  // Equipment: Poisoned Kris — melee attacks apply poison
  if(G.char._eqPoisonOnMelee && amount > 0 && enemy.hp > 0){
@@ -9757,6 +9896,21 @@ function doEnemyTurn() {
  const healAmt=4;
  enemy.hp=Math.min(enemy.maxHP,enemy.hp+healAmt);
  log(`👹 Taragaman Consumes — 8 damage to you, heals himself for ${healAmt}!`,'log-surge');
+ } else if(enemy.id==='onyxia'){
+ const ph=enemy._onyxiaPhase||1;
+ if(ph===1){
+ dealPlayerDamage(8,`${enemy.name} Fire Breath`,true,enemy);
+ log('🐉 Onyxia Fire Breath — 8 fire damage!','log-surge');
+ } else if(ph===2){
+ dealPlayerDamage(14,`${enemy.name} DEEP BREATH`,true,enemy);
+ G.char.statusEffects=G.char.statusEffects||[];
+ if(!G.char.statusEffects.find(s=>s.id==='seared')) G.char.statusEffects.push({id:'seared',stacks:1});
+ log('🐉 DEEP BREATH — 14 fire damage + SEARED applied!','log-surge');
+ } else {
+ dealPlayerDamage(10,`${enemy.name} Fury Slam`,false,enemy);
+ G.char._bleedStacks=(G.char._bleedStacks||0)+5;
+ log('🐉 Fury Slam — 10 damage + 5 Bleed stacks!','log-surge');
+ }
  } else {
  const sm=enemy.surge.match(/Deal (\d+)/i);
  dealPlayerDamage(sm?parseInt(sm[1])*1.5|0:Math.ceil(enemy.atk*1.5),`${enemy.name} surge`,false,enemy);
@@ -10275,6 +10429,20 @@ function _runEndOfRoundTriggers(){
  C.enemies.forEach((e,ei)=>{ if(e.hp>0&&e.id!=='forgemaster'&&!e.fireImmune) dealEnemyDamage(e,2,ei); });
  log(`⚒️ The Forgemaster's aura scorches everyone — 2 fire to you and each other enemy.`,'log-info');
  }
+ // Onyxia — phase-specific end-of-round effects
+ const _onyx=bossAlive('onyxia');
+ if(_onyx){
+ if(_onyx._onyxiaPhase===2){
+ // Spawn a whelpling each round while airborne
+ spawnEnemy('onyxianWhelpling');
+ log(`🐲 Onyxia calls her brood — an Onyxian Whelpling joins the fight!`,'log-surge');
+ }
+ if(_onyx._onyxiaPhase===3){
+ const r=d20();
+ if(r>=10){ G.char._feared=Math.max(G.char._feared||0,2); C.skipNextPlayerTurn=true; log(`🐉 Onyxia's Bellowing Roar — you are Feared and stunned! (rolled ${r}).`,'log-dmg'); }
+ else log(`🐉 Onyxia's Bellowing Roar fizzles (rolled ${r} < 10).`,'log-miss');
+ }
+ }
  // Corruption on player (Jergosh)
  if((G.char._corruptionTurns||0)>0){
  dealPlayerDamage(G.char._corruptionDmg||3,'Corruption',true);
@@ -10443,6 +10611,9 @@ const DUNGEONS = [
   { key:'zelemar',           name:'Zelemar the Wrathful',  icon:'🧛' },
   { key:'jergosh',           name:'Jergosh the Invoker',   icon:'📕' },
   { key:'taragaman',         name:'Taragaman the Hungerer',icon:'👹' },
+ ]},
+ { id:'onyxia', name:"Onyxia's Lair (Raid)", icon:'🐉', bosses:[
+  { key:'onyxia', name:'Onyxia, Daughter of Deathwing', icon:'🐉' },
  ]},
 ];
 
@@ -11156,8 +11327,9 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  const grid=document.createElement('div');grid.className='lv-item-grid';
  ADVENTURES.forEach(adv=>{
  const unlocked=isAdventureUnlocked(adv);
- const sub=unlocked?(adv.unlocked?'★ Starting Dungeon':'✔ Unlocked'):'⚡ 60 LP to unlock';
- const el=makeItem('adv_'+adv.id,adv.icon,adv.title,sub,'',false,window._lgSelected==='adv_'+adv.id,unlocked);
+ const cost=adv.unlockCostLP||60;
+ const sub=unlocked?(adv.unlocked?'★ Starting Dungeon':'✔ Unlocked'):`⚡ ${cost} LP to unlock`;
+ const el=makeItem('adv_'+adv.id,adv.icon,adv.title,sub,adv.isRaid?'RAID':'',false,window._lgSelected==='adv_'+adv.id,unlocked);
  el.onclick=()=>{window._lgSelected='adv_'+adv.id; document.querySelectorAll('.lv-item').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); renderLvDetail('adv_'+adv.id);};
  grid.appendChild(el);
  });
@@ -11264,7 +11436,7 @@ function showLegacyShop(forceClass, activeTab, selectedId) {
  const adv=ADVENTURES.find(a=>a.id===advId);
  if(adv){
  const unlocked=isAdventureUnlocked(adv);
- const costLP=60;
+ const costLP=adv.unlockCostLP||60;
  const canAfford=lp>=costLP;
  const statusLabel=unlocked?(adv.unlocked?'★ Starting Dungeon':'✔ Unlocked'):`⚡ ${costLP} LP to unlock`;
  detail.innerHTML=`
