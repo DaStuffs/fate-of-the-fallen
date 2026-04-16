@@ -801,8 +801,8 @@ const CARDS = {
  hit:'Deal 5 Shadow damage.',
  crit:'Deal 10 Shadow damage.', miss:null, critmiss:'Take 3 damage.' },
  { id:'wl03', name:'Immolate', tier:1, type:'damage', risk:7,
- hit:'Deal 3 fire damage. Apply 1 Ignite stack (1 fire damage per turn).',
- crit:'Deal 6 fire damage and 2 Ignite stacks.', miss:null, critmiss:'Apply Immolate to yourself instead.' },
+ hit:'Deal 3 fire damage. Apply 2 Ignite stacks (1 fire damage per stack per turn).',
+ crit:'Deal 6 fire damage and 4 Ignite stacks.', miss:null, critmiss:'The spell backfires — take 3 fire damage and 2 Seared stacks.' },
  { id:'wl04', name:'Summon: Imp', tier:1, type:'target', risk:6,
  hit:'Summon an Imp (2 HP). Grants +3 max HP while alive. Each turn: roll; on >5 deals 1 fire magic to a random enemy. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 1 enemy appears.' },
@@ -816,8 +816,8 @@ const CARDS = {
  hit:'Target takes +3 Shadow damage for 3 turns.',
  crit:'Affects all enemies.', miss:null, critmiss:'You take +1 damage from the next 3 hits.' },
  { id:'wl08', name:'Siphon Life', tier:1, type:'damage', risk:6,
- hit:'Roll DC 8 — on success deal 1 shadow to all enemies and heal yourself for the total dealt; channel begins. Each subsequent turn rolls DC 8 again before draining. Channel breaks on any failed roll.',
- crit:'Damage is doubled on the initial drain.', miss:null, critmiss:null },
+ hit:'Deal 1 shadow damage to all enemies and heal yourself for the total dealt. Channel begins: each subsequent turn rolls DC 8 before draining — channel breaks on a failed roll.',
+ crit:'Initial drain deals double damage.', miss:null, critmiss:null },
  { id:'wl09', name:'Searing Pain', tier:1, type:'damage', risk:6,
  hit:'Deal 2 fire damage. Apply Searing Pain: target takes +2 damage from all sources this turn.',
  crit:'Damage and Searing Pain debuff applied to all enemies.', miss:null, critmiss:'Take +2 damage this turn.' },
@@ -853,7 +853,7 @@ const CARDS = {
  crit:'Deal double damage.', miss:null, critmiss:'Take 3 fire damage.' },
  { id:'wl20', name:'Implosion', tier:2, type:'damage', risk:8,
  hit:'Deal 3 Shadow damage. If this kills the target, it explodes for 5 Shadow damage to all enemies.',
- crit:'Deal double damage.', miss:null, critmiss:'Take 3 damage.' },
+ crit:'Deal double damage. If the target dies, the explosion deals 10 Shadow to all enemies.', miss:null, critmiss:'Take 3 damage.' },
  { id:'wl21', name:'Conflagrate', tier:3, type:'damage', risk:7,
  hit:'Deal 9 fire damage if target has Ignite. Deal 1 fire damage otherwise.',
  crit:'Deal double damage.', miss:null, critmiss:null },
@@ -5949,8 +5949,18 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  }
  if(card.name==='Immolate'&&(outcomeType==='hit'||outcomeType==='crit')){
  const imDmg=(3+bonusDmg)*(isCrit?2:1);
- if(target&&target.hp>0){dealEnemyDamage(target,imDmg,C.targetIdx);target.debuffs=target.debuffs||[];const ig=target.debuffs.find(d=>d.id==='ignite');if(ig)ig.stacks+=isCrit?2:1;else target.debuffs.push({id:'ignite',stacks:isCrit?2:1});}
- log(`🔥 Immolate: ${imDmg} fire damage + ${isCrit?2:1} Ignite!`,isCrit?'log-crit':'log-hit');
+ const igniteStacks=isCrit?4:2;
+ if(target&&target.hp>0){dealEnemyDamage(target,imDmg,C.targetIdx);target.debuffs=target.debuffs||[];const ig=target.debuffs.find(d=>d.id==='ignite');if(ig)ig.stacks+=igniteStacks;else target.debuffs.push({id:'ignite',stacks:igniteStacks});}
+ log(`🔥 Immolate: ${imDmg} fire damage + ${igniteStacks} Ignite stacks!`,isCrit?'log-crit':'log-hit');
+ C._shredOverrideFired=true;
+ }
+ if(card.name==='Immolate'&&outcomeType==='critmiss'){
+ // Apply Immolate to yourself: 3 fire damage + 2 stacks of Seared
+ dealPlayerDamage(3,'Immolate (critmiss)',true,null,true);
+ G.char.statusEffects=G.char.statusEffects||[];
+ const existing=G.char.statusEffects.find(s=>s.id==='seared');
+ if(existing) existing.stacks=(existing.stacks||1)+2; else G.char.statusEffects.push({id:'seared',stacks:2});
+ log('🔥 Immolate backfires! 3 fire damage + 2 Seared stacks applied to you!','log-critmiss');
  C._shredOverrideFired=true;
  }
  if((card.name==='Summon: Imp'||card.name==='Summon: Fel Guard'||card.name==='Summon: Fel Hunter'||card.name==='Summon Void Walker'||card.name==='Summon: Infernal')&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -6055,7 +6065,7 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  const impDmg=(3+bonusDmg)*(isCrit?2:1);
  if(target&&target.hp>0){
   dealEnemyDamage(target,impDmg,C.targetIdx);
-  if(target.hp<=0){const splash=5;C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,splash,ei);});log(`💀 Implosion: ${impDmg} shadow — ${target.name} EXPLODES for ${splash} to all!`,'log-crit');}
+  if(target.hp<=0){const splash=isCrit?10:5;C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,splash,ei);});log(`💀 Implosion: ${impDmg} shadow — ${target.name} EXPLODES for ${splash} to all!`,'log-crit');}
   else log(`💀 Implosion: ${impDmg} shadow damage!`,isCrit?'log-crit':'log-hit');
  }
  C._shredOverrideFired=true;
@@ -6101,22 +6111,16 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Siphon Life'&&(outcomeType==='hit'||outcomeType==='crit')){
- // Roll DC 8 NOW — every drain (initial included) is gated by its own check
- const slBaseDmg=1+bonusDmg;
- const slRoll=d20()+(G.char.rollBonus||0);
- if(slRoll>=8){
- const dmg=slBaseDmg*(isCrit?2:1);
+ // Initial drain is unconditional (card's own DC already succeeded)
+ const dmg=(1+bonusDmg)*(isCrit?2:1);
  let totalDealt=0;
  C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=Math.min(before,dmg);}});
  const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);
- log(`💀 Siphon Life (rolled ${slRoll}, DC 8): ${dmg} shadow to all, drained ${G.char.hp-_o} HP. Channel begins!`,isCrit?'log-crit':'log-hit');
- // Channel persists — each end-of-round it rolls DC 8 again before damaging
+ log(`💀 Siphon Life: ${dmg} shadow to all, drained ${G.char.hp-_o} HP. Channel begins!`,isCrit?'log-crit':'log-hit');
+ // Channel persists — each subsequent end-of-round rolls DC 8 before draining
  C.activeHoTs=C.activeHoTs||[];
  C.activeHoTs=C.activeHoTs.filter(h=>h.name!=='Siphon Life');
  C.activeHoTs.push({name:'Siphon Life',icon:'💀',channel:true,channelType:'siphon',dc:8,stack:0,baseDmg:1,bonusPerStack:0,turnsLeft:99});
- } else {
- log(`💀 Siphon Life fizzles (rolled ${slRoll}, need 8+). No drain, no channel.`,'log-miss');
- }
  C._siphonLifeActive=false; // legacy flag no longer used
  C._shredOverrideFired=true;}
  if(card.name==='Searing Pain'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -8846,9 +8850,8 @@ function doEnemyTurn() {
 
 function _runEndOfRoundTriggers(){
  log('— end of round: triggers fire —','log-system');
- // Ignite damage
+ // Ignite damage (any class that applies Ignite)
  const livingForIgnite=C.enemies.filter(e=>e.hp>0);
- if(G.char.className==='Mage'&&livingForIgnite.length>0){
  livingForIgnite.forEach(e=>{
  const ig=(e.debuffs||[]).find(d=>d.id==='ignite');
  if(ig&&ig.stacks>0){
@@ -8862,9 +8865,10 @@ function _runEndOfRoundTriggers(){
  e.hp=Math.max(0,e.hp-dmg);
  log(`🔥 Ignite burns ${e.name} for ${dmg}${bonus?` (base ${base} +${bonus} bonuses)`:''}!`,'log-hit');
  ig.stacks=Math.max(0,ig.stacks-1);
+ if(ig.stacks===0){ e.debuffs=e.debuffs.filter(d=>d.id!=='ignite'); log(`🔥 Ignite fades on ${e.name}.`,'log-system'); }
+ if(e.hp<=0){ G.char.runKills=(G.char.runKills||0)+1; log(`🔥 ${e.name} dies from Ignite!`,'log-crit'); }
  }
  });
- }
  // Time Bomb detonation
  C.enemies.forEach((e,ei)=>{
  if(e.hp>0&&(e._timeBombs||0)>0){
