@@ -792,7 +792,7 @@ const CARDS = {
  ],
  Warlock: [
  { id:'wl00', name:'Corruption', tier:1, type:'damage', risk:6,
- hit:'Attach to target: deals 3 Shadow damage per turn for 3 turns.',
+ hit:'Apply Corruption to target: 3 shadow damage per turn for 3 turns. Recasting refreshes duration; does not stack.',
  crit:'Corruption attaches to a second target.', miss:null, critmiss:'Take 2 damage.' },
  { id:'wl01', name:'Curse of Weakness', tier:1, type:'damage', risk:6,
  hit:'Target deals half attack damage for 3 rounds.',
@@ -807,20 +807,20 @@ const CARDS = {
  hit:'Summon an Imp (2 HP). Grants +3 max HP while alive. Each turn: roll; on >5 deals 1 fire magic to a random enemy. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 1 enemy appears.' },
  { id:'wl05', name:'Create: Health Stone', tier:1, type:'target', risk:5,
- hit:'Heal 5 HP immediately.',
- crit:'Use once without discarding.', miss:null, critmiss:'Take 2 damage.' },
+ hit:'Heal 5 HP immediately and add a Health Stone (heals 5 HP) to your inventory for later.',
+ crit:'Heal 10 HP and add 2 Health Stones to inventory.', miss:null, critmiss:'Take 2 damage.' },
  { id:'wl06', name:'Create: Mana Stone', tier:1, type:'cards', risk:5,
- hit:'Draw 1 extra card and play 1 extra card this turn.',
- crit:'Use once without discarding.', miss:null, critmiss:'Draw only 1 card next turn.' },
+ hit:'Gain +1 extra play this turn and +1 card draw next turn. Add a Mana Stone (same effect) to your inventory.',
+ crit:'Gain +2 extra plays. Add 2 Mana Stones to inventory.', miss:null, critmiss:'Draw only 1 card next turn.' },
  { id:'wl07', name:'Fear', tier:1, type:'damage', risk:8,
  hit:'Target takes +3 Shadow damage for 3 turns.',
  crit:'Affects all enemies.', miss:null, critmiss:'You take +1 damage from the next 3 hits.' },
  { id:'wl08', name:'Siphon Life', tier:1, type:'damage', risk:6,
- hit:'Deal 1 Shadow damage to all enemies. Repeats each turn on a successful roll (DC 8+).',
- crit:'Deal double damage.', miss:null, critmiss:null },
+ hit:'Deal 1 shadow damage to all enemies and heal yourself for the total dealt. Channel begins: at the start of each turn roll DC 8 — on success repeat the effect. Channel breaks on failed roll.',
+ crit:'Initial damage is doubled.', miss:null, critmiss:null },
  { id:'wl09', name:'Searing Pain', tier:1, type:'damage', risk:6,
- hit:'Deal 2 fire damage. Target takes +2 from all sources this turn.',
- crit:'Affects all enemies.', miss:null, critmiss:'Take +2 damage this turn.' },
+ hit:'Deal 2 fire damage. Apply Searing Pain: target takes +2 damage from all sources this turn.',
+ crit:'Damage and Searing Pain debuff applied to all enemies.', miss:null, critmiss:'Take +2 damage this turn.' },
  { id:'wl10', name:'Summon: Fel Guard', tier:2, type:'target', risk:10,
  hit:'Summon a Fel Guard (6 HP). Takes -2 damage from all sources. Each turn: roll; on >7 heals 2 HP. Damage redirect is optional (toggleable).',
  crit:'Play another card.', miss:null, critmiss:'A random tier 3 enemy appears.' },
@@ -837,8 +837,8 @@ const CARDS = {
  hit:'Take up to 6 damage. Draw and play 1 extra card for every 2 damage taken.',
  crit:'Draw and play 1 extra card per damage taken.', miss:null, critmiss:'Take 6 damage.' },
  { id:'wl15', name:'Create: Soul Stone', tier:2, type:'target', risk:5,
- hit:'Cheat death — if you would die, return to half HP instead (once per combat).',
- crit:'Use once without discarding.', miss:null, critmiss:null },
+ hit:'Arm cheat-death (if fatal, return to half HP — once per combat). Add a Soul Stone (same effect) to your inventory.',
+ crit:'Add 2 Soul Stones to inventory.', miss:null, critmiss:null },
  { id:'wl16', name:'Soul Siphon', tier:2, type:'damage', risk:8,
  hit:'Deal 3 Shadow damage. Attach to target: deals 1 Shadow damage and heals you 1 HP per turn.',
  crit:'Effect lasts until target dies.', miss:null, critmiss:'Take 3 damage and draw 1 fewer card next turn.' },
@@ -2351,6 +2351,12 @@ const SHOP = [
  use:(c)=>{ c._nextMeleeDmgBonus=(c._nextMeleeDmgBonus||0)+2; return '+2 damage on next attack!'; } },
  { id:'smokebomb', name:'Smoke Bomb', cost:30, icon:'💨', desc:'Gain Stealth immediately. Use during combat.',
  use:(c)=>{ c.statusEffects=c.statusEffects||[]; c.statusEffects.push({id:'stealth',stacks:1}); return 'Gained Stealth!'; } },
+ { id:'healthstone', name:'Health Stone', cost:0, conjured:true, icon:'🩸', desc:'Restore 5 HP. Use from inventory during combat.',
+ use:(c)=>{ const o=c.hp; c.hp=Math.min(c.maxHP,c.hp+5); return `Restored ${c.hp-o} HP!`; } },
+ { id:'manastone', name:'Mana Stone', cost:0, conjured:true, icon:'💎', desc:'Gain 1 extra card play this turn and draw 1 card next turn.',
+ use:(c)=>{ C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1; C.bonusDrawNextTurn=(C.bonusDrawNextTurn||0)+1; return '+1 extra play! +1 card draw next turn.'; } },
+ { id:'soulstone', name:'Soul Stone', cost:0, conjured:true, icon:'💀', desc:'Cheat death — if you would die, return to half HP instead (once per combat).',
+ use:(c)=>{ C._soulStoneActive=true; return 'Soul Stone armed — cheat death active!'; } },
 ];
 const CARD_TALENTS = {
   'Backstab':'Assassination',
@@ -4005,9 +4011,12 @@ function renderEnemies() {
  if(d.id==='ignite'&&d.stacks>0) chips+=sc('🔥',d.stacks,`Ignite (${d.stacks} stack${d.stacks!==1?'s':''})\nTakes ${d.stacks} fire damage per turn.`,'debuff')+'</div>';
  if(d.id==='hemorrhage'&&d.stacks>0) chips+=sc('🩸',d.stacks,`Hemorrhage (${d.stacks})\nDeals ${d.stacks} damage at start of each enemy turn.\\nReduces by 1 stack each turn.`,'debuff')+'</div>';
  if(d.id==='poison'&&d.stacks>0) chips+=sc('☠️',d.stacks,`Poison (${d.stacks})\nTakes ${d.stacks} damage per turn.`,'debuff')+'</div>';
+ if(d.id==='corruption'&&d.stacks>0) chips+=sc('💀',d.stacks,`Corruption\nTakes ${d.dmg||3} shadow damage per turn · ${d.stacks} turn${d.stacks!==1?'s':''} left.`,'debuff')+'</div>';
  if(d.id==='marked') chips+=sc('🎯','MARK',`Marked for Death\\nTakes +${d.stacks} damage from all attacks this turn.`,'debuff')+'</div>';
+ if(d.id==='searingPain'&&d.stacks>0) chips+=sc('🔥','SEAR+',`Searing Pain\nTakes +${d.stacks} damage from all sources this turn.`,'debuff')+'</div>';
  if(d.id==='freeze') chips+=sc('❄️','FRZE','Frozen\nSkips next attack.','debuff')+'</div>';
  });
+ if(e._halfAttackNextTurn) chips+=sc('🦴','WEAK','Weakened\nDeals half attack damage next attack.','debuff')+'</div>';
  if(e._hunterMarked) chips+=sc('🎯','HMRK',"Hunter's Mark\n+1 ranged damage from you and pets\n+2 to rolls targeting this enemy",'debuff')+'</div>';
  if((e._predatorMark||0)>0) chips+=sc('🎯',`PM${e._predatorMark}`,`Predator's Mark (${e._predatorMark}/3)\n+${e._predatorMark} damage per hit from you`,'debuff')+'</div>';
  if((e._stunnedTurns||0)>0) chips+=sc('💤','STUN',`Stunned (${e._stunnedTurns} turn${e._stunnedTurns!==1?'s':''} left)\nLoses their action each turn.\nStill takes damage from effects.`,'debuff')+'</div>';
@@ -4398,6 +4407,9 @@ function renderBuffZone() {
  if(h.channelType==='damage'){
  const nextDmg=(h.baseDmg||0)+h.bonusPerStack*((h.stack||0)+1);
  pills.push(pill(h.icon,`${nextDmg}`,`${h.name} (channel)\nRoll ${h.dc}+ each turn to continue\nNext tick deals ${nextDmg} ice to all · tick ${(h.stack||0)+1}`,'debuff'));
+ } else if(h.channelType==='siphon'){
+ const nextDmg=(h.baseDmg||0)+h.bonusPerStack*((h.stack||0)+1);
+ pills.push(pill(h.icon,`${nextDmg}`,`${h.name} (channel)\nRoll ${h.dc}+ each turn to continue\nNext tick: ${nextDmg} shadow to all + heal you for total dealt`,'buff'));
  } else {
  const nextAmt=h.baseHeal+h.bonusPerStack*((h.stack||0)+1);
  pills.push(pill(h.icon,`+${nextAmt}`,`${h.name} (channel)\nRoll ${h.dc}+ each turn to continue\nNext tick heals ${nextAmt} HP · tick ${(h.stack||0)+1}`,'hot'));
@@ -4542,11 +4554,15 @@ function renderActionBar() {
   bar.appendChild(ragePrev);
  }
  const btn=document.createElement('button');
- btn.className='btn btn-primary';
+ const _playsAllowed=2+(C.extraAllowedThisTurn||0);
+ const _outOfPlays=(C.cardsPlayedThisTurn||0)>=_playsAllowed;
+ btn.className='btn btn-primary'+(_outOfPlays?' btn-ghost':'');
  const spendTxt=comboSpend&&(C.comboPointsToSpend||0)>0?` [${C.comboPointsToSpend}pt]`:'';
  const rageTxt=(G.char.className==='Warrior'&&(C.rageToSpend||0)>0)?` [${C.rageToSpend}💢]`:'';
- btn.innerHTML=`🎲 Play ${card.name}${spendTxt}${rageTxt} (Roll ${card.risk>0?card.risk+'+':'Special'})`;
- btn.onclick=playCard; bar.appendChild(btn);
+ btn.innerHTML=_outOfPlays?`⛔ No plays left — Pass Turn`:`🎲 Play ${card.name}${spendTxt}${rageTxt} (Roll ${card.risk>0?card.risk+'+':'Special'})`;
+ btn.disabled=_outOfPlays;
+ if(!_outOfPlays) btn.onclick=playCard;
+ bar.appendChild(btn);
  const clr=document.createElement('button');
  clr.className='btn btn-ghost btn-sm'; clr.textContent='Deselect';
  clr.onclick=()=>{C.selectedCardId=null;C.comboPointsToSpend=0;C.rageToSpend=0;renderHand();renderActionBar();};
@@ -4830,6 +4846,14 @@ function doDraw() {
  log(`${h.icon} ${h.name} channels: ${dmg} ice to all (rolled ${tRoll}, tick ${h.stack})`,'log-hit');
  return true;
  }
+ if(h.channelType==='siphon'){
+ const dmg=(h.baseDmg||0)+h.bonusPerStack*h.stack;
+ let totalDealt=0;
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=Math.min(before,dmg);}});
+ if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`${h.icon} ${h.name} channels: ${dmg} shadow to all, drained ${G.char.hp-_o} HP (rolled ${tRoll}, tick ${h.stack})`,'log-hit');}
+ else log(`${h.icon} ${h.name} channels: no targets to drain (rolled ${tRoll})`,'log-info');
+ return true;
+ }
  const amt=h.baseHeal+h.bonusPerStack*h.stack+(G.char._hotBonus||0);
  const _co=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+amt);
  log(`${h.icon} ${h.name} channels: +${G.char.hp-_co} HP (rolled ${tRoll}, tick ${h.stack}) → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
@@ -4899,6 +4923,11 @@ function playCard() {
  if(!C.selectedCardId)return;
  const card=getCardById(C.selectedCardId);
  if(!card)return;
+ const playsAllowed=2+(C.extraAllowedThisTurn||0);
+ if((C.cardsPlayedThisTurn||0)>=playsAllowed){
+ toast('No plays left this turn — click Pass Turn to end.','warn');
+ return;
+ }
  G.char.runCardsPlayed=(G.char.runCardsPlayed||0)+1;
  C.phase='rolling';
  log(`You play ${card.name}…`,'log-system');
@@ -5022,21 +5051,9 @@ function resolveCard(card, outcome, effectiveRoll) {
  C.cardsPlayedThisTurn=(C.cardsPlayedThisTurn||0)+1;
  if(C.enemies.every(e=>e.hp<=0)){C.hand.forEach(id=>C.discard.push(id));C.hand=[];setTimeout(onCombatWin,600);return;}
  if(outcome==='critmiss'){C.hand.forEach(id=>C.discard.push(id));C.hand=[];C.phase='enemy';setTimeout(doEnemyTurn,700);return;}
- const playsAllowed=2+(C.extraAllowedThisTurn||0);
  if(C._waitingForPicker)return;
- if(C.cardsPlayedThisTurn<playsAllowed){
- if(C.hand.length===0){
- // No cards left — end turn even if plays remain
- log('No cards left in hand. Ending turn.','log-system');
- C.phase='enemy';setTimeout(doEnemyTurn,400);
- } else {
- C.phase='draw';renderCombat();
- }
- return;
- }
- // Don't end turn if a picker overlay is waiting for user input
- if(C._waitingForPicker)return;
- C.hand.forEach(id=>C.discard.push(id));C.hand=[];C.phase='enemy';setTimeout(doEnemyTurn,700);
+ // Stay in draw phase — player must click Pass Turn to end the turn (no auto-end on empty hand or no plays remaining)
+ C.phase='draw'; renderCombat();
 }
 
 
@@ -5910,9 +5927,13 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
 
  // ═══════════ WARLOCK ═══════════
  if(card.name==='Corruption'&&(outcomeType==='hit'||outcomeType==='crit')){
- const corStacks=isCrit?4:2;
- if(target&&target.hp>0){target.debuffs=target.debuffs||[];const px=target.debuffs.find(d=>d.id==='poison');if(px)px.stacks+=corStacks;else target.debuffs.push({id:'poison',stacks:corStacks});}
- log(`💀 Corruption: ${corStacks} Shadow DoT stacks — deals ${corStacks} damage/turn!`,isCrit?'log-crit':'log-hit');
+ const dur=isCrit?5:3;
+ if(target&&target.hp>0){
+ target.debuffs=target.debuffs||[];
+ const cx=target.debuffs.find(d=>d.id==='corruption');
+ if(cx) cx.stacks=dur; else target.debuffs.push({id:'corruption',stacks:dur,dmg:3});
+ }
+ log(`💀 Corruption applied to ${target?.name||'target'}: 3 shadow damage/turn for ${dur} turn${dur!==1?'s':''}${isCrit?' (crit duration)':' (refreshes on recast)'}.`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Curse of Weakness'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -5943,13 +5964,19 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  if(card.name==='Create: Health Stone'&&(outcomeType==='hit'||outcomeType==='crit')){
  const hsHeal=isCrit?10:5; const _hsOld=G.char.hp;
  G.char.hp=Math.min(G.char.maxHP,G.char.hp+hsHeal);
- log(`💀 Health Stone: healed ${G.char.hp-_hsOld} HP → ${G.char.hp}/${G.char.maxHP}!`,isCrit?'log-crit':'log-hit');
+ const it=SHOP.find(s=>s.id==='healthstone');
+ G.char.inventory=G.char.inventory||[]; G.char.inventory.push({id:it.id,name:it.name,icon:it.icon,desc:it.desc});
+ log(`💀 Health Stone: healed ${G.char.hp-_hsOld} HP and added a Health Stone to inventory!`,isCrit?'log-crit':'log-hit');
+ if(isCrit){G.char.inventory.push({id:it.id,name:it.name,icon:it.icon,desc:it.desc}); log('💀 CRIT: an extra Health Stone added to inventory!','log-crit');}
  renderHUD(); C._shredOverrideFired=true;
  }
  if(card.name==='Create: Mana Stone'&&(outcomeType==='hit'||outcomeType==='crit')){
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+(isCrit?2:1);
  C.bonusDrawNextTurn=(C.bonusDrawNextTurn||0)+1;
- log(`💀 Mana Stone: ${isCrit?2:1} extra play${isCrit?'s':''}! Draw +1 next turn!`,isCrit?'log-crit':'log-hit');
+ const it=SHOP.find(s=>s.id==='manastone');
+ G.char.inventory=G.char.inventory||[]; G.char.inventory.push({id:it.id,name:it.name,icon:it.icon,desc:it.desc});
+ if(isCrit) G.char.inventory.push({id:it.id,name:it.name,icon:it.icon,desc:it.desc});
+ log(`💀 Mana Stone: ${isCrit?2:1} extra play${isCrit?'s':''}, draw +1 next turn, and ${isCrit?'2 Mana Stones':'a Mana Stone'} added to inventory!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Fear'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -6000,7 +6027,10 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  }
  if(card.name==='Create: Soul Stone'&&(outcomeType==='hit'||outcomeType==='crit')){
  C._soulStoneActive=true;
- log(`💀 Soul Stone: cheat death — if fatal, return to half HP instead! (once)${isCrit?' Retained on crit!':''}`,isCrit?'log-crit':'log-hit');
+ const it=SHOP.find(s=>s.id==='soulstone');
+ G.char.inventory=G.char.inventory||[]; G.char.inventory.push({id:it.id,name:it.name,icon:it.icon,desc:it.desc});
+ if(isCrit) G.char.inventory.push({id:it.id,name:it.name,icon:it.icon,desc:it.desc});
+ log(`💀 Soul Stone: cheat death armed and ${isCrit?'2 Soul Stones':'a Soul Stone'} added to inventory!`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Soul Siphon'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -6072,15 +6102,21 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  }
  if(card.name==='Siphon Life'&&(outcomeType==='hit'||outcomeType==='crit')){
  const slDmg=(1+bonusDmg)*(isCrit?2:1);
- C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,slDmg,ei);});
- C._siphonLifeActive=true;
- log(`💀 Siphon Life: ${slDmg} shadow to ALL enemies! Repeats each turn on 8+!`,isCrit?'log-crit':'log-hit');
+ let totalDealt=0;
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,slDmg,ei);totalDealt+=Math.min(before,slDmg);}});
+ if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`💀 Siphon Life: ${slDmg} shadow to all (drained ${G.char.hp-_o} HP). Channel begins!`,isCrit?'log-crit':'log-hit');}
+ else log(`💀 Siphon Life: no targets to drain. Channel begins.`,'log-info');
+ C.activeHoTs=C.activeHoTs||[];
+ C.activeHoTs=C.activeHoTs.filter(h=>h.name!=='Siphon Life');
+ C.activeHoTs.push({name:'Siphon Life',icon:'💀',channel:true,channelType:'siphon',dc:8,stack:0,baseDmg:1,bonusPerStack:0,turnsLeft:99});
+ C._siphonLifeActive=false; // legacy flag no longer used
  C._shredOverrideFired=true;}
  if(card.name==='Searing Pain'&&(outcomeType==='hit'||outcomeType==='crit')){
  const spDmg=(2+bonusDmg)*(isCrit?2:1);
- if(isCrit){C.enemies.forEach((e,ei)=>{if(e.hp>0){dealEnemyDamage(e,spDmg,ei);e.debuffs=e.debuffs||[];const mk=e.debuffs.find(d=>d.id==='marked');if(mk)mk.stacks+=2;else e.debuffs.push({id:'marked',stacks:2});}});}
- else{if(target&&target.hp>0){dealEnemyDamage(target,spDmg,C.targetIdx);target.debuffs=target.debuffs||[];const mk=target.debuffs.find(d=>d.id==='marked');if(mk)mk.stacks+=2;else target.debuffs.push({id:'marked',stacks:2});}}
- log(`🔥 Searing Pain: ${spDmg} fire damage${isCrit?' to ALL enemies':''}! Target takes +2 from all sources!`,isCrit?'log-crit':'log-hit');
+ const applySear=e=>{e.debuffs=e.debuffs||[];const sp=e.debuffs.find(d=>d.id==='searingPain');if(sp)sp.stacks=Math.max(sp.stacks,2);else e.debuffs.push({id:'searingPain',stacks:2});};
+ if(isCrit){C.enemies.forEach((e,ei)=>{if(e.hp>0){dealEnemyDamage(e,spDmg,ei);applySear(e);}});}
+ else{if(target&&target.hp>0){dealEnemyDamage(target,spDmg,C.targetIdx);applySear(target);}}
+ log(`🔥 Searing Pain: ${spDmg} fire damage${isCrit?' to ALL enemies':''}! Target takes +2 from all sources this turn.`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;}
  if(card.name==='Unstable Affliction'&&(outcomeType==='hit'||outcomeType==='crit')){
  const uaAlive=C.enemies.filter(e=>e.hp>0);
@@ -8323,6 +8359,9 @@ function dealEnemyDamage(enemy, amount, idx) {
  // Marked for Death: +stacks bonus damage
  const mark=(enemy.debuffs||[]).find(d=>d.id==='marked');
  if(mark&&mark.stacks>0) amount+=mark.stacks;
+ // Searing Pain: +stacks bonus damage from all sources this turn
+ const sp=(enemy.debuffs||[]).find(d=>d.id==='searingPain');
+ if(sp&&sp.stacks>0) amount+=sp.stacks;
  // Siku pet: bonus damage this turn to marked enemy
  if((enemy._petBonusDmgThisTurn||0)>0) amount+=enemy._petBonusDmgThisTurn;
  // Sneed's damage reduction: -2 from player abilities (DoTs bypass this via direct hp manipulation)
@@ -8531,8 +8570,7 @@ function spawnEnemy(enemyId) {
 // ── ENEMY TURN ────────────────────────────────────────────────────
 function doEnemyTurn() {
  G.char.runTurns=(G.char.runTurns||0)+1;
- C.turn++;
- log(`--- Round ${C.turn} ---`,'log-system');
+ log(`▶ Enemy turn`,'log-system');
  C._lastTurnDamageTaken=0;
  C._provokeDmgReduction=false;
  C._dealtFireLastTurn=C._dealtFireThisTurn||false;
@@ -8571,183 +8609,9 @@ function doEnemyTurn() {
  e._devastated=false;
  // NOTE: _noAttackThisTurn is NOT reset here — it's consumed in the attack step
  // NOTE: _stunnedTurns is consumed/decremented in the attack step
- // Clear Marked for Death (lasts one player turn)
- e.debuffs=(e.debuffs||[]).filter(d=>d.id!=='marked');
+ // NOTE: marked / searingPain are cleared LATER, after end-of-round triggers
  });
- // living is computed AFTER DoT ticks so dead enemies don't attack
- // (defined below after poison/hemorrhage)
-
- // Ignite damage (use current alive list at this point)
- const livingForIgnite=C.enemies.filter(e=>e.hp>0);
- if(G.char.className==='Mage'&&livingForIgnite.length>0){
- livingForIgnite.forEach(e=>{
- const ig=(e.debuffs||[]).find(d=>d.id==='ignite');
- if(ig&&ig.stacks>0){
- e.hp=Math.max(0,e.hp-(ig.stacks+(G.char._igniteBonus||0)));
- log(`🔥 Ignite burns ${e.name} for ${ig.stacks}!`,'log-hit');
- ig.stacks=Math.max(0,ig.stacks-1);
- }
- });
- }
-
- // Time Bomb detonation — player can use a card to detonate (we auto-detonate if counters reach 0)
- C.enemies.forEach((e,ei)=>{
- if(e.hp>0&&(e._timeBombs||0)>0){
- e._timeBombs--;
- if(e._timeBombs<=0){
- const tbDmg=8+(G.char.dmgBonus||0);
- dealEnemyDamage(e,tbDmg,ei);
- log(`💥 TIME BOMB detonates on ${e.name} for ${tbDmg} damage!`,'log-crit');
- e._timeBombs=0;
- }
- }
- });
-
- // Shield wall: blocks attack damage
- // (handled in dealPlayerDamage below via _shieldWallCounters)
-
- // Treant allies attack each round
- if((C._treants||0)>0){
- const living_enemies=C.enemies.filter(e=>e.hp>0);
- if(living_enemies.length>0){
- const treantTarget=living_enemies[0]; // attack lowest-index living enemy
- const treantDmg=3*C._treants;
- const tIdx=C.enemies.indexOf(treantTarget);
- dealEnemyDamage(treantTarget,treantDmg,tIdx);
- log(`🌳 ${C._treants} Treant${C._treants>1?'s':''} attack ${treantTarget.name} for ${treantDmg} nature damage!`,'log-hit');
- }
- }
-
- // Water Elemental now handled via C._pets (see doPetTurn)
-
- // Meteor crit: repeat effect at end of next turn
- if(C._meteorRepeat){
- C._meteorRepeat=false;
- const mtTarget=C.enemies.find(e=>e.hp>0);
- if(mtTarget){const mtIdx=C.enemies.indexOf(mtTarget);dealEnemyDamage(mtTarget,7,mtIdx);C.enemies.forEach((e,ei)=>{if(e.hp>0){e.debuffs=e.debuffs||[];const ig=e.debuffs.find(d=>d.id==='ignite');if(ig)ig.stacks+=2;else e.debuffs.push({id:'ignite',stacks:2});}});log(`☄️ Meteor echo: 7 fire + 2 ignite to all!`,'log-crit');}
- }
-
- // Blade Storm AoE ticks
- if((C._bladeStormTurns||0)>0){
- C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,3,ei);});
- log(`⚔️ Blade Storm: 3 melee to ALL enemies! (${C._bladeStormTurns} turns left)`,'log-hit');
- C._bladeStormTurns--;
- if(C._bladeStormTurns===0)log('⚔️ Blade Storm fades.','log-system');
- }
- // Summon: Infernal attacks
- if((C._infernoTurns||0)>0){
- const infT=C.enemies.find(e=>e.hp>0);
- if(infT){dealEnemyDamage(infT,5,C.enemies.indexOf(infT));log(`🔥 Infernal: 5 fire damage to ${infT.name}!`,'log-hit');}
- C._infernoTurns--;
- if(C._infernoTurns===0)log('🔥 Infernal dissipates.','log-system');
- }
- // Ancestral Spirit attacks
- if((C._ancestralSpiritTurns||0)>0){
- const asT=C.enemies.find(e=>e.hp>0);
- if(asT){dealEnemyDamage(asT,2,C.enemies.indexOf(asT));log(`👻 Ancestral Spirit: 2 nature damage to ${asT.name}!`,'log-hit');}
- C._ancestralSpiritTurns--;
- if(C._ancestralSpiritTurns===0)log('👻 Ancestral Spirit fades.','log-system');
- }
- // Soul Siphon drain
- if((C._soulSiphonTargetIdx||0)>=0&&C._soulSiphonTargetIdx!==-1){
- const ssE=C.enemies[C._soulSiphonTargetIdx];
- if(ssE&&ssE.hp>0){dealEnemyDamage(ssE,1,C._soulSiphonTargetIdx);const _ssOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);log(`💀 Soul Siphon: drained 1 HP from ${ssE.name}!`,'log-hit');renderHUD();if(ssE.hp<=0)C._soulSiphonTargetIdx=-1;}
- else C._soulSiphonTargetIdx=-1;
- }
- // Fel Armor HP regen
- if(C._felArmorActive){const _faOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);if(G.char.hp>_faOld)log('🟢 Fel Armor: +1 HP regenerated!','log-info');renderHUD();}
- // Reign Of Fire tick
- if(C._reignOfFireActive){
- C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,3,ei);});
- log('🔥 Reign Of Fire: 3 fire to ALL enemies!','log-hit');
- const rofR=d20();
- if(rofR<10){C._reignOfFireActive=false;log(`🔥 Reign Of Fire ends (rolled ${rofR}, need 10+).`,'log-system');}
- }
- // Lightwell healing
- if(C._lightwellActive){const lwR=d20();if(lwR>=13){const _lwOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+2);log(`✨ Lightwell: rolled ${lwR} — healed ${G.char.hp-_lwOld} HP!`,'log-hit');renderHUD();}}
- // Mana Spring / Grace of Air now handled as pets (see CLASS_PETS)
- // Temporal Abstraction: deal buffered damage at end of turn
- if((C._temporalDmgBuffer||0)>0){const td=C._temporalDmgBuffer;C._temporalDmgBuffer=0;C._temporalAbstractionActive=false;dealPlayerDamage(td,'Temporal Abstraction (delayed)',true);log(`⏳ Temporal Abstraction: ${td} delayed damage resolved!`,'log-hit');}
- else C._temporalAbstractionActive=false;
- // Unstable Power self-damage
- if(C._unstablePowerActive){const upR=d20();const upDmg=Math.max(1,Math.ceil(upR/5));dealPlayerDamage(upDmg,'Unstable Power',true);log(`💀 Unstable Power: rolled ${upR} — ${upDmg} self-damage!`,'log-hit');}
- // Consecration: 1 holy damage to all enemies each round
- if(C._consecrationActive){C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,1,ei);});log('✨ Consecration: 1 holy damage to all enemies!','log-hit');}
- // Shadow Fiend now handled via C._pets (see doPetTurn)
- // Siphon Life: repeat on roll 8+
- if(C._siphonLifeActive){const slR=d20();if(slR>=8){const slLiving=C.enemies.filter(e=>e.hp>0);slLiving.forEach(e=>{dealEnemyDamage(e,1,C.enemies.indexOf(e));});log(`💀 Siphon Life: rolled ${slR} — 1 shadow to all enemies!`,'log-hit');}else{C._siphonLifeActive=false;log(`💀 Siphon Life fades (rolled ${slR}, need 8+).`,'log-system');}}
- // Unstable Affliction: 5 shadow/turn, jumps on roll 7 or less
- if(C._unstableAfflictionTargetIdx>=0){const uaE=C.enemies[C._unstableAfflictionTargetIdx];if(uaE&&uaE.hp>0){dealEnemyDamage(uaE,5,C._unstableAfflictionTargetIdx);log(`💀 Unstable Affliction: 5 shadow to ${uaE.name}!`,'log-hit');const uaR=d20();if(uaR<=7){const uaNew=C.enemies.filter((e,i)=>e.hp>0&&i!==C._unstableAfflictionTargetIdx);if(uaNew.length>0){const uaNT=uaNew[Math.floor(Math.random()*uaNew.length)];C._unstableAfflictionTargetIdx=C.enemies.indexOf(uaNT);log(`💀 Unstable Affliction jumps to ${uaNT.name}! (rolled ${uaR})`,'log-system');}else{C._unstableAfflictionTargetIdx=-1;log('💀 Unstable Affliction: no new target.','log-system');}}}else C._unstableAfflictionTargetIdx=-1;}
- // Gravity Beam: auto-fires and grows each turn
- if((C._gravityBeamCounters||0)>0){const gbAutoT=C.enemies.find(e=>e.hp>0);if(gbAutoT){const gbAutoDmg=1+C._gravityBeamCounters;dealEnemyDamage(gbAutoT,gbAutoDmg,C.enemies.indexOf(gbAutoT));log(`⏳ Gravity Beam: ${gbAutoDmg} arcane! (${C._gravityBeamCounters} counters → ${C._gravityBeamCounters+1})`,'log-hit');}C._gravityBeamCounters=Math.min(C._gravityBeamCounters+1,12);}
- // Ritual of Doom: clear at end of turn
- if(C._ritualOfDoomActive)C._ritualOfDoomActive=false;
-
- // Starfall ticks
- if((G.char._starfallCounters||0)>0){
- C.enemies.forEach((e,ei)=>{ if(e.hp>0){ dealEnemyDamage(e,4,ei); log(`⭐ Starfall: 4 arcane damage to ${e.name}!`,'log-hit'); }});
- G.char._starfallCounters--;
- if(G.char._starfallCounters===0) log('⭐ Starfall fades.','log-system');
- }
-
- // Enemy Poison ticks (Deadly Poison applied to enemies)
- C.enemies.forEach(e=>{
- if(e.hp<=0)return;
- const pois=(e.debuffs||[]).find(d=>d.id==='poison');
- if(pois&&pois.stacks>0){
- e.hp=Math.max(0,e.hp-pois.stacks);
- log(`☠️ Poison deals ${pois.stacks} damage to ${e.name}! (${e.hp}/${e.maxHP} HP)`,'log-hit');
- pois.stacks=Math.max(0,pois.stacks-1);
- if(pois.stacks===0){
- e.debuffs=e.debuffs.filter(d=>d.id!=='poison');
- log(`☠️ Poison fades on ${e.name}.`,'log-system');
- }
- if(e.hp<=0){
- G.char.runKills=(G.char.runKills||0)+1;
- log(`☠️ ${e.name} dies from Poison!`,'log-crit');
- if(e.id==='sneedShredder'&&!e._sneedSpawned){
- e._sneedSpawned=true;spawnEnemy('sneed');
- log('🔧 Sneed crawls out of the wreckage!','log-surge');
- }
- }
- }
- });
-
- // Hemorrhage damage on enemies (stacks deal damage to enemy per turn, reduce by 1)
- C.enemies.forEach(e=>{
- if(e.hp<=0)return;
- const hem=(e.debuffs||[]).find(d=>d.id==='hemorrhage');
- if(hem&&hem.stacks>0){
- e.hp=Math.max(0,e.hp-hem.stacks);
- log(`🩸 Hemorrhage deals ${hem.stacks} damage to ${e.name}! (${e.hp}/${e.maxHP} HP)`,'log-hit');
- hem.stacks=Math.max(0,hem.stacks-1);
- if(hem.stacks===0){
- e.debuffs=e.debuffs.filter(d=>d.id!=='hemorrhage');
- log(`🩸 Hemorrhage fades on ${e.name}.`,'log-system');
- }
- if(e.hp<=0){
- G.char.runKills=(G.char.runKills||0)+1;
- log(`☠️ ${e.name} defeated by Hemorrhage!`,'log-crit');
- if(e.id==='sneedShredder'&&!e._sneedSpawned){
- e._sneedSpawned=true;spawnEnemy('sneed');
- log('🔧 Sneed crawls out of the wreckage!','log-surge');
- }
- }
- }
- });
-
- // Status damage (skip if already ticked during a player turn skip)
- if(!C._skipTurnEffectsApplied){
- (G.char.statusEffects||[]).find(s=>s.id==='seared')&&dealPlayerDamage(2,'Seared',true);
- (G.char.statusEffects||[]).filter(s=>s.id==='poison').forEach(s=>dealPlayerDamage(s.stacks||1,'Poison',true));
- G.char.statusEffects=(G.char.statusEffects||[]).filter(s=>{
- if(s.id==='poison'){const r=d20();if(r>15){log(`💊 Poison resisted! (${r})`,'log-hit');return false;}}
- return true;
- });
- }
- if(G.char.hp<=0)return;
-
- // Recompute living AFTER all DoT damage — enemies killed by DoT don't attack
+ // Enemies attack FIRST (before triggers) — round flow: player → enemies → triggers
  const living=C.enemies.filter(e=>e.hp>0);
 
  // Per-enemy action logic extracted so sequential setTimeout chain can call it
@@ -8908,6 +8772,14 @@ function doEnemyTurn() {
  log(`${h.icon} ${h.name} channels: ${dmg} ice to all (rolled ${tRoll}, tick ${h.stack})`,'log-hit');
  return true;
  }
+ if(h.channelType==='siphon'){
+ const dmg=(h.baseDmg||0)+h.bonusPerStack*h.stack;
+ let totalDealt=0;
+ C.enemies.forEach((e,ei)=>{if(e.hp>0){const before=e.hp;dealEnemyDamage(e,dmg,ei);totalDealt+=Math.min(before,dmg);}});
+ if(totalDealt>0){const _o=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+totalDealt);log(`${h.icon} ${h.name} channels: ${dmg} shadow to all, drained ${G.char.hp-_o} HP (rolled ${tRoll}, tick ${h.stack})`,'log-hit');}
+ else log(`${h.icon} ${h.name} channels: no targets to drain (rolled ${tRoll})`,'log-info');
+ return true;
+ }
  const amt=h.baseHeal+h.bonusPerStack*h.stack+(G.char._hotBonus||0);
  const _co=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+amt);
  log(`${h.icon} ${h.name} channels: +${G.char.hp-_co} HP (rolled ${tRoll}, tick ${h.stack}) → ${G.char.hp}/${G.char.maxHP}`,'log-hit');
@@ -8933,6 +8805,10 @@ function doEnemyTurn() {
  log('🐻 Growl fades — enemy attacks return to normal.','log-system');
  }
  }
+ // True end of round — log a divider with the new round number, then transition
+ log(`════ Round ${C.turn} ends ════`,'log-system');
+ C.turn++;
+ log(`--- Round ${C.turn} begins ---`,'log-system');
  C.phase='draw';
  renderCombat();
  setTimeout(doDraw,400);
@@ -8942,7 +8818,14 @@ function doEnemyTurn() {
  let _eti=0;
  function _nextEnemy(){
  if(G.char.hp<=0)return;
- if(_eti>=living.length){_finishEnemyTurn();return;}
+ if(_eti>=living.length){
+ // Enemies done — now run end-of-round triggers (DoTs, ally attacks, debuff ticks)
+ _runEndOfRoundTriggers();
+ if(G.char.hp<=0)return;
+ if(C.enemies.every(e=>e.hp<=0)){setTimeout(onCombatWin,400);return;}
+ _finishEnemyTurn();
+ return;
+ }
  const enemy=living[_eti++];
  log(`— ${enemy.portrait} ${enemy.name} acts —`,'log-system');
  doOneEnemy(enemy);
@@ -8951,6 +8834,190 @@ function doEnemyTurn() {
  setTimeout(_nextEnemy,3000);
  }
  _nextEnemy();
+}
+
+function _runEndOfRoundTriggers(){
+ log('— end of round: triggers fire —','log-system');
+ // Ignite damage
+ const livingForIgnite=C.enemies.filter(e=>e.hp>0);
+ if(G.char.className==='Mage'&&livingForIgnite.length>0){
+ livingForIgnite.forEach(e=>{
+ const ig=(e.debuffs||[]).find(d=>d.id==='ignite');
+ if(ig&&ig.stacks>0){
+ const mk=(e.debuffs||[]).find(d=>d.id==='marked');
+ const sp=(e.debuffs||[]).find(d=>d.id==='searingPain');
+ const bonus=(mk?.stacks||0)+(sp?.stacks||0);
+ const base=ig.stacks+(G.char._igniteBonus||0);
+ const dmg=base+bonus;
+ e.hp=Math.max(0,e.hp-dmg);
+ log(`🔥 Ignite burns ${e.name} for ${dmg}${bonus?` (base ${base} +${bonus} debuff)`:''}!`,'log-hit');
+ ig.stacks=Math.max(0,ig.stacks-1);
+ }
+ });
+ }
+ // Time Bomb detonation
+ C.enemies.forEach((e,ei)=>{
+ if(e.hp>0&&(e._timeBombs||0)>0){
+ e._timeBombs--;
+ if(e._timeBombs<=0){
+ const tbDmg=8+(G.char.dmgBonus||0);
+ dealEnemyDamage(e,tbDmg,ei);
+ log(`💥 TIME BOMB detonates on ${e.name} for ${tbDmg} damage!`,'log-crit');
+ e._timeBombs=0;
+ }
+ }
+ });
+ // Treant allies attack each round (legacy counter — Druid hero abilities, Shaman, Warlock Armies of Hell)
+ if((C._treants||0)>0){
+ const living_enemies=C.enemies.filter(e=>e.hp>0);
+ if(living_enemies.length>0){
+ const treantTarget=living_enemies[0];
+ const treantDmg=3*C._treants;
+ const tIdx=C.enemies.indexOf(treantTarget);
+ dealEnemyDamage(treantTarget,treantDmg,tIdx);
+ log(`🌳 ${C._treants} Treant${C._treants>1?'s':''} attack ${treantTarget.name} for ${treantDmg} nature damage!`,'log-hit');
+ }
+ }
+ // Meteor crit echo
+ if(C._meteorRepeat){
+ C._meteorRepeat=false;
+ const mtTarget=C.enemies.find(e=>e.hp>0);
+ if(mtTarget){const mtIdx=C.enemies.indexOf(mtTarget);dealEnemyDamage(mtTarget,7,mtIdx);C.enemies.forEach((e,ei)=>{if(e.hp>0){e.debuffs=e.debuffs||[];const ig=e.debuffs.find(d=>d.id==='ignite');if(ig)ig.stacks+=2;else e.debuffs.push({id:'ignite',stacks:2});}});log(`☄️ Meteor echo: 7 fire + 2 ignite to all!`,'log-crit');}
+ }
+ // Blade Storm AoE ticks
+ if((C._bladeStormTurns||0)>0){
+ C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,3,ei);});
+ log(`⚔️ Blade Storm: 3 melee to ALL enemies! (${C._bladeStormTurns} turns left)`,'log-hit');
+ C._bladeStormTurns--;
+ if(C._bladeStormTurns===0)log('⚔️ Blade Storm fades.','log-system');
+ }
+ // Inferno
+ if((C._infernoTurns||0)>0){
+ const infT=C.enemies.find(e=>e.hp>0);
+ if(infT){dealEnemyDamage(infT,5,C.enemies.indexOf(infT));log(`🔥 Infernal: 5 fire damage to ${infT.name}!`,'log-hit');}
+ C._infernoTurns--;
+ if(C._infernoTurns===0)log('🔥 Infernal dissipates.','log-system');
+ }
+ // Ancestral Spirit
+ if((C._ancestralSpiritTurns||0)>0){
+ const asT=C.enemies.find(e=>e.hp>0);
+ if(asT){dealEnemyDamage(asT,2,C.enemies.indexOf(asT));log(`👻 Ancestral Spirit: 2 nature damage to ${asT.name}!`,'log-hit');}
+ C._ancestralSpiritTurns--;
+ if(C._ancestralSpiritTurns===0)log('👻 Ancestral Spirit fades.','log-system');
+ }
+ // Soul Siphon drain
+ if((C._soulSiphonTargetIdx||0)>=0&&C._soulSiphonTargetIdx!==-1){
+ const ssE=C.enemies[C._soulSiphonTargetIdx];
+ if(ssE&&ssE.hp>0){dealEnemyDamage(ssE,1,C._soulSiphonTargetIdx);const _ssOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);log(`💀 Soul Siphon: drained 1 HP from ${ssE.name}!`,'log-hit');renderHUD();if(ssE.hp<=0)C._soulSiphonTargetIdx=-1;}
+ else C._soulSiphonTargetIdx=-1;
+ }
+ // Fel Armor regen
+ if(C._felArmorActive){const _faOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+1);if(G.char.hp>_faOld)log('🟢 Fel Armor: +1 HP regenerated!','log-info');renderHUD();}
+ // Reign Of Fire
+ if(C._reignOfFireActive){
+ C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,3,ei);});
+ log('🔥 Reign Of Fire: 3 fire to ALL enemies!','log-hit');
+ const rofR=d20();
+ if(rofR<10){C._reignOfFireActive=false;log(`🔥 Reign Of Fire ends (rolled ${rofR}, need 10+).`,'log-system');}
+ }
+ // Lightwell heal
+ if(C._lightwellActive){const lwR=d20();if(lwR>=13){const _lwOld=G.char.hp;G.char.hp=Math.min(G.char.maxHP,G.char.hp+2);log(`✨ Lightwell: rolled ${lwR} — healed ${G.char.hp-_lwOld} HP!`,'log-hit');renderHUD();}}
+ // Temporal Abstraction buffer release
+ if((C._temporalDmgBuffer||0)>0){const td=C._temporalDmgBuffer;C._temporalDmgBuffer=0;C._temporalAbstractionActive=false;dealPlayerDamage(td,'Temporal Abstraction (delayed)',true);log(`⏳ Temporal Abstraction: ${td} delayed damage resolved!`,'log-hit');}
+ else C._temporalAbstractionActive=false;
+ // Unstable Power self-damage
+ if(C._unstablePowerActive){const upR=d20();const upDmg=Math.max(1,Math.ceil(upR/5));dealPlayerDamage(upDmg,'Unstable Power',true);log(`💀 Unstable Power: rolled ${upR} — ${upDmg} self-damage!`,'log-hit');}
+ // Consecration
+ if(C._consecrationActive){C.enemies.forEach((e,ei)=>{if(e.hp>0)dealEnemyDamage(e,1,ei);});log('✨ Consecration: 1 holy damage to all enemies!','log-hit');}
+ // Unstable Affliction
+ if(C._unstableAfflictionTargetIdx>=0){const uaE=C.enemies[C._unstableAfflictionTargetIdx];if(uaE&&uaE.hp>0){dealEnemyDamage(uaE,5,C._unstableAfflictionTargetIdx);log(`💀 Unstable Affliction: 5 shadow to ${uaE.name}!`,'log-hit');const uaR=d20();if(uaR<=7){const uaNew=C.enemies.filter((e,i)=>e.hp>0&&i!==C._unstableAfflictionTargetIdx);if(uaNew.length>0){const uaNT=uaNew[Math.floor(Math.random()*uaNew.length)];C._unstableAfflictionTargetIdx=C.enemies.indexOf(uaNT);log(`💀 Unstable Affliction jumps to ${uaNT.name}! (rolled ${uaR})`,'log-system');}else{C._unstableAfflictionTargetIdx=-1;log('💀 Unstable Affliction: no new target.','log-system');}}}else C._unstableAfflictionTargetIdx=-1;}
+ // Gravity Beam
+ if((C._gravityBeamCounters||0)>0){const gbAutoT=C.enemies.find(e=>e.hp>0);if(gbAutoT){const gbAutoDmg=1+C._gravityBeamCounters;dealEnemyDamage(gbAutoT,gbAutoDmg,C.enemies.indexOf(gbAutoT));log(`⏳ Gravity Beam: ${gbAutoDmg} arcane! (${C._gravityBeamCounters} counters → ${C._gravityBeamCounters+1})`,'log-hit');}C._gravityBeamCounters=Math.min(C._gravityBeamCounters+1,12);}
+ // Ritual of Doom flag clear
+ if(C._ritualOfDoomActive)C._ritualOfDoomActive=false;
+ // Starfall
+ if((G.char._starfallCounters||0)>0){
+ C.enemies.forEach((e,ei)=>{ if(e.hp>0){ dealEnemyDamage(e,4,ei); log(`⭐ Starfall: 4 arcane damage to ${e.name}!`,'log-hit'); }});
+ G.char._starfallCounters--;
+ if(G.char._starfallCounters===0) log('⭐ Starfall fades.','log-system');
+ }
+ // Helper: apply per-enemy damage-amp debuffs (Marked / Searing Pain) to DoT ticks
+ const dotBonus=(e)=>{
+ const mk=(e.debuffs||[]).find(d=>d.id==='marked');
+ const sp=(e.debuffs||[]).find(d=>d.id==='searingPain');
+ return (mk?.stacks||0)+(sp?.stacks||0);
+ };
+ // Corruption ticks (Warlock — fixed dmg, decays per turn)
+ C.enemies.forEach(e=>{
+ if(e.hp<=0)return;
+ const cor=(e.debuffs||[]).find(d=>d.id==='corruption');
+ if(cor&&cor.stacks>0){
+ const base=cor.dmg||3, bonus=dotBonus(e), dmg=base+bonus;
+ e.hp=Math.max(0,e.hp-dmg);
+ log(`💀 Corruption deals ${dmg} shadow to ${e.name}${bonus?` (base ${base} +${bonus} debuff)`:''}! (${e.hp}/${e.maxHP} HP · ${cor.stacks-1} turn${cor.stacks-1!==1?'s':''} left)`,'log-hit');
+ cor.stacks=Math.max(0,cor.stacks-1);
+ if(cor.stacks===0){ e.debuffs=e.debuffs.filter(d=>d.id!=='corruption'); log(`💀 Corruption fades on ${e.name}.`,'log-system'); }
+ if(e.hp<=0){ G.char.runKills=(G.char.runKills||0)+1; log(`💀 ${e.name} dies from Corruption!`,'log-crit'); }
+ }
+ });
+ // Poison ticks (Deadly Poison applied to enemies)
+ C.enemies.forEach(e=>{
+ if(e.hp<=0)return;
+ const pois=(e.debuffs||[]).find(d=>d.id==='poison');
+ if(pois&&pois.stacks>0){
+ const base=pois.stacks, bonus=dotBonus(e), dmg=base+bonus;
+ e.hp=Math.max(0,e.hp-dmg);
+ log(`☠️ Poison deals ${dmg} damage to ${e.name}${bonus?` (base ${base} +${bonus} debuff)`:''}! (${e.hp}/${e.maxHP} HP)`,'log-hit');
+ pois.stacks=Math.max(0,pois.stacks-1);
+ if(pois.stacks===0){
+ e.debuffs=e.debuffs.filter(d=>d.id!=='poison');
+ log(`☠️ Poison fades on ${e.name}.`,'log-system');
+ }
+ if(e.hp<=0){
+ G.char.runKills=(G.char.runKills||0)+1;
+ log(`☠️ ${e.name} dies from Poison!`,'log-crit');
+ if(e.id==='sneedShredder'&&!e._sneedSpawned){
+ e._sneedSpawned=true;spawnEnemy('sneed');
+ log('🔧 Sneed crawls out of the wreckage!','log-surge');
+ }
+ }
+ }
+ });
+ // Hemorrhage ticks
+ C.enemies.forEach(e=>{
+ if(e.hp<=0)return;
+ const hem=(e.debuffs||[]).find(d=>d.id==='hemorrhage');
+ if(hem&&hem.stacks>0){
+ const base=hem.stacks, bonus=dotBonus(e), dmg=base+bonus;
+ e.hp=Math.max(0,e.hp-dmg);
+ log(`🩸 Hemorrhage deals ${dmg} damage to ${e.name}${bonus?` (base ${base} +${bonus} debuff)`:''}! (${e.hp}/${e.maxHP} HP)`,'log-hit');
+ hem.stacks=Math.max(0,hem.stacks-1);
+ if(hem.stacks===0){
+ e.debuffs=e.debuffs.filter(d=>d.id!=='hemorrhage');
+ log(`🩸 Hemorrhage fades on ${e.name}.`,'log-system');
+ }
+ if(e.hp<=0){
+ G.char.runKills=(G.char.runKills||0)+1;
+ log(`☠️ ${e.name} defeated by Hemorrhage!`,'log-crit');
+ if(e.id==='sneedShredder'&&!e._sneedSpawned){
+ e._sneedSpawned=true;spawnEnemy('sneed');
+ log('🔧 Sneed crawls out of the wreckage!','log-surge');
+ }
+ }
+ }
+ });
+ // Clear one-turn damage-amp debuffs (Marked / Searing Pain) — DoTs above benefited from them
+ C.enemies.forEach(e=>{ e.debuffs=(e.debuffs||[]).filter(d=>d.id!=='marked'&&d.id!=='searingPain'); });
+ // Status damage on player (Seared, Poison)
+ if(!C._skipTurnEffectsApplied){
+ (G.char.statusEffects||[]).find(s=>s.id==='seared')&&dealPlayerDamage(2,'Seared',true);
+ (G.char.statusEffects||[]).filter(s=>s.id==='poison').forEach(s=>dealPlayerDamage(s.stacks||1,'Poison',true));
+ G.char.statusEffects=(G.char.statusEffects||[]).filter(s=>{
+ if(s.id==='poison'){const r=d20();if(r>15){log(`💊 Poison resisted! (${r})`,'log-hit');return false;}}
+ return true;
+ });
+ }
+ renderCombat();
 }
 
 // ── COMBAT WIN ────────────────────────────────────────────────────
