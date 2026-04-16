@@ -1386,7 +1386,7 @@ const ENEMIES = {
  shadowAttacks:true, xp:85, sorceressCorrupt:true },
  onyxia: { id:'onyxia', name:'Onyxia, Broodmother', portrait:'🐉',
  tier:6, maxHP:400, atk:7, type:'boss', isFinalBoss:true,
- ongoing:'PHASE 1 (400–300 HP): melee + Fire Breath. PHASE 2 (300–175 HP): takes flight — -2 damage taken, summons Whelplings each round, Deep Breath surge hits for massive fire. PHASE 3 (175–0 HP): LANDS IN FURY — +3 attack, Bellowing Roar applies Fear + stun each end of round (DC 10), no longer takes reduced damage.',
+ ongoing:'PHASE 1 (400–300 HP): melee + Fire Breath, -3 damage taken. PHASE 2 (300–175 HP): takes flight — -4 damage taken, summons Whelplings each round, Deep Breath surge hits for massive fire. PHASE 3 (175–0 HP): LANDS IN FURY — +3 attack, Bellowing Roar applies Fear + stun each end of round (DC 10), -5 damage taken.',
  surge:'Phase-dependent.',
  xp:600, gold:200,
  onyxiaBoss:true,
@@ -9488,8 +9488,8 @@ function dealEnemyDamage(enemy, amount, idx) {
  if(enemy.id==='archmageArugal'&&enemy.arugalBarrier&&!enemy._barrierBroken) amount=Math.max(1,amount-2);
  // Taragaman Shadow Cloak: -3 damage from all sources while active
  if(enemy.id==='taragaman'&&enemy._cloakActive) amount=Math.max(1,amount-3);
- // Onyxia Phase 2: -2 damage taken while airborne
- if(enemy.id==='onyxia'&&(enemy._onyxiaMitigation||0)>0) amount=Math.max(1,amount-enemy._onyxiaMitigation);
+ // Onyxia phase-scaling damage reduction: P1 -3, P2 -4, P3 -5
+ if(enemy.id==='onyxia'&&enemy.onyxiaBoss){ const _oph=enemy._onyxiaPhase||1; const _omit=_oph===3?5:_oph===2?4:3; amount=Math.max(1,amount-_omit); }
  // Commander Springvale armor: -1 damage from all sources
  if(enemy.id==='commanderSpringvale'&&enemy.armoredNegOne) amount=Math.max(1,amount-1);
  // Forgemaster fire immunity
@@ -9556,15 +9556,13 @@ function dealEnemyDamage(enemy, amount, idx) {
  if(enemy.id==='onyxia'&&enemy.onyxiaBoss&&enemy.hp>0){
  if(enemy.hp<=enemy.phase2At&&enemy._onyxiaPhase!==2&&enemy._onyxiaPhase!==3){
  enemy._onyxiaPhase=2;
- enemy._onyxiaMitigation=2; // -2 damage taken while airborne
- log('🐉 PHASE 2: Onyxia takes flight! She is harder to hit (-2 damage taken) and will call her whelps each round. Beware Deep Breath!','log-surge');
+ log('🐉 PHASE 2: Onyxia takes flight! She is harder to hit (-4 damage taken) and will call her whelps each round. Beware Deep Breath!','log-surge');
  spawnEnemy('onyxianWhelpling'); spawnEnemy('onyxianWhelpling');
  }
  if(enemy.hp<=enemy.phase3At&&enemy._onyxiaPhase!==3){
  enemy._onyxiaPhase=3;
- enemy._onyxiaMitigation=0;
  enemy.atk=(enemy.atk||7)+3;
- log('🐉 PHASE 3: Onyxia LANDS IN FURY! +3 attack, no longer reduced damage. She will Fear you at end of each round.','log-surge');
+ log('🐉 PHASE 3: Onyxia LANDS IN FURY! +3 attack, -5 damage taken. She will Fear you at end of each round.','log-surge');
  }
  }
  // Equipment: Poisoned Kris — melee attacks apply poison
