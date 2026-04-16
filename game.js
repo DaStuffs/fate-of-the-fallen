@@ -629,8 +629,8 @@ const CARDS = {
  hit:'Your next ranged card deals double damage. Play another card.',
  crit:'Your next ranged card auto-crits instead.', miss:null, critmiss:null },
  { id:'h17', name:'Eagle Eye', tier:2, type:'target', risk:13,
- hit:'Play with top card of your deck revealed each turn — you may play it as a bonus (persistent).',
- crit:null, miss:null, critmiss:null },
+ hit:'Persistent: each turn draw 1 extra card and gain 1 extra card play.',
+ crit:'Also +1 to all rolls while active.', miss:null, critmiss:null },
  { id:'h18', name:'Ricochet Shot', tier:2, type:'damage', risk:8,
  hit:'Deal 4 ranged damage. On hit, reroll DC to hit a new random enemy — repeat up to 3 total hits.',
  crit:'Deal double damage on the first hit.', miss:null, critmiss:null },
@@ -4353,6 +4353,7 @@ function renderBuffZone() {
  if(C._unstablePowerActive) pills.push(pill('💀','UP','Unstable Power: shadow ×2, take roll/5 dmg/turn','debuff'));
  if(C._blackOutActive) pills.push(pill('🌑','BO','Black Out: shadow damage doubled','buff'));
  if(C._lockAndLoadActive) pills.push(pill('🏹','L&L','Lock and Load: damage → roll 15+ for extra play','buff'));
+ if(C._eagleEyeActive) pills.push(pill('🦅','EE',`Eagle Eye: persistent — +1 draw and +1 play each turn${C._eagleEyeRollBonus?' · +1 rolls':''}`,'buff'));
  if(C._aimedShotActive) pills.push(pill('🎯','AIM','Aimed Shot: next ranged card deals double damage','buff'));
  if(C._aimedShotAutoCrit) pills.push(pill('🎯','AIM★','Aimed Shot (CRIT): next ranged card auto-crits','buff'));
  if(G.char._aspectMonkey) pills.push(pill('🐒','MNK','Aspect of the Monkey: roll 11+ on attacks taken to halve damage','buff'));
@@ -4861,6 +4862,8 @@ function doDraw() {
  doPetTurn();
  let drawCount=3+(G.char.extraDraw||0)+(G.char._eqDraw||0);
  if(C._aspectHawkActive)drawCount=Math.max(1,drawCount-(C._aspectHawkDrawPenalty||0));
+ // Eagle Eye: persistent +1 draw and +1 play each turn
+ if(C._eagleEyeActive){ drawCount+=1; C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1; }
  if(C.drawPenalty){drawCount=C.drawPenalty;C.drawPenalty=0;}
  if(C.bonusDrawNextTurn){drawCount+=C.bonusDrawNextTurn;C.bonusDrawNextTurn=0;}
  drawCount=Math.max(1,drawCount);
@@ -5540,9 +5543,13 @@ if(_cdt&&['fire','frost','nature','arcane','shadow','holy'].includes(_cdt))bonus
  C._shredOverrideFired=true;
  }
  if(card.name==='Eagle Eye'&&(outcomeType==='hit'||outcomeType==='crit')){
- C.bonusDrawNextTurn=(C.bonusDrawNextTurn||0)+(isCrit?3:2);
+ C._eagleEyeActive=true;
+ if(isCrit){ C._eagleEyeRollBonus=1; G.char.rollBonus=(G.char.rollBonus||0)+1; }
+ // Immediate effect this turn too
  C.extraAllowedThisTurn=(C.extraAllowedThisTurn||0)+1;
- log(`🦅 Eagle Eye: draw ${isCrit?3:2} extra next turn! Extra play!`,isCrit?'log-crit':'log-hit');
+ const drawRes=drawFromDeck(C.deck,C.discard,1);
+ C.deck=drawRes.deck; C.discard=drawRes.discard; C.hand=[...C.hand,...drawRes.drawn];
+ log(`🦅 Eagle Eye: persistent — +1 draw and +1 play each turn!${isCrit?' (+1 to all rolls)':''}`,isCrit?'log-crit':'log-hit');
  C._shredOverrideFired=true;
  }
  if(card.name==='Ricochet Shot'&&(outcomeType==='hit'||outcomeType==='crit')){
@@ -7973,17 +7980,17 @@ function spawnPlayerFloat(text,type){
 
 // ── PETS ──────────────────────────────────────────────────────────
 const HUNTER_PETS = [
- { id:'harou',      name:'Harou the Wolf',         icon:'🐺', species:'Wolf',    maxHP:6,  cls:'Hunter', range:[1,3],
+ { id:'harou',      name:'Harou the Wolf',         icon:'🐺', species:'Wolf',    maxHP:6,  cls:'Hunter', range:[1,3], canToggleRedirect:true,
    rollTable:[['1-5','1 melee dmg; +1 your dmg this turn'],['6-10','2 melee dmg; +1 your dmg this turn'],['11-19','3 melee dmg; +1 your dmg this turn'],['20','3 melee dmg; +2 your dmg this turn']] },
- { id:'kuma',       name:'Kuma the Bear',          icon:'🐻', species:'Bear',    maxHP:10, cls:'Hunter', range:[4,7],
+ { id:'kuma',       name:'Kuma the Bear',          icon:'🐻', species:'Bear',    maxHP:10, cls:'Hunter', range:[4,7], canToggleRedirect:true,
    rollTable:[['1-5','Kuma heals 3 HP'],['6-10','2 melee to 2 enemies'],['11-19','5 melee to 1 enemy'],['20','5 melee to all; enemies deal half dmg this turn']] },
- { id:'siku',       name:'Siku the Hawk',          icon:'🦅', species:'Hawk',    maxHP:5,  cls:'Hunter', range:[8,10],
+ { id:'siku',       name:'Siku the Hawk',          icon:'🦅', species:'Hawk',    maxHP:5,  cls:'Hunter', range:[8,10], canToggleRedirect:true,
    rollTable:[['1-5','Fetch tier 1 loot'],['6-10','1 melee dmg + fetch tier 2 loot'],['11-19','3 melee dmg; target takes +2 dmg this turn'],['20','Sacrifice Siku: 10 melee to 1 enemy']] },
- { id:'bhengalesh', name:'Bhengalesh the Tiger',   icon:'🐅', species:'Tiger',   maxHP:8,  cls:'Hunter', range:[11,14],
+ { id:'bhengalesh', name:'Bhengalesh the Tiger',   icon:'🐅', species:'Tiger',   maxHP:8,  cls:'Hunter', range:[11,14], canToggleRedirect:true,
    rollTable:[['1-5',"Double Bhengalesh's next damage (no stack)"],['6-10','3 melee dmg'],['11-19','5 melee dmg'],['20','8 melee dmg; roll again']] },
- { id:'chichwa',    name:'Chichwa the Gorilla',    icon:'🦍', species:'Gorilla', maxHP:7,  cls:'Hunter', range:[15,17],
+ { id:'chichwa',    name:'Chichwa the Gorilla',    icon:'🦍', species:'Gorilla', maxHP:7,  cls:'Hunter', range:[15,17], canToggleRedirect:true,
    rollTable:[['1-5','Heal Chichwa 2 HP; play another card'],['6-10','3 melee dmg'],['11-19','3 melee to all enemies'],['20','6 melee dmg; play another card']] },
- { id:'moonui',     name:"Mo'o Nui the Turtle",    icon:'🐢', species:'Turtle',  maxHP:6,  cls:'Hunter', range:[18,20],
+ { id:'moonui',     name:"Mo'o Nui the Turtle",    icon:'🐢', species:'Turtle',  maxHP:6,  cls:'Hunter', range:[18,20], canToggleRedirect:true,
    rollTable:[['1-5','Shell: pet damage capped at 1 per source this turn'],['6-10','3 melee dmg'],['11-19','Prevent attack dmg to you; reflect it back'],['20','3 melee dmg; next ability auto-crits']] },
 ];
 const CLASS_PETS = {
@@ -9092,6 +9099,7 @@ function onCombatWin() {
  if(C._aspectCheetahRollDelta) G.char.rollBonus=Math.max(0,(G.char.rollBonus||0)-C._aspectCheetahRollDelta);
  if(C._aspectCheetahDrawDelta) G.char.extraDraw=Math.max(0,(G.char.extraDraw||0)-C._aspectCheetahDrawDelta);
  if(C._aspectMonkeyFromCombat) G.char._aspectMonkey=false;
+ if(C._eagleEyeRollBonus) G.char.rollBonus=Math.max(0,(G.char.rollBonus||0)-C._eagleEyeRollBonus);
  // Pets fade at combat end — revert passives, clear list
  (C._pets||[]).forEach(p=>_removePetPassive(p));
  C._pets=[]; G.char._petActive=null; G.char._petBonus=null;
